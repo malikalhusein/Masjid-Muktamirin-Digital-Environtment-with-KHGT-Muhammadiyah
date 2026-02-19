@@ -220,25 +220,66 @@ export default function LayoutPage() {
             {/* Background Image */}
             <Card className="bg-slate-900/80 border-slate-800">
                 <CardHeader>
-                    <CardTitle className="font-heading text-xl text-white">Gambar Latar (Opsional)</CardTitle>
+                    <CardTitle className="font-heading text-xl text-white">Gambar Latar Belakang</CardTitle>
                     <CardDescription className="text-slate-400">
-                        URL gambar untuk latar belakang display TV
+                        URL gambar untuk latar belakang display TV (untuk tema Klasik & Al-Iftitar)
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <Input
-                        value={settings.background_image}
-                        onChange={(e) => setSettings(prev => ({ ...prev, background_image: e.target.value }))}
-                        placeholder="https://example.com/background.jpg"
-                        className="bg-slate-800 border-slate-700 text-white"
-                        data-testid="background-image-input"
-                    />
-                    {settings.background_image && (
-                        <img 
-                            src={settings.background_image} 
-                            alt="Background preview" 
-                            className="mt-4 max-h-32 rounded-lg"
+                <CardContent className="space-y-4">
+                    {/* Quick select backgrounds */}
+                    <div>
+                        <Label className="text-slate-300 mb-3 block">Pilih Background</Label>
+                        <div className="grid grid-cols-3 gap-3">
+                            {[
+                                { url: 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=1920&q=80', name: 'Masjid Nabawi' },
+                                { url: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?w=1920&q=80', name: 'Masjid Sunset' },
+                                { url: 'https://images.unsplash.com/photo-1519817650390-64a93db51149?w=1920&q=80', name: 'Interior Masjid' },
+                            ].map((bg) => (
+                                <button
+                                    key={bg.url}
+                                    onClick={() => setSettings(prev => ({ ...prev, background_image: bg.url }))}
+                                    className={cn(
+                                        "relative rounded-lg overflow-hidden border-2 transition-all aspect-video",
+                                        settings.background_image === bg.url
+                                            ? "border-emerald-500"
+                                            : "border-transparent hover:border-slate-600"
+                                    )}
+                                >
+                                    <img src={bg.url} alt={bg.name} className="w-full h-full object-cover" />
+                                    <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center">
+                                        {bg.name}
+                                    </span>
+                                    {settings.background_image === bg.url && (
+                                        <div className="absolute top-1 right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+                                            <Check className="w-3 h-3 text-white" />
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    {/* Custom URL */}
+                    <div className="space-y-2">
+                        <Label className="text-slate-300">Atau masukkan URL kustom</Label>
+                        <Input
+                            value={settings.background_image}
+                            onChange={(e) => setSettings(prev => ({ ...prev, background_image: e.target.value }))}
+                            placeholder="https://example.com/background.jpg"
+                            className="bg-slate-800 border-slate-700 text-white"
+                            data-testid="background-image-input"
                         />
+                    </div>
+                    
+                    {settings.background_image && (
+                        <div className="space-y-2">
+                            <Label className="text-slate-300">Preview</Label>
+                            <img 
+                                src={settings.background_image} 
+                                alt="Background preview" 
+                                className="max-h-40 rounded-lg w-full object-cover"
+                            />
+                        </div>
                     )}
                 </CardContent>
             </Card>
