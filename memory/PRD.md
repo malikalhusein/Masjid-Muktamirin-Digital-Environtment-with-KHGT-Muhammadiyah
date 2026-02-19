@@ -129,3 +129,30 @@ Kecamatan Galur, Kulon Progo, Yogyakarta
 - `/classic` - Classic dengan foto masjid
 - `/layout2` - Sidebar layout
 - `/connect` - Dashboard admin
+
+---
+
+## Update: 20 Februari 2026 - Perbaikan Kalender & Layout Switching
+
+### Issues Fixed
+1. **Kalender Hijriyah** - Sekarang benar menampilkan **3 Ramadan 1447 H** (bukan 2 Ramadan)
+   - Menggunakan timezone WIB (UTC+7) untuk Indonesia
+   - Mengacu pada tabel KHGT resmi dari hisabmu.com
+
+2. **Layout Switching** - Layout sekarang berubah otomatis berdasarkan setting di dashboard
+   - Setting theme disimpan di database
+   - TVDisplay membaca setting dan render layout yang sesuai
+
+3. **Background Image** - Bisa diganti dari halaman Tampilan di dashboard
+   - Ada 3 preset background masjid
+   - Bisa input URL custom
+
+### Layouts Available
+1. **Modern** - Dark theme minimalis dengan glass effect
+2. **Classic** - Background foto masjid fullscreen (mirip referensi user)
+3. **Al-Iftitar** - Sidebar layout dengan quote dan konten besar
+
+### Ramadan Features
+- Imsak time otomatis muncul di semua layout
+- Badge "Ramadan Mubarak!" di layout Modern
+- Countdown hari besar Islam (Nuzulul Quran, dll)
