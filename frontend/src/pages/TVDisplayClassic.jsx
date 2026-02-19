@@ -128,7 +128,6 @@ export default function TVDisplayClassic({
     
     const { currentPrayer, nextPrayer } = prayerTimes ? getCurrentAndNextPrayer(prayerTimes) : {};
     const hijriDate = getKHGTHijriDate(currentTime);
-    const nextEvent = getNextIslamicEvent(currentTime);
     const inRamadan = isRamadan(currentTime);
     
     const marqueeText = runningTexts.length > 0 
