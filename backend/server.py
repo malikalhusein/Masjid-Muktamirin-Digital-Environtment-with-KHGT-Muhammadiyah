@@ -347,7 +347,99 @@ async def update_layout_settings(update: LayoutSettingsUpdate, user: dict = Depe
     updated = await db.layout_settings.find_one({}, {"_id": 0})
     return LayoutSettings(**updated)
 
-# ==================== PRAYER TIMES (KHGT API) ====================
+# ==================== PRAYER TIMES (KHGT DATABASE) ====================
+
+# Data jadwal sholat KHGT Yogyakarta Feb-Mar 2026 (dari hisabmu.com)
+# Format: (subuh, terbit, dhuha, dzuhur, ashar, maghrib, isya)
+KHGT_YOGYAKARTA_2026 = {
+    # February 2026
+    (2026, 2, 1): ("04:25", "05:39", "05:57", "11:53", "15:12", "18:06", "19:19"),
+    (2026, 2, 2): ("04:26", "05:39", "05:57", "11:53", "15:12", "18:06", "19:19"),
+    (2026, 2, 3): ("04:26", "05:39", "05:57", "11:53", "15:11", "18:06", "19:19"),
+    (2026, 2, 4): ("04:27", "05:40", "05:58", "11:53", "15:11", "18:06", "19:19"),
+    (2026, 2, 5): ("04:27", "05:40", "05:58", "11:53", "15:11", "18:06", "19:19"),
+    (2026, 2, 6): ("04:28", "05:40", "05:58", "11:54", "15:10", "18:06", "19:18"),
+    (2026, 2, 7): ("04:28", "05:40", "05:58", "11:54", "15:10", "18:06", "19:18"),
+    (2026, 2, 8): ("04:28", "05:41", "05:59", "11:54", "15:09", "18:06", "19:18"),
+    (2026, 2, 9): ("04:29", "05:41", "05:59", "11:54", "15:09", "18:05", "19:18"),
+    (2026, 2, 10): ("04:29", "05:41", "05:59", "11:54", "15:09", "18:05", "19:17"),
+    (2026, 2, 11): ("04:29", "05:41", "05:59", "11:54", "15:08", "18:05", "19:17"),
+    (2026, 2, 12): ("04:30", "05:42", "06:00", "11:54", "15:07", "18:05", "19:17"),
+    (2026, 2, 13): ("04:30", "05:42", "06:00", "11:54", "15:07", "18:05", "19:17"),
+    (2026, 2, 14): ("04:30", "05:42", "06:00", "11:54", "15:06", "18:04", "19:16"),
+    (2026, 2, 15): ("04:30", "05:42", "06:00", "11:54", "15:05", "18:04", "19:16"),
+    (2026, 2, 16): ("04:31", "05:42", "06:00", "11:54", "15:05", "18:04", "19:15"),
+    (2026, 2, 17): ("04:31", "05:42", "06:00", "11:54", "15:05", "18:04", "19:15"),
+    (2026, 2, 18): ("04:31", "05:43", "06:01", "11:53", "15:03", "18:03", "19:14"),
+    (2026, 2, 19): ("04:31", "05:43", "06:01", "11:53", "15:02", "18:03", "19:14"),
+    (2026, 2, 20): ("04:32", "05:43", "06:01", "11:53", "15:02", "18:03", "19:14"),
+    (2026, 2, 21): ("04:32", "05:43", "06:01", "11:53", "15:01", "18:02", "19:13"),
+    (2026, 2, 22): ("04:32", "05:43", "06:01", "11:53", "15:01", "18:02", "19:13"),
+    (2026, 2, 23): ("04:32", "05:43", "06:01", "11:53", "14:59", "18:02", "19:12"),
+    (2026, 2, 24): ("04:33", "05:43", "06:01", "11:53", "14:58", "18:01", "19:12"),
+    (2026, 2, 25): ("04:33", "05:43", "06:01", "11:53", "14:57", "18:01", "19:11"),
+    (2026, 2, 26): ("04:33", "05:43", "06:01", "11:52", "14:56", "18:01", "19:11"),
+    (2026, 2, 27): ("04:33", "05:43", "06:01", "11:52", "14:55", "18:00", "19:10"),
+    (2026, 2, 28): ("04:33", "05:43", "06:01", "11:52", "14:54", "18:00", "19:10"),
+    # March 2026
+    (2026, 3, 1): ("04:33", "05:43", "06:01", "11:51", "14:52", "17:59", "19:09"),
+    (2026, 3, 2): ("04:33", "05:43", "06:01", "11:51", "14:52", "17:58", "19:08"),
+    (2026, 3, 3): ("04:33", "05:43", "06:01", "11:51", "14:51", "17:58", "19:08"),
+    (2026, 3, 4): ("04:33", "05:43", "06:01", "11:51", "14:50", "17:57", "19:07"),
+    (2026, 3, 5): ("04:33", "05:43", "06:01", "11:51", "14:50", "17:57", "19:07"),
+    (2026, 3, 6): ("04:33", "05:43", "06:01", "11:50", "14:48", "17:56", "19:06"),
+    (2026, 3, 7): ("04:33", "05:43", "06:01", "11:50", "14:47", "17:55", "19:05"),
+    (2026, 3, 8): ("04:33", "05:42", "06:00", "11:50", "14:46", "17:55", "19:05"),
+    (2026, 3, 9): ("04:33", "05:42", "06:00", "11:49", "14:45", "17:54", "19:04"),
+    (2026, 3, 10): ("04:33", "05:42", "06:00", "11:49", "14:44", "17:53", "19:03"),
+    (2026, 3, 11): ("04:33", "05:42", "06:00", "11:49", "14:43", "17:53", "19:03"),
+    (2026, 3, 12): ("04:32", "05:41", "05:59", "11:48", "14:42", "17:52", "19:02"),
+    (2026, 3, 13): ("04:32", "05:41", "05:59", "11:48", "14:41", "17:51", "19:01"),
+    (2026, 3, 14): ("04:32", "05:41", "05:59", "11:47", "14:40", "17:51", "19:01"),
+    (2026, 3, 15): ("04:32", "05:40", "05:58", "11:47", "14:39", "17:50", "19:00"),
+    (2026, 3, 16): ("04:31", "05:40", "05:58", "11:47", "14:38", "17:49", "18:59"),
+    (2026, 3, 17): ("04:31", "05:39", "05:57", "11:46", "14:37", "17:49", "18:58"),
+    (2026, 3, 18): ("04:31", "05:39", "05:57", "11:46", "14:36", "17:48", "18:58"),
+    (2026, 3, 19): ("04:30", "05:39", "05:57", "11:45", "14:35", "17:47", "18:57"),
+    (2026, 3, 20): ("04:30", "05:38", "05:56", "11:45", "14:34", "17:47", "18:56"),
+    (2026, 3, 21): ("04:30", "05:38", "05:56", "11:44", "14:32", "17:46", "18:55"),
+    (2026, 3, 22): ("04:29", "05:37", "05:55", "11:44", "14:31", "17:45", "18:55"),
+    (2026, 3, 23): ("04:29", "05:37", "05:55", "11:44", "14:30", "17:45", "18:54"),
+    (2026, 3, 24): ("04:28", "05:36", "05:54", "11:43", "14:29", "17:44", "18:53"),
+    (2026, 3, 25): ("04:28", "05:36", "05:54", "11:43", "14:28", "17:43", "18:52"),
+    (2026, 3, 26): ("04:27", "05:35", "05:53", "11:42", "14:27", "17:43", "18:52"),
+    (2026, 3, 27): ("04:27", "05:35", "05:53", "11:42", "14:26", "17:42", "18:51"),
+    (2026, 3, 28): ("04:26", "05:34", "05:52", "11:41", "14:25", "17:41", "18:50"),
+    (2026, 3, 29): ("04:26", "05:34", "05:52", "11:41", "14:24", "17:41", "18:50"),
+    (2026, 3, 30): ("04:25", "05:33", "05:51", "11:40", "14:23", "17:40", "18:49"),
+    (2026, 3, 31): ("04:25", "05:33", "05:51", "11:40", "14:22", "17:39", "18:48"),
+}
+
+def get_khgt_prayer_times(year: int, month: int, day: int):
+    """Get prayer times from KHGT database"""
+    key = (year, month, day)
+    if key in KHGT_YOGYAKARTA_2026:
+        times = KHGT_YOGYAKARTA_2026[key]
+        # Calculate imsak (10 minutes before subuh)
+        subuh_parts = times[0].split(":")
+        imsak_hour = int(subuh_parts[0])
+        imsak_min = int(subuh_parts[1]) - 10
+        if imsak_min < 0:
+            imsak_min += 60
+            imsak_hour -= 1
+        imsak = f"{imsak_hour:02d}:{imsak_min:02d}"
+        
+        return {
+            "imsak": imsak,
+            "subuh": times[0],
+            "terbit": times[1],
+            "dhuha": times[2],
+            "dzuhur": times[3],
+            "ashar": times[4],
+            "maghrib": times[5],
+            "isya": times[6],
+        }
+    return None
 
 @api_router.get("/prayer-times")
 async def get_prayer_times(date: Optional[str] = None):
@@ -355,47 +447,60 @@ async def get_prayer_times(date: Optional[str] = None):
     if not identity:
         identity = MosqueIdentity().model_dump()
     
-    lat = identity.get("latitude", -7.9404)
-    lng = identity.get("longitude", 110.2357)
-    elev = identity.get("elevation", 50)
     tz = identity.get("timezone_offset", 7)
     
-    # If date provided, use it. Otherwise use today
+    # If date provided, use it. Otherwise use today (WIB)
     if date:
         target_date = datetime.fromisoformat(date)
     else:
         target_date = datetime.now(timezone(timedelta(hours=tz)))
     
-    # Format for KHGT API (month and year)
-    month = target_date.month
     year = target_date.year
+    month = target_date.month
     day = target_date.day
+    
+    # Try to get from KHGT database first
+    khgt_times = get_khgt_prayer_times(year, month, day)
+    
+    if khgt_times:
+        return {
+            "date": target_date.strftime("%Y-%m-%d"),
+            **khgt_times
+        }
+    
+    # Fallback to API if not in database
+    lat = identity.get("latitude", -7.9404)
+    lng = identity.get("longitude", 110.2357)
+    elev = identity.get("elevation", 50)
     
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             url = f"https://hisabmu.com/shalat/?latitude={lat}&longitude={lng}&elevation={elev}&timezone={tz}&dst=auto&method=MU&ikhtiyat=16"
             response = await client.get(url)
-            
-            # Parse the HTML response to extract prayer times
             html = response.text
             
-            # Simple parsing - look for table data
-            # The API returns HTML with a table, we need to extract the current day's times
             import re
-            
-            # Find the table rows
             pattern = r'<tr[^>]*>\s*<td[^>]*>(\d+)[^<]*</td>\s*<td[^>]*>(\d+:\d+:\d+)</td>\s*<td[^>]*>(\d+:\d+:\d+)</td>\s*<td[^>]*>(\d+:\d+:\d+)</td>\s*<td[^>]*>(\d+:\d+:\d+)</td>\s*<td[^>]*>(\d+:\d+:\d+)</td>\s*<td[^>]*>(\d+:\d+:\d+)</td>\s*<td[^>]*>(\d+:\d+:\d+)</td>'
             
             matches = re.findall(pattern, html, re.DOTALL)
             
-            prayer_data = {}
             for match in matches:
                 row_day = int(match[0].split('/')[0] if '/' in match[0] else match[0])
                 if row_day == day:
-                    prayer_data = {
+                    subuh = match[1][:5]
+                    # Calculate imsak
+                    subuh_parts = subuh.split(":")
+                    imsak_hour = int(subuh_parts[0])
+                    imsak_min = int(subuh_parts[1]) - 10
+                    if imsak_min < 0:
+                        imsak_min += 60
+                        imsak_hour -= 1
+                    imsak = f"{imsak_hour:02d}:{imsak_min:02d}"
+                    
+                    return {
                         "date": target_date.strftime("%Y-%m-%d"),
-                        "hijri": "",  # Will be filled from another source if needed
-                        "subuh": match[1][:5],
+                        "imsak": imsak,
+                        "subuh": subuh,
                         "terbit": match[2][:5],
                         "dhuha": match[3][:5],
                         "dzuhur": match[4][:5],
@@ -403,38 +508,21 @@ async def get_prayer_times(date: Optional[str] = None):
                         "maghrib": match[6][:5],
                         "isya": match[7][:5],
                     }
-                    break
-            
-            if not prayer_data:
-                # Fallback with default times
-                prayer_data = {
-                    "date": target_date.strftime("%Y-%m-%d"),
-                    "hijri": "",
-                    "subuh": "04:30",
-                    "terbit": "05:45",
-                    "dhuha": "06:15",
-                    "dzuhur": "11:55",
-                    "ashar": "15:10",
-                    "maghrib": "18:05",
-                    "isya": "19:15",
-                }
-            
-            return prayer_data
-            
     except Exception as e:
         logging.error(f"Error fetching prayer times: {e}")
-        # Return default prayer times on error
-        return {
-            "date": target_date.strftime("%Y-%m-%d"),
-            "hijri": "",
-            "subuh": "04:30",
-            "terbit": "05:45", 
-            "dhuha": "06:15",
-            "dzuhur": "11:55",
-            "ashar": "15:10",
-            "maghrib": "18:05",
-            "isya": "19:15",
-        }
+    
+    # Final fallback
+    return {
+        "date": target_date.strftime("%Y-%m-%d"),
+        "imsak": "04:22",
+        "subuh": "04:32",
+        "terbit": "05:43",
+        "dhuha": "06:01",
+        "dzuhur": "11:53",
+        "ashar": "15:02",
+        "maghrib": "18:03",
+        "isya": "19:14",
+    }
 
 @api_router.get("/prayer-times/monthly")
 async def get_monthly_prayer_times(month: Optional[int] = None, year: Optional[int] = None):
