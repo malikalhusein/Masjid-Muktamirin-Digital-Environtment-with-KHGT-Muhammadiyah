@@ -24,6 +24,7 @@ const navItems = [
     { path: '/connect/agenda', icon: CalendarDays, label: 'Agenda' },
     { path: '/connect/running-text', icon: Type, label: 'Running Text' },
     { path: '/connect/layout', icon: Palette, label: 'Tampilan' },
+    { path: '/connect/calibration', icon: Clock, label: 'Kalibrasi' },
     { path: '/connect/settings', icon: Settings, label: 'Pengaturan' },
 ];
 

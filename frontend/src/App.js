@@ -29,6 +29,7 @@ import AgendaPage from "@/pages/dashboard/AgendaPage";
 import RunningTextPage from "@/pages/dashboard/RunningTextPage";
 import LayoutPage from "@/pages/dashboard/LayoutPage";
 import SettingsPage from "@/pages/dashboard/SettingsPage";
+import CalibrationPage from "@/pages/dashboard/CalibrationPage";
 
 function App() {
     return (
@@ -58,6 +59,7 @@ function App() {
                             <Route path="agenda" element={<AgendaPage />} />
                             <Route path="running-text" element={<RunningTextPage />} />
                             <Route path="layout" element={<LayoutPage />} />
+                            <Route path="calibration" element={<CalibrationPage />} />
                             <Route path="settings" element={<SettingsPage />} />
                         </Route>
                         
