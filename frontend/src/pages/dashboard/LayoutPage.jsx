@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Palette, Save, Loader2, Check } from 'lucide-react';
-import { settingsAPI } from '../../lib/api';
+import { Palette, Save, Loader2, Check, Plus, Trash2, Upload, Image } from 'lucide-react';
+import { settingsAPI, uploadAPI } from '../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -19,6 +19,12 @@ const COLOR_PRESETS = [
     { name: 'Teal', primary: '#0D9488', secondary: '#F59E0B' },
     { name: 'Blue', primary: '#1E40AF', secondary: '#EA580C' },
     { name: 'Purple', primary: '#581C87', secondary: '#F97316' },
+];
+
+const DEFAULT_BACKGROUNDS = [
+    { url: 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=1920&q=80', name: 'Masjid Nabawi' },
+    { url: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?w=1920&q=80', name: 'Masjid Sunset' },
+    { url: 'https://images.unsplash.com/photo-1519817650390-64a93db51149?w=1920&q=80', name: 'Interior Masjid' },
 ];
 
 export default function LayoutPage() {
