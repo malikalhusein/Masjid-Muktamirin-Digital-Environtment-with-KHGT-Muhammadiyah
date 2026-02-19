@@ -9,9 +9,9 @@ import { toast } from 'sonner';
 import { cn } from '../../lib/utils';
 
 const THEMES = [
-    { id: 'modern', name: 'Modern', description: 'Tema modern minimalis dark mode', url: '/' },
-    { id: 'classic', name: 'Klasik', description: 'Tema klasik dengan background foto masjid', url: '/classic' },
-    { id: 'layout2', name: 'Al-Iftitar', description: 'Layout sidebar dengan konten slideshow', url: '/layout2' },
+    { id: 'modern', name: 'Modern', description: 'Tema modern minimalis dark mode dengan glass effect' },
+    { id: 'classic', name: 'Klasik', description: 'Tema klasik dengan background foto masjid (seperti referensi)' },
+    { id: 'layout2', name: 'Al-Iftitar', description: 'Layout sidebar dengan quote dan konten slideshow besar' },
 ];
 
 const COLOR_PRESETS = [
@@ -114,15 +114,6 @@ export default function LayoutPage() {
                                     )}
                                 </div>
                                 <p className="text-slate-400 text-sm">{theme.description}</p>
-                                <a 
-                                    href={theme.url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-emerald-400 text-xs mt-2 inline-block hover:underline"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    Preview →
-                                </a>
                             </button>
                         ))}
                     </div>
