@@ -15,7 +15,11 @@ import {
 } from '../lib/utils';
 import { getKHGTHijriDate, isRamadan, getNextIslamicEvent } from '../lib/khgtCalendar';
 
-// Prayer Card Component
+// Import layout components
+import TVDisplayClassic from './TVDisplayClassic';
+import TVDisplayLayout2 from './TVDisplayLayout2';
+
+// Prayer Card Component for Modern Layout
 const PrayerCard = ({ name, time, isActive, isNext, arabicName }) => {
     return (
         <motion.div
@@ -128,7 +132,6 @@ const ContentSlideshow = ({ contents }) => {
                 </motion.div>
             </AnimatePresence>
             
-            {/* Progress indicators */}
             {contents.length > 1 && (
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
                     {contents.map((_, idx) => (
@@ -170,101 +173,22 @@ const AgendaList = ({ agendas }) => {
     );
 };
 
-// Main TV Display Component
-export default function TVDisplay() {
-    const [currentTime, setCurrentTime] = useState(new Date());
-    const [prayerTimes, setPrayerTimes] = useState(null);
-    const [mosqueIdentity, setMosqueIdentity] = useState(null);
-    const [prayerSettings, setPrayerSettings] = useState(null);
-    const [contents, setContents] = useState([]);
-    const [agendas, setAgendas] = useState([]);
-    const [runningTexts, setRunningTexts] = useState([]);
-    const [countdownSeconds, setCountdownSeconds] = useState(0);
-    const [countdownMode, setCountdownMode] = useState('adzan'); // 'adzan' or 'iqomah'
-    const [bellPlayed, setBellPlayed] = useState(false);
-    
-    // Fetch all data
-    const fetchData = useCallback(async () => {
-        try {
-            const [prayerRes, mosqueRes, settingsRes, contentRes, agendaRes, textRes] = await Promise.all([
-                prayerAPI.getTimes(),
-                mosqueAPI.getIdentity(),
-                settingsAPI.getPrayer(),
-                contentAPI.getAll(true),
-                agendaAPI.getAll(true, true),
-                runningTextAPI.getAll(true),
-            ]);
-            
-            setPrayerTimes(prayerRes.data);
-            setMosqueIdentity(mosqueRes.data);
-            setPrayerSettings(settingsRes.data);
-            setContents(contentRes.data);
-            setAgendas(agendaRes.data);
-            setRunningTexts(textRes.data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    }, []);
-    
-    useEffect(() => {
-        fetchData();
-        // Refresh data every 5 minutes
-        const interval = setInterval(fetchData, 5 * 60 * 1000);
-        return () => clearInterval(interval);
-    }, [fetchData]);
-    
-    // Update clock every second
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000);
-        return () => clearInterval(timer);
-    }, []);
-    
-    // Calculate countdown
-    useEffect(() => {
-        if (!prayerTimes || !prayerSettings) return;
-        
-        const { nextPrayer, nextPrayerTime } = getCurrentAndNextPrayer(prayerTimes);
-        
-        if (nextPrayerTime) {
-            const diff = getTimeDiffSeconds(nextPrayerTime, currentTime);
-            
-            // Check if we should switch to iqomah mode
-            if (diff <= 0 && diff > -60 * prayerSettings[`iqomah_${nextPrayer}`]) {
-                setCountdownMode('iqomah');
-                const iqomahSeconds = prayerSettings[`iqomah_${nextPrayer}`] * 60 + diff;
-                setCountdownSeconds(Math.max(0, iqomahSeconds));
-            } else if (diff > 0) {
-                setCountdownMode('adzan');
-                setCountdownSeconds(diff);
-                
-                // Play bell 5 minutes before prayer
-                if (prayerSettings.bell_enabled && diff <= prayerSettings.bell_before_minutes * 60 && diff > (prayerSettings.bell_before_minutes * 60 - 2) && !bellPlayed) {
-                    playBellSound();
-                    setBellPlayed(true);
-                }
-            } else {
-                // Reset for next prayer
-                setCountdownMode('adzan');
-                setBellPlayed(false);
-            }
-        }
-    }, [currentTime, prayerTimes, prayerSettings, bellPlayed]);
-    
+// Modern Layout Component
+const ModernLayout = ({ 
+    currentTime, prayerTimes, mosqueIdentity, prayerSettings, 
+    contents, agendas, runningTexts, countdownSeconds, countdownMode 
+}) => {
     const { currentPrayer, nextPrayer } = prayerTimes ? getCurrentAndNextPrayer(prayerTimes) : {};
     const hijriDate = getKHGTHijriDate(currentTime);
     const inRamadan = isRamadan(currentTime);
-    const nextEvent = getNextIslamicEvent(currentTime);
     
-    // Prepare running text
     const marqueeText = runningTexts.length > 0 
         ? runningTexts.map(t => t.text).join('   •   ')
         : 'Selamat datang di Masjid • Jaga kebersihan dan kekhusyukan • Mari tingkatkan ibadah kita';
     
     return (
-        <div className="tv-display min-h-screen p-6 lg:p-8 xl:p-12" data-testid="tv-display">
-            {/* Header - Mosque Identity */}
+        <div className="tv-display min-h-screen p-6 lg:p-8 xl:p-12" data-testid="tv-display-modern">
+            {/* Header */}
             <header className="flex items-center justify-between mb-6 lg:mb-8">
                 <div className="flex items-center gap-4 lg:gap-6">
                     {mosqueIdentity?.logo_url ? (
@@ -291,7 +215,6 @@ export default function TVDisplay() {
                     </div>
                 </div>
                 
-                {/* Date Display */}
                 <div className="text-right">
                     <p className="font-body text-lg lg:text-xl text-slate-300" data-testid="gregorian-date">
                         {formatDateIndonesian(currentTime)}
@@ -307,14 +230,12 @@ export default function TVDisplay() {
             
             {/* Main Content Grid */}
             <div className="grid grid-cols-12 gap-4 lg:gap-6 xl:gap-8">
-                {/* Left Column - Clock and Countdown */}
+                {/* Left Column */}
                 <div className="col-span-12 lg:col-span-5 xl:col-span-4 space-y-4 lg:space-y-6">
-                    {/* Main Clock */}
                     <div className="glass-card rounded-2xl p-6 lg:p-8">
                         <MainClock time={currentTime} />
                     </div>
                     
-                    {/* Countdown */}
                     <div className="glass-card rounded-2xl p-6 lg:p-8">
                         <CountdownDisplay 
                             seconds={countdownSeconds}
@@ -332,13 +253,21 @@ export default function TVDisplay() {
                         )}
                     </div>
                     
-                    {/* Agenda */}
                     <AgendaList agendas={agendas} />
                 </div>
                 
                 {/* Center Column - Prayer Times */}
                 <div className="col-span-12 lg:col-span-4 xl:col-span-5">
                     <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
+                        {inRamadan && (
+                            <PrayerCard 
+                                name="Imsak" 
+                                time={prayerTimes?.subuh ? `${parseInt(prayerTimes.subuh.split(':')[0]).toString().padStart(2, '0')}:${Math.max(0, parseInt(prayerTimes.subuh.split(':')[1]) - 10).toString().padStart(2, '0')}` : '--:--'}
+                                arabicName="الإمساك"
+                                isActive={false}
+                                isNext={false}
+                            />
+                        )}
                         <PrayerCard 
                             name="Subuh" 
                             time={prayerTimes?.subuh}
@@ -405,5 +334,128 @@ export default function TVDisplay() {
                 </Marquee>
             </div>
         </div>
+    );
+};
+
+// Main TV Display Component - Loads correct layout based on settings
+export default function TVDisplay() {
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const [prayerTimes, setPrayerTimes] = useState(null);
+    const [mosqueIdentity, setMosqueIdentity] = useState(null);
+    const [prayerSettings, setPrayerSettings] = useState(null);
+    const [layoutSettings, setLayoutSettings] = useState(null);
+    const [contents, setContents] = useState([]);
+    const [agendas, setAgendas] = useState([]);
+    const [runningTexts, setRunningTexts] = useState([]);
+    const [countdownSeconds, setCountdownSeconds] = useState(0);
+    const [countdownMode, setCountdownMode] = useState('adzan');
+    const [bellPlayed, setBellPlayed] = useState(false);
+    const [loading, setLoading] = useState(true);
+    
+    // Fetch all data
+    const fetchData = useCallback(async () => {
+        try {
+            const [prayerRes, mosqueRes, prayerSettingsRes, layoutRes, contentRes, agendaRes, textRes] = await Promise.all([
+                prayerAPI.getTimes(),
+                mosqueAPI.getIdentity(),
+                settingsAPI.getPrayer(),
+                settingsAPI.getLayout(),
+                contentAPI.getAll(true),
+                agendaAPI.getAll(true, true),
+                runningTextAPI.getAll(true),
+            ]);
+            
+            setPrayerTimes(prayerRes.data);
+            setMosqueIdentity(mosqueRes.data);
+            setPrayerSettings(prayerSettingsRes.data);
+            setLayoutSettings(layoutRes.data);
+            setContents(contentRes.data);
+            setAgendas(agendaRes.data);
+            setRunningTexts(textRes.data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+    
+    useEffect(() => {
+        fetchData();
+        const interval = setInterval(fetchData, 5 * 60 * 1000);
+        return () => clearInterval(interval);
+    }, [fetchData]);
+    
+    // Update clock
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+    
+    // Calculate countdown
+    useEffect(() => {
+        if (!prayerTimes || !prayerSettings) return;
+        
+        const { nextPrayer, nextPrayerTime } = getCurrentAndNextPrayer(prayerTimes);
+        
+        if (nextPrayerTime) {
+            const diff = getTimeDiffSeconds(nextPrayerTime, currentTime);
+            
+            if (diff <= 0 && diff > -60 * (prayerSettings[`iqomah_${nextPrayer}`] || 10)) {
+                setCountdownMode('iqomah');
+                const iqomahSeconds = (prayerSettings[`iqomah_${nextPrayer}`] || 10) * 60 + diff;
+                setCountdownSeconds(Math.max(0, iqomahSeconds));
+            } else if (diff > 0) {
+                setCountdownMode('adzan');
+                setCountdownSeconds(diff);
+                
+                if (prayerSettings.bell_enabled && diff <= prayerSettings.bell_before_minutes * 60 && diff > (prayerSettings.bell_before_minutes * 60 - 2) && !bellPlayed) {
+                    playBellSound();
+                    setBellPlayed(true);
+                }
+            } else {
+                setCountdownMode('adzan');
+                setBellPlayed(false);
+            }
+        }
+    }, [currentTime, prayerTimes, prayerSettings, bellPlayed]);
+    
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+                <div className="animate-spin w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full" />
+            </div>
+        );
+    }
+    
+    // Render based on layout setting
+    const selectedTheme = layoutSettings?.theme || 'modern';
+    
+    // Pass common props to all layouts
+    const commonProps = {
+        currentTime,
+        prayerTimes,
+        mosqueIdentity,
+        prayerSettings,
+        layoutSettings,
+        contents,
+        agendas,
+        runningTexts,
+        countdownSeconds,
+        countdownMode,
+    };
+    
+    if (selectedTheme === 'classic') {
+        return <TVDisplayClassic {...commonProps} />;
+    }
+    
+    if (selectedTheme === 'layout2') {
+        return <TVDisplayLayout2 {...commonProps} />;
+    }
+    
+    // Default to modern layout
+    return (
+        <ModernLayout {...commonProps} />
     );
 }
