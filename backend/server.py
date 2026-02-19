@@ -127,12 +127,14 @@ class LayoutSettings(BaseModel):
     primary_color: str = "#064E3B"
     secondary_color: str = "#D97706"
     background_image: Optional[str] = None
+    background_images: List[str] = Field(default_factory=list)
 
 class LayoutSettingsUpdate(BaseModel):
     theme: Optional[str] = None
     primary_color: Optional[str] = None
     secondary_color: Optional[str] = None
     background_image: Optional[str] = None
+    background_images: Optional[List[str]] = None
 
 class Content(BaseModel):
     model_config = ConfigDict(extra="ignore")
