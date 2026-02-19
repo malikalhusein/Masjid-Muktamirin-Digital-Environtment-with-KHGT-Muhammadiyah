@@ -442,13 +442,13 @@ export default function TVDisplay() {
             setCountdownSeconds(diff);
             setCountdownLabel(`Menuju ${prayerName}`);
             
-            // Reset sounds for new prayer cycle
+            // Reset sounds for new prayer cycle - use callback to avoid stale closure
             if (diff > preAdzanSeconds + 60) {
-                setSoundsPlayed({
-                    preAdzan: false,
-                    adzan: false,
-                    preIqamah: false,
-                    iqamah: false,
+                setSoundsPlayed(prev => {
+                    if (prev.preAdzan || prev.adzan || prev.preIqamah || prev.iqamah) {
+                        return { preAdzan: false, adzan: false, preIqamah: false, iqamah: false };
+                    }
+                    return prev;
                 });
             }
         } else if (diff > 0 && diff <= preAdzanSeconds) {
@@ -457,10 +457,15 @@ export default function TVDisplay() {
             setCountdownSeconds(diff);
             setCountdownLabel(`⏰ ${prayerName} Sebentar Lagi`);
             
-            // Play pre-adzan sound once
-            if (!soundsPlayed.preAdzan && prayerSettings.sound_pre_adzan !== false) {
-                playNotificationSound(SOUND_TYPES.PRE_ADZAN);
-                setSoundsPlayed(prev => ({ ...prev, preAdzan: true }));
+            // Play pre-adzan sound once - use callback to check current state
+            if (prayerSettings.sound_pre_adzan !== false) {
+                setSoundsPlayed(prev => {
+                    if (!prev.preAdzan) {
+                        playNotificationSound(SOUND_TYPES.PRE_ADZAN);
+                        return { ...prev, preAdzan: true };
+                    }
+                    return prev;
+                });
             }
         } else if (diff <= 0 && diff > -jedaAdzanSeconds) {
             // Adzan time / Jeda adzan
@@ -468,10 +473,15 @@ export default function TVDisplay() {
             setCountdownSeconds(jedaAdzanSeconds + diff);
             setCountdownLabel(`🔊 Adzan ${prayerName}`);
             
-            // Play adzan sound once
-            if (!soundsPlayed.adzan && prayerSettings.sound_adzan !== false) {
-                playNotificationSound(SOUND_TYPES.ADZAN);
-                setSoundsPlayed(prev => ({ ...prev, adzan: true }));
+            // Play adzan sound once - use callback to check current state
+            if (prayerSettings.sound_adzan !== false) {
+                setSoundsPlayed(prev => {
+                    if (!prev.adzan) {
+                        playNotificationSound(SOUND_TYPES.ADZAN);
+                        return { ...prev, adzan: true };
+                    }
+                    return prev;
+                });
             }
         } else if (diff <= -jedaAdzanSeconds && diff > -(jedaAdzanSeconds + preIqamahSeconds)) {
             // Iqamah countdown
@@ -480,16 +490,26 @@ export default function TVDisplay() {
             setCountdownSeconds(Math.max(0, iqamahRemaining));
             setCountdownLabel(`Iqomah ${prayerName}`);
             
-            // Play pre-iqamah sound when 1 minute left
-            if (!soundsPlayed.preIqamah && iqamahRemaining <= 60 && iqamahRemaining > 58 && prayerSettings.sound_pre_iqamah !== false) {
-                playNotificationSound(SOUND_TYPES.PRE_IQAMAH);
-                setSoundsPlayed(prev => ({ ...prev, preIqamah: true }));
+            // Play pre-iqamah sound when 1 minute left - use callback
+            if (iqamahRemaining <= 60 && iqamahRemaining > 58 && prayerSettings.sound_pre_iqamah !== false) {
+                setSoundsPlayed(prev => {
+                    if (!prev.preIqamah) {
+                        playNotificationSound(SOUND_TYPES.PRE_IQAMAH);
+                        return { ...prev, preIqamah: true };
+                    }
+                    return prev;
+                });
             }
             
-            // Play iqamah sound when countdown ends
-            if (!soundsPlayed.iqamah && iqamahRemaining <= 2 && prayerSettings.sound_iqamah !== false) {
-                playNotificationSound(SOUND_TYPES.IQAMAH);
-                setSoundsPlayed(prev => ({ ...prev, iqamah: true }));
+            // Play iqamah sound when countdown ends - use callback
+            if (iqamahRemaining <= 2 && prayerSettings.sound_iqamah !== false) {
+                setSoundsPlayed(prev => {
+                    if (!prev.iqamah) {
+                        playNotificationSound(SOUND_TYPES.IQAMAH);
+                        return { ...prev, iqamah: true };
+                    }
+                    return prev;
+                });
             }
         } else {
             // After iqamah - waiting for next prayer
@@ -497,7 +517,7 @@ export default function TVDisplay() {
             setCountdownSeconds(0);
             setCountdownLabel('Sholat Berlangsung');
         }
-    }, [currentTime, prayerTimes, prayerSettings, soundsPlayed]);
+    }, [currentTime, prayerTimes, prayerSettings]); // Removed soundsPlayed from dependencies
     
     if (loading) {
         return (
