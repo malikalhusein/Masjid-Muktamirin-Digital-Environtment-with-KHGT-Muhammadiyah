@@ -9,7 +9,7 @@ Bangun sebuah Web App Jam Sholat Digital berbasis KHGT Muhammadiyah, siap di-dep
 3. **Muadzin** - Menggunakan countdown iqomah setelah adzan
 
 ## Core Requirements (Static)
-- Display jadwal sholat 5 waktu dari API KHGT Muhammadiyah
+- Display jadwal sholat 5 waktu dari KHGT Muhammadiyah
 - Countdown waktu adzan dan iqomah
 - Identitas masjid (nama, logo, alamat)
 - Kalender Hijriyah dan Masehi
@@ -17,75 +17,14 @@ Bangun sebuah Web App Jam Sholat Digital berbasis KHGT Muhammadiyah, siap di-dep
 - Agenda masjid
 - Running text
 - Panel dashboard admin dengan JWT auth
-
-## What's Been Implemented ✅
-**Date: 19 Februari 2026**
-
-### Backend (FastAPI + MongoDB)
-- JWT authentication (register/login)
-- Mosque identity CRUD
-- Prayer times API (KHGT integration via hisabmu.com)
-- Prayer settings (iqomah duration, bell)
-- Layout settings (theme, colors)
-- Content management (poster, announcement, video)
-- Agenda CRUD
-- Running text CRUD
-- File upload with base64
-
-### Frontend (React)
-- TV Display page (/) - fullscreen for TV
-  - Live clock with seconds
-  - 5 prayer times with Arabic names
-  - Countdown to next prayer
-  - Iqomah countdown mode
-  - Content slideshow
-  - Running text marquee
-  - Hijri + Gregorian calendar
-  - Bell notification indicator
-- Admin Dashboard (/connect/*)
-  - Login/Register
-  - Dashboard overview with stats
-  - Identity management
-  - Content management
-  - Agenda management
-  - Running text management
-  - Layout/theme settings
-  - Iqomah & bell settings
-
-### Design System
-- Modern minimalist dark theme
-- Emerald (#064E3B) + Gold (#D97706) palette
-- Barlow Condensed (headings) + Outfit (body) + Amiri (Arabic)
-- Glass-morphism cards
-- Responsive for TV + desktop/mobile
-
-## Prioritized Backlog
-
-### P0 - Critical (Next)
-- [ ] Integration dengan GPS dari STB Android TV Box
-- [ ] Docker Compose deployment configuration
-- [ ] Nginx reverse proxy setup
-
-### P1 - High Priority
-- [ ] Audio notification/bell sound (Web Audio API ready)
-- [ ] Accurate Hijri calendar from KHGT API
-- [ ] Multiple layout templates (classic, ramadhan)
-
-### P2 - Medium Priority
-- [ ] Homepage masjid subdomain (profil, berita)
-- [ ] Kanal Ramadhan subdomain (imsakiyah, agenda tarawih)
-- [ ] Admin unified dashboard for all subdomains
-
-### P3 - Low Priority
-- [ ] Video content support
-- [ ] Multi-language support
-- [ ] Offline mode/PWA
+- Kalibrasi manual untuk waktu sholat
+- Notifikasi suara/dering
 
 ## Tech Stack
 - Backend: FastAPI, MongoDB, Motor (async)
 - Frontend: React 19, Tailwind CSS, Framer Motion
 - Auth: JWT (PyJWT, bcrypt)
-- API: KHGT via hisabmu.com
+- Data KHGT: Hardcoded dari hisabmu.com
 
 ## Default Location
 Kecamatan Galur, Kulon Progo, Yogyakarta
@@ -97,62 +36,102 @@ Kecamatan Galur, Kulon Progo, Yogyakarta
 - TV Display: /
 - Admin Login: /connect
 - Dashboard: /connect/dashboard
+- Kalibrasi: /connect/calibration
 - Settings: /connect/settings
 
 ---
 
-## Update: 19 Februari 2026 - Layout Options & Hijri Calendar Fix
+## What's Been Implemented ✅
 
-### New Features
-1. **3 Layout Options untuk TV Display:**
-   - **Modern** (`/`) - Dark theme minimalis
-   - **Classic** (`/classic`) - Background foto masjid seperti referensi
-   - **Layout2** (`/layout2`) - Sidebar dengan quote dan countdown
+### Update: 19 Februari 2026 - Kalibrasi & Notifikasi Suara
 
-2. **Kalender Hijriyah KHGT Akurat:**
-   - Menggunakan tabel konversi KHGT 1447 H resmi
-   - Menampilkan tanggal Ramadan dengan benar (bukan Sya'ban)
-   - 18 Feb 2026 = 1 Ramadan 1447 H
+#### New Features
+1. **Menu Kalibrasi di Dashboard:**
+   - Route `/connect/calibration` dengan 2 tab
+   - Tab "Kalibrasi per Waktu": Pengaturan per waktu sholat (Subuh, Dzuhur, Ashar, Maghrib, Isya)
+   - Setiap waktu memiliki 4 field: pre_adzan, jeda_adzan, pre_iqamah, jeda_sholat
+   - Tab "Bunyi Notifikasi": 4 toggle untuk kontrol suara
 
-3. **Fitur Ramadan:**
-   - Waktu Imsak otomatis muncul saat Ramadan
-   - Badge "Ramadan Mubarak!"
-   - Countdown ke hari besar Islam (Nuzulul Quran, Idul Fitri)
+2. **Sistem Notifikasi Suara:**
+   - `SOUND_TYPES`: PRE_ADZAN, ADZAN, PRE_IQAMAH, IQAMAH
+   - Setiap tipe memiliki karakteristik audio berbeda (frekuensi, durasi, pattern)
+   - Menggunakan Web Audio API
+   - Tombol test sound di halaman kalibrasi
 
-### Files Added
-- `/app/frontend/src/lib/khgtCalendar.js` - Tabel konversi KHGT 1447 H
-- `/app/frontend/src/pages/TVDisplayClassic.jsx` - Layout klasik
-- `/app/frontend/src/pages/TVDisplayLayout2.jsx` - Layout sidebar
+3. **Countdown System dengan Mode:**
+   - Mode `adzan`: Menuju waktu adzan
+   - Mode `jeda_adzan`: Adzan berkumandang
+   - Mode `iqomah`: Countdown menuju iqamah
+   - Label dinamis dengan emoji indikator
 
-### Routes
-- `/` - Modern dark layout
-- `/classic` - Classic dengan foto masjid
-- `/layout2` - Sidebar layout
-- `/connect` - Dashboard admin
+4. **Bug Fix - Floating Bar Sidebar:**
+   - Mengubah struktur sidebar dari `position: absolute` ke `flex`
+   - User info di bagian bawah tidak lagi overlap dengan menu
+   - Navigation area sekarang scrollable
+
+5. **Bug Fix - Infinite Loop useEffect:**
+   - Ditemukan oleh testing agent
+   - Penyebab: `soundsPlayed` di dependency array sambil dimodifikasi dalam effect
+   - Solusi: Menggunakan callback pattern untuk state updates
+
+#### Files Modified
+- `/app/frontend/src/pages/TVDisplay.jsx` - Countdown & notifikasi
+- `/app/frontend/src/pages/dashboard/DashboardLayout.jsx` - Fix sidebar
+- `/app/frontend/src/pages/dashboard/CalibrationPage.jsx` - UI kalibrasi
+- `/app/frontend/src/lib/utils.js` - Sound system baru
+- `/app/frontend/src/App.js` - Route kalibrasi
+
+#### Backend (Already Complete)
+- JWT authentication
+- Mosque identity CRUD
+- Prayer times (KHGT data Feb-Mar 2026)
+- Prayer settings with calibration
+- Layout settings
+- Content, Agenda, Running text CRUD
 
 ---
 
-## Update: 20 Februari 2026 - Perbaikan Kalender & Layout Switching
+## Prioritized Backlog
 
-### Issues Fixed
-1. **Kalender Hijriyah** - Sekarang benar menampilkan **3 Ramadan 1447 H** (bukan 2 Ramadan)
-   - Menggunakan timezone WIB (UTC+7) untuk Indonesia
-   - Mengacu pada tabel KHGT resmi dari hisabmu.com
+### P0 - Critical (Completed ✅)
+- [x] Implementasi countdown waktu adzan
+- [x] Implementasi countdown waktu iqomah
+- [x] Kalibrasi manual per waktu sholat
+- [x] Notifikasi suara untuk countdown
+- [x] Perbaikan bug floating bar sidebar
 
-2. **Layout Switching** - Layout sekarang berubah otomatis berdasarkan setting di dashboard
-   - Setting theme disimpan di database
-   - TVDisplay membaca setting dan render layout yang sesuai
+### P1 - High Priority
+- [ ] Expand KHGT data untuk bulan lain (Apr-Dec 2026, 2027)
+- [ ] Docker Compose deployment configuration
+- [ ] Nginx reverse proxy setup
+- [ ] Integration dengan GPS dari STB Android TV Box
 
-3. **Background Image** - Bisa diganti dari halaman Tampilan di dashboard
-   - Ada 3 preset background masjid
-   - Bisa input URL custom
+### P2 - Medium Priority
+- [ ] Homepage masjid subdomain (profil, berita)
+- [ ] Kanal Ramadhan subdomain (imsakiyah, agenda tarawih)
+- [ ] Admin unified dashboard for all subdomains
+- [ ] Upload file audio kustom untuk notifikasi
 
-### Layouts Available
-1. **Modern** - Dark theme minimalis dengan glass effect
-2. **Classic** - Background foto masjid fullscreen (mirip referensi user)
-3. **Al-Iftitar** - Sidebar layout dengan quote dan konten besar
+### P3 - Low Priority
+- [ ] Video content support
+- [ ] Multi-language support
+- [ ] Offline mode/PWA
 
-### Ramadan Features
-- Imsak time otomatis muncul di semua layout
-- Badge "Ramadan Mubarak!" di layout Modern
-- Countdown hari besar Islam (Nuzulul Quran, dll)
+---
+
+## Test Credentials
+- Username: `admin`
+- Password: `admin123`
+
+## API Endpoints
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `GET, PUT /api/mosque/identity`
+- `GET, PUT /api/settings/prayer` (includes calibration)
+- `GET, PUT /api/settings/layout`
+- `GET /api/prayer-times`
+- `GET /api/prayer-times/monthly`
+- `GET, POST, PUT, DELETE /api/content`
+- `GET, POST, PUT, DELETE /api/agenda`
+- `GET, POST, PUT, DELETE /api/running-text`
