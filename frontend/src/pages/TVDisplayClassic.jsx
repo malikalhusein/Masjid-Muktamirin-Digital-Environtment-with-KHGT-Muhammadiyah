@@ -235,21 +235,8 @@ export default function TVDisplayClassic({
                         {contents.length > 0 && <ClassicSlideshow contents={contents} />}
                     </div>
                     
-                    {/* Event Badge - Right */}
-                    <div className="flex flex-col gap-4 items-end">
-                        {nextEvent && nextEvent.daysUntil <= 90 && (
-                            <div className="bg-red-500 text-white rounded-full px-5 py-2 shadow-lg">
-                                <span className="font-body font-medium">
-                                    {nextEvent.name} -{nextEvent.daysUntil} Hari
-                                </span>
-                            </div>
-                        )}
-                        
-                        {/* Settings Button */}
-                        <a href="/connect" className="bg-white/80 backdrop-blur-sm text-gray-700 rounded-full p-3 hover:bg-white transition-colors shadow-lg">
-                            <Settings className="w-6 h-6" />
-                        </a>
-                    </div>
+                    {/* Empty spacer for balance */}
+                    <div className="w-40"></div>
                 </div>
                 
                 {/* Bottom Prayer Times Bar */}
