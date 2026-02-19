@@ -33,9 +33,12 @@ export default function LayoutPage() {
         primary_color: '#064E3B',
         secondary_color: '#D97706',
         background_image: '',
+        background_images: [],
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [newBgUrl, setNewBgUrl] = useState('');
     
     useEffect(() => {
         fetchSettings();
@@ -44,7 +47,12 @@ export default function LayoutPage() {
     const fetchSettings = async () => {
         try {
             const res = await settingsAPI.getLayout();
-            setSettings(res.data);
+            // Ensure background_images is always an array
+            const data = res.data;
+            if (!data.background_images) {
+                data.background_images = data.background_image ? [data.background_image] : [];
+            }
+            setSettings(data);
         } catch (error) {
             console.error('Error fetching settings:', error);
             toast.error('Gagal memuat pengaturan tampilan');
@@ -56,7 +64,12 @@ export default function LayoutPage() {
     const handleSave = async () => {
         setSaving(true);
         try {
-            await settingsAPI.updateLayout(settings);
+            // Set background_image to first image in array for backward compatibility
+            const dataToSave = {
+                ...settings,
+                background_image: settings.background_images?.[0] || '',
+            };
+            await settingsAPI.updateLayout(dataToSave);
             toast.success('Pengaturan tampilan berhasil disimpan');
         } catch (error) {
             console.error('Error saving settings:', error);
@@ -72,6 +85,54 @@ export default function LayoutPage() {
             primary_color: preset.primary,
             secondary_color: preset.secondary,
         }));
+    };
+    
+    const handleFileUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        setUploading(true);
+        try {
+            const res = await uploadAPI.upload(file);
+            const newUrl = res.data.url;
+            setSettings(prev => ({
+                ...prev,
+                background_images: [...(prev.background_images || []), newUrl],
+            }));
+            toast.success('Background berhasil diunggah');
+        } catch (error) {
+            console.error('Error uploading:', error);
+            toast.error('Gagal mengunggah gambar');
+        } finally {
+            setUploading(false);
+        }
+    };
+    
+    const addBackgroundUrl = () => {
+        if (!newBgUrl) return;
+        setSettings(prev => ({
+            ...prev,
+            background_images: [...(prev.background_images || []), newBgUrl],
+        }));
+        setNewBgUrl('');
+        toast.success('Background berhasil ditambahkan');
+    };
+    
+    const removeBackground = (index) => {
+        setSettings(prev => ({
+            ...prev,
+            background_images: prev.background_images.filter((_, i) => i !== index),
+        }));
+        toast.success('Background dihapus');
+    };
+    
+    const selectDefaultBackground = (url) => {
+        if (!settings.background_images?.includes(url)) {
+            setSettings(prev => ({
+                ...prev,
+                background_images: [...(prev.background_images || []), url],
+            }));
+        }
     };
     
     if (loading) {
