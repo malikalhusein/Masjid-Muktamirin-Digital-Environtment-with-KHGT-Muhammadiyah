@@ -464,7 +464,7 @@ async def get_contents(active_only: bool = False):
     contents = await db.contents.find(query, {"_id": 0}).sort("order", 1).to_list(100)
     return [Content(**c) for c in contents]
 
-@api_router.post("/content", response_model=Content)
+@api_router.post("/content", response_model=Content, status_code=201)
 async def create_content(content: ContentCreate, user: dict = Depends(get_current_user)):
     content_obj = Content(**content.model_dump())
     doc = content_obj.model_dump()
