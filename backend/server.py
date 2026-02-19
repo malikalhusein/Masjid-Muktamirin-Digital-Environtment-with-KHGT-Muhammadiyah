@@ -72,9 +72,17 @@ class MosqueIdentityUpdate(BaseModel):
     elevation: Optional[int] = None
     timezone_offset: Optional[int] = None
 
+class PrayerCalibration(BaseModel):
+    """Kalibrasi waktu per sholat"""
+    pre_adzan: int = 1  # Peringatan sebelum adzan (menit)
+    jeda_adzan: int = 3  # Jeda adzan berlangsung (menit)
+    pre_iqamah: int = 10  # Peringatan sebelum iqamah / waktu menunggu iqamah (menit)
+    jeda_sholat: int = 10  # Durasi estimasi sholat (menit)
+
 class PrayerSettings(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    # Legacy iqomah (kept for compatibility)
     iqomah_subuh: int = 15
     iqomah_dzuhur: int = 10
     iqomah_ashar: int = 10
@@ -82,6 +90,17 @@ class PrayerSettings(BaseModel):
     iqomah_isya: int = 10
     bell_enabled: bool = True
     bell_before_minutes: int = 5
+    # New calibration per prayer
+    calibration_subuh: dict = Field(default_factory=lambda: {"pre_adzan": 1, "jeda_adzan": 3, "pre_iqamah": 15, "jeda_sholat": 10})
+    calibration_dzuhur: dict = Field(default_factory=lambda: {"pre_adzan": 1, "jeda_adzan": 3, "pre_iqamah": 10, "jeda_sholat": 10})
+    calibration_ashar: dict = Field(default_factory=lambda: {"pre_adzan": 1, "jeda_adzan": 3, "pre_iqamah": 10, "jeda_sholat": 10})
+    calibration_maghrib: dict = Field(default_factory=lambda: {"pre_adzan": 1, "jeda_adzan": 3, "pre_iqamah": 5, "jeda_sholat": 10})
+    calibration_isya: dict = Field(default_factory=lambda: {"pre_adzan": 1, "jeda_adzan": 3, "pre_iqamah": 10, "jeda_sholat": 10})
+    # Notification sounds
+    sound_pre_adzan: bool = True
+    sound_adzan: bool = True
+    sound_pre_iqamah: bool = True
+    sound_iqamah: bool = True
 
 class PrayerSettingsUpdate(BaseModel):
     iqomah_subuh: Optional[int] = None
@@ -91,6 +110,15 @@ class PrayerSettingsUpdate(BaseModel):
     iqomah_isya: Optional[int] = None
     bell_enabled: Optional[bool] = None
     bell_before_minutes: Optional[int] = None
+    calibration_subuh: Optional[dict] = None
+    calibration_dzuhur: Optional[dict] = None
+    calibration_ashar: Optional[dict] = None
+    calibration_maghrib: Optional[dict] = None
+    calibration_isya: Optional[dict] = None
+    sound_pre_adzan: Optional[bool] = None
+    sound_adzan: Optional[bool] = None
+    sound_pre_iqamah: Optional[bool] = None
+    sound_iqamah: Optional[bool] = None
 
 class LayoutSettings(BaseModel):
     model_config = ConfigDict(extra="ignore")
