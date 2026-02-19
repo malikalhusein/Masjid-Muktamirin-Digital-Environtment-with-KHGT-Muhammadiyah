@@ -58,13 +58,13 @@ const PrayerCard = ({ name, time, isActive, isNext, arabicName }) => {
 };
 
 // Countdown Component
-const CountdownDisplay = ({ seconds, label, isUrgent }) => {
+const CountdownDisplay = ({ seconds, label, isUrgent, colorClass }) => {
     return (
         <div className="text-center" data-testid="countdown-display">
             <p className="text-slate-400 text-lg lg:text-xl font-body uppercase tracking-wider mb-2">
                 {label}
             </p>
-            <p className={`font-heading text-5xl lg:text-7xl xl:text-8xl tabular-nums ${isUrgent ? 'countdown-urgent' : 'text-white'}`}>
+            <p className={`font-heading text-5xl lg:text-7xl xl:text-8xl tabular-nums ${colorClass || (isUrgent ? 'countdown-urgent' : 'text-white')}`}>
                 {formatCountdown(seconds)}
             </p>
         </div>
