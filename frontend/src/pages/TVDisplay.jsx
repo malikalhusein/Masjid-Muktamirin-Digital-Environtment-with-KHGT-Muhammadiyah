@@ -349,8 +349,14 @@ export default function TVDisplay() {
     const [agendas, setAgendas] = useState([]);
     const [runningTexts, setRunningTexts] = useState([]);
     const [countdownSeconds, setCountdownSeconds] = useState(0);
-    const [countdownMode, setCountdownMode] = useState('adzan');
-    const [bellPlayed, setBellPlayed] = useState(false);
+    const [countdownMode, setCountdownMode] = useState('adzan'); // 'adzan', 'jeda_adzan', 'iqomah', 'sholat'
+    const [countdownLabel, setCountdownLabel] = useState('');
+    const [soundsPlayed, setSoundsPlayed] = useState({
+        preAdzan: false,
+        adzan: false,
+        preIqamah: false,
+        iqamah: false,
+    });
     const [loading, setLoading] = useState(true);
     
     // Fetch all data
@@ -394,33 +400,91 @@ export default function TVDisplay() {
         return () => clearInterval(timer);
     }, []);
     
-    // Calculate countdown
+    // Calculate countdown with calibration settings
     useEffect(() => {
         if (!prayerTimes || !prayerSettings) return;
         
         const { nextPrayer, nextPrayerTime } = getCurrentAndNextPrayer(prayerTimes);
+        if (!nextPrayerTime || !nextPrayer) return;
         
-        if (nextPrayerTime) {
-            const diff = getTimeDiffSeconds(nextPrayerTime, currentTime);
+        // Get calibration for this prayer
+        const calibration = prayerSettings[`calibration_${nextPrayer}`] || {
+            pre_adzan: 1,
+            jeda_adzan: 3,
+            pre_iqamah: prayerSettings[`iqomah_${nextPrayer}`] || 10,
+            jeda_sholat: 10,
+        };
+        
+        const diff = getTimeDiffSeconds(nextPrayerTime, currentTime);
+        const preAdzanSeconds = calibration.pre_adzan * 60;
+        const jedaAdzanSeconds = calibration.jeda_adzan * 60;
+        const preIqamahSeconds = calibration.pre_iqamah * 60;
+        const prayerName = PRAYER_NAMES[nextPrayer]?.id || nextPrayer;
+        
+        // Timeline: PreAdzan -> Adzan -> JedaAdzan -> Iqamah -> Sholat
+        
+        if (diff > preAdzanSeconds) {
+            // Before pre-adzan warning
+            setCountdownMode('adzan');
+            setCountdownSeconds(diff);
+            setCountdownLabel(`Menuju ${prayerName}`);
             
-            if (diff <= 0 && diff > -60 * (prayerSettings[`iqomah_${nextPrayer}`] || 10)) {
-                setCountdownMode('iqomah');
-                const iqomahSeconds = (prayerSettings[`iqomah_${nextPrayer}`] || 10) * 60 + diff;
-                setCountdownSeconds(Math.max(0, iqomahSeconds));
-            } else if (diff > 0) {
-                setCountdownMode('adzan');
-                setCountdownSeconds(diff);
-                
-                if (prayerSettings.bell_enabled && diff <= prayerSettings.bell_before_minutes * 60 && diff > (prayerSettings.bell_before_minutes * 60 - 2) && !bellPlayed) {
-                    playBellSound();
-                    setBellPlayed(true);
-                }
-            } else {
-                setCountdownMode('adzan');
-                setBellPlayed(false);
+            // Reset sounds for new prayer cycle
+            if (diff > preAdzanSeconds + 60) {
+                setSoundsPlayed({
+                    preAdzan: false,
+                    adzan: false,
+                    preIqamah: false,
+                    iqamah: false,
+                });
             }
+        } else if (diff > 0 && diff <= preAdzanSeconds) {
+            // Pre-adzan warning period
+            setCountdownMode('adzan');
+            setCountdownSeconds(diff);
+            setCountdownLabel(`⏰ ${prayerName} Sebentar Lagi`);
+            
+            // Play pre-adzan sound once
+            if (!soundsPlayed.preAdzan && prayerSettings.sound_pre_adzan !== false) {
+                playNotificationSound(SOUND_TYPES.PRE_ADZAN);
+                setSoundsPlayed(prev => ({ ...prev, preAdzan: true }));
+            }
+        } else if (diff <= 0 && diff > -jedaAdzanSeconds) {
+            // Adzan time / Jeda adzan
+            setCountdownMode('jeda_adzan');
+            setCountdownSeconds(jedaAdzanSeconds + diff);
+            setCountdownLabel(`🔊 Adzan ${prayerName}`);
+            
+            // Play adzan sound once
+            if (!soundsPlayed.adzan && prayerSettings.sound_adzan !== false) {
+                playNotificationSound(SOUND_TYPES.ADZAN);
+                setSoundsPlayed(prev => ({ ...prev, adzan: true }));
+            }
+        } else if (diff <= -jedaAdzanSeconds && diff > -(jedaAdzanSeconds + preIqamahSeconds)) {
+            // Iqamah countdown
+            const iqamahRemaining = preIqamahSeconds + jedaAdzanSeconds + diff;
+            setCountdownMode('iqomah');
+            setCountdownSeconds(Math.max(0, iqamahRemaining));
+            setCountdownLabel(`Iqomah ${prayerName}`);
+            
+            // Play pre-iqamah sound when 1 minute left
+            if (!soundsPlayed.preIqamah && iqamahRemaining <= 60 && iqamahRemaining > 58 && prayerSettings.sound_pre_iqamah !== false) {
+                playNotificationSound(SOUND_TYPES.PRE_IQAMAH);
+                setSoundsPlayed(prev => ({ ...prev, preIqamah: true }));
+            }
+            
+            // Play iqamah sound when countdown ends
+            if (!soundsPlayed.iqamah && iqamahRemaining <= 2 && prayerSettings.sound_iqamah !== false) {
+                playNotificationSound(SOUND_TYPES.IQAMAH);
+                setSoundsPlayed(prev => ({ ...prev, iqamah: true }));
+            }
+        } else {
+            // After iqamah - waiting for next prayer
+            setCountdownMode('adzan');
+            setCountdownSeconds(0);
+            setCountdownLabel('Sholat Berlangsung');
         }
-    }, [currentTime, prayerTimes, prayerSettings, bellPlayed]);
+    }, [currentTime, prayerTimes, prayerSettings, soundsPlayed]);
     
     if (loading) {
         return (
