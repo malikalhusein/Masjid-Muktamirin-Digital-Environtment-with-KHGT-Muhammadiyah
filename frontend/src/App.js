@@ -20,6 +20,8 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Pages
 import TVDisplay from "@/pages/TVDisplay";
+import TVDisplayClassic from "@/pages/TVDisplayClassic";
+import TVDisplayLayout2 from "@/pages/TVDisplayLayout2";
 import Login from "@/pages/Login";
 import DashboardLayout from "@/pages/dashboard/DashboardLayout";
 import DashboardHome from "@/pages/dashboard/DashboardHome";
@@ -37,8 +39,10 @@ function App() {
                 <Toaster position="top-right" richColors />
                 <BrowserRouter>
                     <Routes>
-                        {/* TV Display - Main public page */}
+                        {/* TV Display - Main public page with different layouts */}
                         <Route path="/" element={<TVDisplay />} />
+                        <Route path="/classic" element={<TVDisplayClassic />} />
+                        <Route path="/layout2" element={<TVDisplayLayout2 />} />
                         
                         {/* Admin Login */}
                         <Route path="/connect" element={<Login />} />
