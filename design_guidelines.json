@@ -1,0 +1,181 @@
+{
+  "identity": {
+    "persona": "E1",
+    "mission": "Create a Modern Minimalist Digital Mosque Display that balances sacred serenity with digital precision. No clutter, high glanceability.",
+    "tone": "Serene, Precise, Sacred, Communal"
+  },
+  "theme": {
+    "mode": "dark",
+    "description": "A deep, restful dark mode optimized for low-light mosque environments and TV displays, with a high-contrast light mode option for bright daylight."
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#064E3B",
+        "foreground": "#ECFDF5",
+        "50": "#ECFDF5",
+        "100": "#D1FAE5",
+        "200": "#A7F3D0",
+        "300": "#6EE7B7",
+        "400": "#34D399",
+        "500": "#10B981",
+        "600": "#059669",
+        "700": "#047857",
+        "800": "#065F46",
+        "900": "#064E3B",
+        "950": "#022C22"
+      },
+      "secondary": {
+        "DEFAULT": "#D97706",
+        "foreground": "#FFFBEB",
+        "50": "#FFFBEB",
+        "100": "#FEF3C7",
+        "200": "#FDE68A",
+        "300": "#FCD34D",
+        "400": "#FBBF24",
+        "500": "#F59E0B",
+        "600": "#D97706",
+        "700": "#B45309",
+        "800": "#92400E",
+        "900": "#78350F"
+      },
+      "background": {
+        "light": "#F8FAFC",
+        "dark": "#020617"
+      },
+      "surface": {
+        "light": "#FFFFFF",
+        "dark": "#0F172A"
+      },
+      "text": {
+        "primary": {
+          "light": "#0F172A",
+          "dark": "#F1F5F9"
+        },
+        "secondary": {
+          "light": "#475569",
+          "dark": "#94A3B8"
+        }
+      },
+      "accent": "#0D9488",
+      "warning": "#DC2626",
+      "success": "#059669"
+    },
+    "rules": [
+      "No purple gradients. Use Deep Green or Slate gradients only.",
+      "High contrast is mandatory for TV display (WCAG AAA for main text).",
+      "Use Gold (#D97706) sparingly for active prayer times and urgent alerts."
+    ]
+  },
+  "typography": {
+    "fonts": {
+      "heading": "Barlow Condensed, sans-serif",
+      "body": "Outfit, sans-serif",
+      "arabic": "Amiri, serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "tv_huge": "text-[12rem] leading-none tracking-tighter",
+      "tv_large": "text-8xl tracking-tight",
+      "tv_medium": "text-6xl tracking-tight",
+      "tv_normal": "text-4xl",
+      "dashboard_h1": "text-3xl font-bold tracking-tight",
+      "dashboard_body": "text-base"
+    },
+    "rules": [
+      "Headings (Clock, Prayer Names) MUST use Barlow Condensed.",
+      "Body text MUST use Outfit.",
+      "Quranic verses MUST use Amiri.",
+      "Minimum font size for TV display is 24px (text-2xl).",
+      "Use tabular-nums for all clocks and timers to prevent jitter."
+    ]
+  },
+  "layout": {
+    "grid_system": {
+      "tv": "grid-cols-12 gap-8 p-12",
+      "dashboard": "grid-cols-1 md:grid-cols-4 gap-6 p-6"
+    },
+    "spacing": {
+      "container_padding": "p-8 md:p-12",
+      "section_gap": "gap-8"
+    },
+    "tv_safe_area": "p-12",
+    "modes": {
+      "tv_display": "Bento Grid Mode A (Tetris). Hero is the Clock/Next Prayer. Sidebar is Prayer List. Footer is Running Text.",
+      "dashboard": "Dense Grid Mode B. High density, clear hierarchy."
+    }
+  },
+  "components": {
+    "radius": "rounded-lg",
+    "shadows": "shadow-lg",
+    "glassmorphism": {
+      "enabled": true,
+      "classes": "bg-slate-950/80 backdrop-blur-xl border border-white/10"
+    },
+    "cards": {
+      "style": "Flat, high contrast borders in dark mode. Soft shadows in light mode.",
+      "classes": "border-slate-800 bg-slate-900/50"
+    },
+    "buttons": {
+      "style": "Sharp or slightly rounded. High contrast.",
+      "classes": "font-medium tracking-wide uppercase"
+    }
+  },
+  "assets": {
+    "images": {
+      "backgrounds": [
+        "https://images.unsplash.com/photo-1771158761657-9e8678f7b875?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwyfHxjYWxtJTIwbmF0dXJlJTIwbGFuZHNjYXBlJTIwbW91bnRhaW5zJTIwZm9nJTIwbWluaW1hbGlzdHxlbnwwfHx8fDE3NzE1MzMyMTN8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1770544702629-96b61281ab03?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwxfHxjYWxtJTIwbmF0dXJlJTIwbGFuZHNjYXBlJTIwbW91bnRhaW5zJTIwZm9nJTIwbWluaW1hbGlzdHxlbnwwfHx8fDE3NzE1MzMyMTN8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.pexels.com/photos/29359531/pexels-photo-29359531.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      ],
+      "mosque_interiors": [
+        "https://images.unsplash.com/photo-1761639935258-c74c0cd2fc3a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzR8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBtb3NxdWUlMjBpbnRlcmlvciUyMG1pbmltYWwlMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzcxNTMzMjExfDA&ixlib=rb-4.1.0&q=85",
+        "https://images.pexels.com/photos/33685448/pexels-photo-33685448.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      ],
+      "patterns": [
+        "https://images.unsplash.com/photo-1739477274868-86a943b6cd5b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNDR8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwZ2VvbWV0cmljJTIwcGF0dGVybiUyMHNlYW1sZXNzJTIwbWluaW1hbCUyMHZlY3RvcnxlbnwwfHx8fDE3NzE1MzMyMDl8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1739478469686-b4aab237a38e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNDR8MHwxfHNlYXJjaHwyfHxpc2xhbWljJTIwZ2VvbWV0cmljJTIwcGF0dGVybiUyMHNlYW1sZXNzJTIwbWluaW1hbCUyMHZlY3RvcnxlbnwwfHx8fDE3NzE1MzMyMDl8MA&ixlib=rb-4.1.0&q=85"
+      ]
+    },
+    "icons": "Use Lucide React or Heroicons. Keep it simple and outlined."
+  },
+  "motion": {
+    "enabled": true,
+    "rules": [
+      "Use 'AnimatePresence' for smooth prayer time transitions.",
+      "Marquee text must move SLOWLY and SMOOTHLY (linear easing).",
+      "No heavy parallax or 3D effects to ensure performance on Android TV boxes."
+    ]
+  },
+  "accessibility": {
+    "contrast": "AAA for main text.",
+    "sizing": "Large touch targets on dashboard. Massive text on TV.",
+    "reduced_motion": "Respect prefers-reduced-motion."
+  },
+  "instructions_to_main_agent": [
+    "1. Install necessary fonts: @fontsource/barlow-condensed, @fontsource/outfit, @fontsource/amiri.",
+    "2. Setup Tailwind config with the custom colors and font families.",
+    "3. Create the 'TV Display' layout (/) using a Bento Grid with a focus on the Clock and Next Prayer.",
+    "4. Create the 'Dashboard' layout (/connect) using a sidebar + dense grid content area.",
+    "5. Use 'react-fast-marquee' for the running text footer.",
+    "6. Ensure all 'Date' and 'Time' displays use 'tabular-nums' class to avoid jitter.",
+    "7. Mock the Prayer Time API data initially, but structure it for easy KHGT integration.",
+    "8. Use the provided image URLs for the slideshow and backgrounds.",
+    "9. DO NOT use purple or teal gradients. Stick to the Deep Green/Gold/Slate palette.",
+    "10. For the Admin Dashboard, use Shadcn components but customize them to match the 'Outfit' font and rounded-lg style."
+  ],
+  "universal_guidelines": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms.",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file.",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠 etc.",
+    "Every interaction needs micro-animations - hover states, transitions.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})"
+  ]
+}
