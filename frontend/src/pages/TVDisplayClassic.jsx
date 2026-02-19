@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Marquee from 'react-fast-marquee';
-import { MapPin, Volume2, Settings } from 'lucide-react';
+import { MapPin, Volume2 } from 'lucide-react';
 import { 
     formatTime, 
     formatCountdown, 
@@ -9,7 +9,7 @@ import {
     formatDateIndonesian,
     PRAYER_NAMES,
 } from '../lib/utils';
-import { getKHGTHijriDate, isRamadan, getNextIslamicEvent } from '../lib/khgtCalendar';
+import { getKHGTHijriDate, isRamadan } from '../lib/khgtCalendar';
 
 // Default background images untuk slideshow
 const DEFAULT_BACKGROUNDS = [
