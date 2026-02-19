@@ -544,7 +544,7 @@ async def get_running_texts(active_only: bool = False):
     texts = await db.running_texts.find(query, {"_id": 0}).sort("order", 1).to_list(100)
     return [RunningText(**t) for t in texts]
 
-@api_router.post("/running-text", response_model=RunningText)
+@api_router.post("/running-text", response_model=RunningText, status_code=201)
 async def create_running_text(text: RunningTextCreate, user: dict = Depends(get_current_user)):
     text_obj = RunningText(**text.model_dump())
     await db.running_texts.insert_one(text_obj.model_dump())
