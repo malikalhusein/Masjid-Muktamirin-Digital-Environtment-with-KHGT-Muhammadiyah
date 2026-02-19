@@ -52,13 +52,13 @@ export default function DashboardLayout() {
             {/* Sidebar */}
             <aside 
                 className={cn(
-                    "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 transform transition-transform lg:transform-none",
+                    "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 transform transition-transform lg:transform-none flex flex-col",
                     sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
                 )}
                 data-testid="sidebar"
             >
                 {/* Sidebar Header */}
-                <div className="p-6 border-b border-slate-800">
+                <div className="p-6 border-b border-slate-800 flex-shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-emerald-900/50 border border-emerald-500 flex items-center justify-center">
                             <Clock className="w-5 h-5 text-emerald-400" />
@@ -76,44 +76,46 @@ export default function DashboardLayout() {
                     </button>
                 </div>
                 
-                {/* Navigation */}
-                <nav className="p-4 space-y-1">
-                    {navItems.map((item) => {
-                        const isActive = location.pathname === item.path;
-                        return (
-                            <Link
-                                key={item.path}
-                                to={item.path}
-                                onClick={() => setSidebarOpen(false)}
-                                className={cn(
-                                    "flex items-center gap-3 px-4 py-3 rounded-lg font-body text-sm transition-colors",
-                                    isActive 
-                                        ? "bg-emerald-900/50 text-emerald-400 border-l-2 border-emerald-500" 
-                                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                                )}
-                                data-testid={`nav-${item.label.toLowerCase().replace(' ', '-')}`}
-                            >
-                                <item.icon className="w-5 h-5" />
-                                {item.label}
-                            </Link>
-                        );
-                    })}
-                </nav>
-                
-                {/* Preview Link */}
-                <div className="px-4 mt-4">
-                    <Link
-                        to="/"
-                        target="_blank"
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg font-body text-sm text-gold-400 bg-gold-900/20 hover:bg-gold-900/30 transition-colors"
-                    >
-                        <Clock className="w-5 h-5" />
-                        Lihat Display TV
-                    </Link>
+                {/* Navigation - Scrollable */}
+                <div className="flex-1 overflow-y-auto">
+                    <nav className="p-4 space-y-1">
+                        {navItems.map((item) => {
+                            const isActive = location.pathname === item.path;
+                            return (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    onClick={() => setSidebarOpen(false)}
+                                    className={cn(
+                                        "flex items-center gap-3 px-4 py-3 rounded-lg font-body text-sm transition-colors",
+                                        isActive 
+                                            ? "bg-emerald-900/50 text-emerald-400 border-l-2 border-emerald-500" 
+                                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                                    )}
+                                    data-testid={`nav-${item.label.toLowerCase().replace(' ', '-')}`}
+                                >
+                                    <item.icon className="w-5 h-5" />
+                                    {item.label}
+                                </Link>
+                            );
+                        })}
+                    </nav>
+                    
+                    {/* Preview Link */}
+                    <div className="px-4 pb-4">
+                        <Link
+                            to="/"
+                            target="_blank"
+                            className="flex items-center gap-3 px-4 py-3 rounded-lg font-body text-sm text-gold-400 bg-gold-900/20 hover:bg-gold-900/30 transition-colors"
+                        >
+                            <Clock className="w-5 h-5" />
+                            Lihat Display TV
+                        </Link>
+                    </div>
                 </div>
                 
-                {/* User Info & Logout */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-800 bg-slate-900">
+                {/* User Info & Logout - Fixed at bottom */}
+                <div className="flex-shrink-0 p-4 border-t border-slate-800 bg-slate-900">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
