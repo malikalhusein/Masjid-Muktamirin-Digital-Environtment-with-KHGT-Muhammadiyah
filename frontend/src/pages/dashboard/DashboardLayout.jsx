@@ -4,14 +4,13 @@ import {
     LayoutDashboard, 
     Building2, 
     Image, 
-    CalendarDays, 
     Settings, 
     Palette,
-    Type,
     LogOut,
     Menu,
     X,
-    Clock
+    Clock,
+    Tv
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
@@ -20,12 +19,9 @@ import { cn } from '../../lib/utils';
 const navItems = [
     { path: '/connect/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/connect/identity', icon: Building2, label: 'Identitas Masjid' },
-    { path: '/connect/content', icon: Image, label: 'Konten' },
-    { path: '/connect/agenda', icon: CalendarDays, label: 'Agenda' },
-    { path: '/connect/running-text', icon: Type, label: 'Running Text' },
+    { path: '/connect/display-content', icon: Image, label: 'Display Konten' },
     { path: '/connect/layout', icon: Palette, label: 'Tampilan' },
-    { path: '/connect/calibration', icon: Clock, label: 'Kalibrasi' },
-    { path: '/connect/settings', icon: Settings, label: 'Pengaturan' },
+    { path: '/connect/prayer-settings', icon: Clock, label: 'Pengaturan Jadwal Sholat' },
 ];
 
 export default function DashboardLayout() {
