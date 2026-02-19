@@ -284,70 +284,125 @@ export default function LayoutPage() {
                 </CardContent>
             </Card>
             
-            {/* Background Image */}
+            {/* Background Image Management */}
             <Card className="bg-slate-900/80 border-slate-800">
                 <CardHeader>
-                    <CardTitle className="font-heading text-xl text-white">Gambar Latar Belakang</CardTitle>
+                    <CardTitle className="font-heading text-xl text-white flex items-center gap-2">
+                        <Image className="w-5 h-5 text-emerald-400" />
+                        Gambar Latar Belakang
+                    </CardTitle>
                     <CardDescription className="text-slate-400">
-                        URL gambar untuk latar belakang display TV (untuk tema Klasik & Al-Iftitar)
+                        Kelola gambar background untuk tema Klasik & Al-Iftitar. Jika lebih dari satu gambar, akan ditampilkan sebagai slideshow.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    {/* Quick select backgrounds */}
-                    <div>
-                        <Label className="text-slate-300 mb-3 block">Pilih Background</Label>
-                        <div className="grid grid-cols-3 gap-3">
-                            {[
-                                { url: 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=1920&q=80', name: 'Masjid Nabawi' },
-                                { url: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?w=1920&q=80', name: 'Masjid Sunset' },
-                                { url: 'https://images.unsplash.com/photo-1519817650390-64a93db51149?w=1920&q=80', name: 'Interior Masjid' },
-                            ].map((bg) => (
-                                <button
-                                    key={bg.url}
-                                    onClick={() => setSettings(prev => ({ ...prev, background_image: bg.url }))}
-                                    className={cn(
-                                        "relative rounded-lg overflow-hidden border-2 transition-all aspect-video",
-                                        settings.background_image === bg.url
-                                            ? "border-emerald-500"
-                                            : "border-transparent hover:border-slate-600"
-                                    )}
-                                >
-                                    <img src={bg.url} alt={bg.name} className="w-full h-full object-cover" />
-                                    <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center">
-                                        {bg.name}
-                                    </span>
-                                    {settings.background_image === bg.url && (
-                                        <div className="absolute top-1 right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
-                                            <Check className="w-3 h-3 text-white" />
+                <CardContent className="space-y-6">
+                    {/* Current Backgrounds */}
+                    {settings.background_images?.length > 0 && (
+                        <div>
+                            <Label className="text-slate-300 mb-3 block">Background Aktif ({settings.background_images.length})</Label>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                {settings.background_images.map((url, index) => (
+                                    <div key={index} className="relative group aspect-video rounded-lg overflow-hidden border-2 border-emerald-500">
+                                        <img src={url} alt={`Background ${index + 1}`} className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <Button
+                                                variant="destructive"
+                                                size="icon"
+                                                onClick={() => removeBackground(index)}
+                                                className="h-8 w-8"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
                                         </div>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    
-                    {/* Custom URL */}
-                    <div className="space-y-2">
-                        <Label className="text-slate-300">Atau masukkan URL kustom</Label>
-                        <Input
-                            value={settings.background_image}
-                            onChange={(e) => setSettings(prev => ({ ...prev, background_image: e.target.value }))}
-                            placeholder="https://example.com/background.jpg"
-                            className="bg-slate-800 border-slate-700 text-white"
-                            data-testid="background-image-input"
-                        />
-                    </div>
-                    
-                    {settings.background_image && (
-                        <div className="space-y-2">
-                            <Label className="text-slate-300">Preview</Label>
-                            <img 
-                                src={settings.background_image} 
-                                alt="Background preview" 
-                                className="max-h-40 rounded-lg w-full object-cover"
-                            />
+                                        <span className="absolute bottom-1 left-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded">
+                                            #{index + 1}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
+                    
+                    {/* Add from defaults */}
+                    <div>
+                        <Label className="text-slate-300 mb-3 block">Pilih dari Koleksi</Label>
+                        <div className="grid grid-cols-3 gap-3">
+                            {DEFAULT_BACKGROUNDS.map((bg) => {
+                                const isSelected = settings.background_images?.includes(bg.url);
+                                return (
+                                    <button
+                                        key={bg.url}
+                                        onClick={() => selectDefaultBackground(bg.url)}
+                                        disabled={isSelected}
+                                        className={cn(
+                                            "relative rounded-lg overflow-hidden border-2 transition-all aspect-video",
+                                            isSelected
+                                                ? "border-emerald-500 opacity-50 cursor-not-allowed"
+                                                : "border-transparent hover:border-slate-600"
+                                        )}
+                                    >
+                                        <img src={bg.url} alt={bg.name} className="w-full h-full object-cover" />
+                                        <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center">
+                                            {bg.name}
+                                        </span>
+                                        {isSelected && (
+                                            <div className="absolute top-1 right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+                                                <Check className="w-3 h-3 text-white" />
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    
+                    {/* Upload or Add URL */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-slate-300">Upload Gambar</Label>
+                            <div>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileUpload}
+                                    className="hidden"
+                                    id="bg-upload"
+                                />
+                                <Button
+                                    variant="outline"
+                                    className="w-full border-slate-700"
+                                    onClick={() => document.getElementById('bg-upload').click()}
+                                    disabled={uploading}
+                                >
+                                    {uploading ? (
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    ) : (
+                                        <Upload className="w-4 h-4 mr-2" />
+                                    )}
+                                    {uploading ? 'Mengunggah...' : 'Upload Gambar'}
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-slate-300">Atau Masukkan URL</Label>
+                            <div className="flex gap-2">
+                                <Input
+                                    value={newBgUrl}
+                                    onChange={(e) => setNewBgUrl(e.target.value)}
+                                    placeholder="https://example.com/image.jpg"
+                                    className="bg-slate-800 border-slate-700 text-white flex-1"
+                                />
+                                <Button
+                                    variant="outline"
+                                    className="border-slate-700"
+                                    onClick={addBackgroundUrl}
+                                    disabled={!newBgUrl}
+                                >
+                                    <Plus className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
             
