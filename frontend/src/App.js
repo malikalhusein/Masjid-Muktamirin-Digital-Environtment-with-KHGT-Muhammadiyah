@@ -24,12 +24,9 @@ import Login from "@/pages/Login";
 import DashboardLayout from "@/pages/dashboard/DashboardLayout";
 import DashboardHome from "@/pages/dashboard/DashboardHome";
 import IdentityPage from "@/pages/dashboard/IdentityPage";
-import ContentPage from "@/pages/dashboard/ContentPage";
-import AgendaPage from "@/pages/dashboard/AgendaPage";
-import RunningTextPage from "@/pages/dashboard/RunningTextPage";
+import DisplayContentPage from "@/pages/dashboard/DisplayContentPage";
 import LayoutPage from "@/pages/dashboard/LayoutPage";
-import SettingsPage from "@/pages/dashboard/SettingsPage";
-import CalibrationPage from "@/pages/dashboard/CalibrationPage";
+import PrayerSettingsPage from "@/pages/dashboard/PrayerSettingsPage";
 
 function App() {
     return (
