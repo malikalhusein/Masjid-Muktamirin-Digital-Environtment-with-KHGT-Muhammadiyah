@@ -8,40 +8,23 @@ import { Label } from '../../components/ui/label';
 import { Switch } from '../../components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { toast } from 'sonner';
-import { PRAYER_NAMES } from '../../lib/utils';
+import { PRAYER_NAMES, playNotificationSound, SOUND_TYPES } from '../../lib/utils';
 
 const PRAYERS = ['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'];
 
-// Test sound function
+// Test sound function using the new sound system
 const playTestSound = (type) => {
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        // Different frequencies for different sounds
-        const frequencies = {
-            'pre_adzan': 600,
-            'adzan': 800,
-            'pre_iqamah': 700,
-            'iqamah': 900,
-        };
-        
-        oscillator.frequency.value = frequencies[type] || 800;
-        oscillator.type = 'sine';
-        
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.8);
-        
+    const soundType = {
+        'pre_adzan': SOUND_TYPES.PRE_ADZAN,
+        'adzan': SOUND_TYPES.ADZAN,
+        'pre_iqamah': SOUND_TYPES.PRE_IQAMAH,
+        'iqamah': SOUND_TYPES.IQAMAH,
+    }[type] || SOUND_TYPES.ADZAN;
+    
+    const success = playNotificationSound(soundType);
+    if (success) {
         toast.success(`Tes bunyi ${type.replace('_', ' ')}`);
-    } catch (e) {
-        console.error('Error playing sound:', e);
+    } else {
         toast.error('Tidak dapat memutar suara');
     }
 };
