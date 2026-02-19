@@ -509,6 +509,7 @@ export default function TVDisplay() {
         runningTexts,
         countdownSeconds,
         countdownMode,
+        countdownLabel,
     };
     
     if (selectedTheme === 'classic') {
