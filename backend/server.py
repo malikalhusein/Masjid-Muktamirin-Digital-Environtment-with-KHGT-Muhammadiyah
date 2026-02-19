@@ -508,7 +508,7 @@ async def get_agendas(active_only: bool = False, upcoming_only: bool = False):
     
     return [Agenda(**a) for a in agendas]
 
-@api_router.post("/agenda", response_model=Agenda)
+@api_router.post("/agenda", response_model=Agenda, status_code=201)
 async def create_agenda(agenda: AgendaCreate, user: dict = Depends(get_current_user)):
     agenda_obj = Agenda(**agenda.model_dump())
     doc = agenda_obj.model_dump()
