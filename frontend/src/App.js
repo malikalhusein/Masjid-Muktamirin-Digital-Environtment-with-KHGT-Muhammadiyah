@@ -52,12 +52,9 @@ function App() {
                         >
                             <Route path="dashboard" element={<DashboardHome />} />
                             <Route path="identity" element={<IdentityPage />} />
-                            <Route path="content" element={<ContentPage />} />
-                            <Route path="agenda" element={<AgendaPage />} />
-                            <Route path="running-text" element={<RunningTextPage />} />
+                            <Route path="display-content" element={<DisplayContentPage />} />
                             <Route path="layout" element={<LayoutPage />} />
-                            <Route path="calibration" element={<CalibrationPage />} />
-                            <Route path="settings" element={<SettingsPage />} />
+                            <Route path="prayer-settings" element={<PrayerSettingsPage />} />
                         </Route>
                         
                         {/* Fallback */}
