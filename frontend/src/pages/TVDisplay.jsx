@@ -177,7 +177,7 @@ const AgendaList = ({ agendas }) => {
 // Modern Layout Component
 const ModernLayout = ({ 
     currentTime, prayerTimes, mosqueIdentity, prayerSettings, 
-    contents, agendas, runningTexts, countdownSeconds, countdownMode 
+    contents, agendas, runningTexts, countdownSeconds, countdownMode, countdownLabel 
 }) => {
     const { currentPrayer, nextPrayer } = prayerTimes ? getCurrentAndNextPrayer(prayerTimes) : {};
     const hijriDate = getKHGTHijriDate(currentTime);
@@ -186,6 +186,15 @@ const ModernLayout = ({
     const marqueeText = runningTexts.length > 0 
         ? runningTexts.map(t => t.text).join('   •   ')
         : 'Selamat datang di Masjid • Jaga kebersihan dan kekhusyukan • Mari tingkatkan ibadah kita';
+    
+    // Determine countdown display color based on mode
+    const getCountdownColor = () => {
+        switch (countdownMode) {
+            case 'jeda_adzan': return 'text-gold-400';
+            case 'iqomah': return 'text-emerald-400';
+            default: return countdownSeconds < 300 ? 'text-red-400' : 'text-white';
+        }
+    };
     
     return (
         <div className="tv-display min-h-screen p-6 lg:p-8 xl:p-12" data-testid="tv-display-modern">
@@ -240,16 +249,20 @@ const ModernLayout = ({
                     <div className="glass-card rounded-2xl p-6 lg:p-8">
                         <CountdownDisplay 
                             seconds={countdownSeconds}
-                            label={countdownMode === 'adzan' 
-                                ? `Menuju ${PRAYER_NAMES[nextPrayer]?.id || 'Sholat'}`
-                                : `Iqomah ${PRAYER_NAMES[nextPrayer]?.id || ''}`
-                            }
-                            isUrgent={countdownSeconds < 300}
+                            label={countdownLabel || `Menuju ${PRAYER_NAMES[nextPrayer]?.id || 'Sholat'}`}
+                            isUrgent={countdownSeconds < 300 && countdownMode === 'adzan'}
+                            colorClass={getCountdownColor()}
                         />
-                        {prayerSettings?.bell_enabled && countdownMode === 'adzan' && (
-                            <div className="flex items-center justify-center gap-2 mt-4 text-slate-400">
-                                <Bell className="w-4 h-4" />
-                                <span className="text-sm">Bell {prayerSettings.bell_before_minutes} menit sebelum</span>
+                        {countdownMode === 'jeda_adzan' && (
+                            <div className="flex items-center justify-center gap-2 mt-4 text-gold-400">
+                                <Bell className="w-4 h-4 animate-pulse" />
+                                <span className="text-sm font-medium">Adzan Berkumandang</span>
+                            </div>
+                        )}
+                        {countdownMode === 'iqomah' && (
+                            <div className="flex items-center justify-center gap-2 mt-4 text-emerald-400">
+                                <Clock className="w-4 h-4" />
+                                <span className="text-sm font-medium">Bersiap Sholat Berjamaah</span>
                             </div>
                         )}
                     </div>
