@@ -2,8 +2,11 @@
 // Data diambil dari https://hisabmu.com/khgt/
 
 // Tabel konversi bulan-bulan Hijriyah 1447 H ke Masehi
+// Sumber: https://hisabmu.com/khgt/ - KHGT Muhammadiyah
+// Tanggal 18/1 pada tabel jadwal sholat berarti 18 Feb = 1 Ramadan
 export const KHGT_1447_CALENDAR = {
     // Format: [startGregorianDate, endGregorianDate] (inclusive)
+    // Berdasarkan hisabmu.com/khgt: 1 Ramadan 1447 = 18 Feb 2026
     1: { name: 'Muharram', nameAr: 'محرم', start: '2025-06-27', end: '2025-07-26' },
     2: { name: 'Shafar', nameAr: 'صفر', start: '2025-07-27', end: '2025-08-24' },
     3: { name: 'Rabiul Awal', nameAr: 'ربيع الأول', start: '2025-08-25', end: '2025-09-23' },
@@ -20,20 +23,31 @@ export const KHGT_1447_CALENDAR = {
 
 // Fungsi untuk menghitung tanggal Hijriyah KHGT dari tanggal Masehi
 export function getKHGTHijriDate(gregorianDate = new Date()) {
-    const dateStr = gregorianDate.toISOString().split('T')[0];
-    const targetDate = new Date(dateStr + 'T00:00:00');
+    // Gunakan tanggal lokal, bukan UTC
+    const year = gregorianDate.getFullYear();
+    const month = gregorianDate.getMonth(); // 0-indexed
+    const day = gregorianDate.getDate();
+    
+    // Buat tanggal untuk perbandingan (tanpa timezone issues)
+    const targetDate = new Date(year, month, day, 12, 0, 0); // noon untuk avoid timezone issues
     
     // Cari bulan yang sesuai
     for (const [monthNum, monthData] of Object.entries(KHGT_1447_CALENDAR)) {
-        const startDate = new Date(monthData.start + 'T00:00:00');
-        const endDate = new Date(monthData.end + 'T00:00:00');
+        const startParts = monthData.start.split('-').map(Number);
+        const endParts = monthData.end.split('-').map(Number);
+        
+        const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2], 12, 0, 0);
+        const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2], 12, 0, 0);
         
         if (targetDate >= startDate && targetDate <= endDate) {
             // Hitung hari ke berapa dalam bulan ini
-            const dayDiff = Math.floor((targetDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            // Gunakan kalkulasi yang lebih akurat
+            const diffTime = targetDate.getTime() - startDate.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+            const dayInMonth = diffDays + 1; // +1 karena hari pertama adalah 1, bukan 0
             
             return {
-                day: dayDiff,
+                day: dayInMonth,
                 month: parseInt(monthNum),
                 year: 1447,
                 monthName: monthData.name,
