@@ -11,7 +11,8 @@ import {
     getTimeDiffSeconds,
     formatDateIndonesian,
     PRAYER_NAMES,
-    playBellSound
+    playNotificationSound,
+    SOUND_TYPES
 } from '../lib/utils';
 import { getKHGTHijriDate, isRamadan, getNextIslamicEvent } from '../lib/khgtCalendar';
 
