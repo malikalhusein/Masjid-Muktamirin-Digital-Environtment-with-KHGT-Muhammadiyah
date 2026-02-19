@@ -1,0 +1,173 @@
+<analysis>**original_problem_statement:**
+Tujuan: Bangun sebuah Web App Jam Sholat Digital berbasis KHGT Muhammadiyah, siap di-deploy di VPS/self-hosted, dengan panel dashboard untuk konfigurasi dan manajemen konten. Web App ini akan ditampilkan di TV masjid melalui STB Android TV Box dalam mode fullscreen. Siapkan arsitektur modular agar bisa diperluas menjadi ekosistem website masjid (homepage, kanal ramadhan, dll).
+
+PRODUCT REQUIREMENTS:
+1.  **Display Identitas Masjid:** Nama, logo, alamat bisa diatur dari dashboard.
+2.  **Pilihan Layout:** Beberapa template (klasik, modern) yang bisa diganti dari dashboard.
+3.  **Jadwal Shalat KHGT:** Akurat berdasarkan data KHGT Muhammadiyah, bukan Kemenag.
+4.  **Countdown Waktu Adzan:** Hitung mundur visual menuju waktu adzan.
+5.  **Countdown Waktu Iqomah:** Timer otomatis setelah adzan, durasi bisa diatur.
+6.  **Konten untuk Jamaah:** Upload poster, video, pengumuman (slideshow, running text).
+7.  **Display Agenda Masjid:** Modul untuk menampilkan agenda kegiatan.
+8.  **Kalender Hijriyah & Masehi:** Kalender Hijriyah sinkron dengan KHGT.
+9.  **Panel Dashboard Terintegrasi:**  untuk mengelola semua fitur di atas.
+10. **Kalibrasi Manual:** Menu untuk penyesuaian manual (peringatan sebelum adzan, jeda adzan, peringatan iqamah, jeda sholat).
+11. **Background Dustom:** Background gambar pada layout harus bisa diganti melalui dashboard.
+12. **Notifikasi Suara:** Bunyi dering/notifikasi untuk countdown.
+13. **Perbaikan Bug UI:** Perbaiki bug pada floating bar di dashboard admin.
+
+**User's preferred language**: Bahasa Indonesia
+
+**what currently exists?**
+Aplikasi full-stack (FastAPI + React) telah dibangun. Backend menyediakan API untuk otentikasi (JWT), identitas masjid, konten, agenda, dan pengaturan (layout, gambar background). Frontend menampilkan halaman utama (TV Display) yang dinamis, serta dashboard admin untuk mengelola semua fitur. Terdapat dua layout, Modern dan Klasik, yang dapat diganti secara dinamis dari dashboard. Isu utama terkait keakuratan tanggal Hijriyah dan *timezone* telah diperbaiki.
+
+**Last working item**:
+    - Last item agent was working: Agent sedang melakukan perbaikan besar berdasarkan permintaan terakhir pengguna. Ini mencakup:
+        1.  **Backend:** Membuat model data baru (, ) dan API untuk fitur kalibrasi manual.
+        2.  **Database:** Menyiapkan skrip () untuk memasukkan jadwal sholat KHGT yang akurat (disediakan pengguna) ke dalam database MongoDB.
+        3.  **Refactor:** Mengubah logika endpoint  untuk mengambil data dari database internal, bukan lagi dari API eksternal atau data *hardcoded*.
+        4.  **Frontend:** Membuat file placeholder untuk halaman Kalibrasi di dashboard.
+    - Status: IN PROGRESS
+    - Agent Testing Done: N
+    - Which testing method agent to use? both
+    - User Testing Done: N
+
+**All Pending/In progress Issue list**:
+  - Issue 1: Floating bar di dashboard admin tersangkut (P0)
+  - Issue 2: Jadwal sholat mungkin masih belum akurat (P1)
+  
+  Issues Detail:
+  - Issue 1: 
+     - Attempted fixes: Belum ada.
+     - Next debug checklist: 
+       1. Identifikasi elemen floating bar di kode frontend (kemungkinan di ).
+       2. Periksa properti CSS (, ) dan potensi konflik style atau manipulasi dari JavaScript.
+     - Why fix this issue and what will be achieved with the fix? Memperbaiki bug UI yang dilaporkan pengguna dan mengganggu pengalaman penggunaan dashboard.
+     - Status:  NOT STARTED
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Frontend
+     - Blocked on other issue: Tidak ada
+  - Issue 2: 
+     - Attempted fixes: Agent telah mencoba menggunakan API eksternal (tidak akurat untuk tanggal Hijriyah) dan array JavaScript *hardcoded*. Fix yang sedang berjalan adalah memindahkan data jadwal ke database MongoDB.
+     - Next debug checklist: 
+       1. Selesaikan dan jalankan skrip  untuk mengisi database.
+       2. Pastikan endpoint  mengambil data dari koleksi  dengan benar.
+       3. Verifikasi frontend menampilkan data yang sesuai.
+     - Why fix this issue and what will be achieved with the fix? Memastikan fitur inti aplikasi, yaitu jadwal sholat, 100% akurat sesuai data KHGT yang diberikan pengguna.
+     - Status:  IN PROGRESS
+     - Is recurring issue? Y
+     - Should Test frontend/backend/both after fix? Both
+     - Blocked on other issue: Tergantung pada penyelesaian 'In progress Task 1'.
+
+**In progress Task List**:
+  - Task 1:  Implementasi Kalibrasi Manual dan Jadwal Sholat dari Database (P0)
+
+ Task Detail:
+  - Task 1: 
+     - Where to resume: 
+       1. Selesaikan skrip  dan jalankan untuk mengisi database MongoDB.
+       2. Selesaikan implementasi endpoint API  di .
+       3. Selesaikan logika endpoint  untuk menggunakan data dari koleksi .
+       4. Bangun UI untuk halaman kalibrasi () dengan semua input form yang diperlukan.
+       5. Hubungkan form frontend ke API backend.
+     - What will be achieved with this? Jadwal sholat akan menjadi sangat akurat dan dapat dikalibrasi secara manual oleh takmir masjid.
+     - Status:  IN PROGRESS
+     - Should Test frontend/backend/both after fix? Both
+     - Blocked on something: Tidak ada
+
+**Upcoming and Future Tasks**
+ Upcoming Tasks:
+    - **P0:** Implementasi Countdown Waktu Adzan.
+    - **P0:** Implementasi Countdown Waktu Iqomah.
+    - **P0:** Tambahkan notifikasi suara (dering) untuk kedua countdown tersebut.
+ 
+ Future Tasks:
+    - Membangun ekosistem website masjid dengan subdomain (Homepage, Kanal Ramadhan, Admin terpusat).
+    - Membuat dokumentasi untuk proses deployment ke VPS/self-hosted.
+
+**Completed work in this session**
+- List of all completed tasks with file and method name:
+  - Inisialisasi proyek dan struktur aplikasi full-stack.
+  - Implementasi otentikasi pengguna berbasis JWT.
+  - Pembuatan UI TV Display dengan jam, jadwal sholat, dan slideshow konten.
+  - Pembuatan dashboard admin untuk manajemen identitas, konten, agenda, dan layout.
+  - Implementasi dua layout (Modern & Classic) yang dapat diganti secara dinamis.
+  - Perbaikan kalkulasi tanggal Hijriyah agar akurat dan sadar *timezone*.
+  - Implementasi fitur ganti background gambar dari dashboard.
+
+**Earlier issues found/mentioned but not fixed**
+   - Tidak ada isu sebelumnya yang terlewat. Semua isu yang dilaporkan sedang ditangani atau masuk dalam daftar tugas.
+
+**Known issue recurrence from previous fork**
+  - N/A
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+- **Backend:** FastAPI, Pydantic, MongoDB (dengan library ), JWT.
+- **Frontend:** React, TailwindCSS, Shadcn/UI.
+- **Arsitektur:** Full-stack dengan pemisahan frontend dan backend.
+
+**key DB schema**
+  - **users:** 
+  - **identity:** 
+  - **settings:** 
+  - **announcements:** 
+  - **agendas:** 
+  - **khgt_schedules:**  (Baru)
+  - **calibration_settings:**  (Baru)
+
+**changes in tech stack**
+  - Tidak ada.
+
+**All files of reference**
+- **/app/backend/server.py**: File utama backend. Sedang dimodifikasi untuk menambahkan API kalibrasi dan menggunakan database jadwal sholat baru.
+- **/app/frontend/src/pages/TVDisplay.jsx**: Komponen utama yang menampilkan layout berdasarkan pengaturan.
+- **/app/frontend/src/pages/Dashboard/CalibrationPage.jsx**: File placeholder baru untuk UI pengaturan kalibrasi.
+- **/app/backend/seed_khgt.py**: File baru untuk mengisi database dengan jadwal sholat yang akurat.
+- **/app/frontend/src/pages/Dashboard/LayoutsPage.jsx**: Baru-baru ini diperbarui untuk menambahkan input URL gambar background.
+
+**Areas that need refactoring**:
+- Logika pengambilan jadwal sholat telah diubah beberapa kali. Setelah implementasi database baru stabil, kode lama yang tidak terpakai harus dibersihkan untuk menjaga kualitas kode.
+
+**key api endpoints**
+- 
+- 
+- 
+- 
+-  (Sedang dalam proses refactor besar)
+-  (Endpoint baru yang sedang dibuat)
+
+**Critical Info for New Agent**
+- Pengguna sangat detail mengenai keakuratan jadwal sholat dan tanggal Hijriyah. Aplikasi HARUS sesuai dengan data dari KHGT Muhammadiyah yang telah disediakan.
+- Isu *timezone* (server UTC vs. lokasi WIB/UTC+7) telah menjadi masalah berulang. Selalu gunakan  dari koleksi  untuk semua kalkulasi tanggal/waktu di frontend.
+- Prioritaskan perbaikan bug dan implementasi fitur yang diminta langsung oleh pengguna (bug floating bar, countdown, kalibrasi).
+
+**documents and test reports created in this job**
+  - /app/memory/PRD.md
+
+**Last 10 User Messages and any pending HUMAN messages** 
+ - **Pengguna (Pesan 112):** Memberikan file jadwal imsakiyah yang akurat. Meminta menu kalibrasi manual untuk jadwal sholat. Meminta countdown adzan & iqomah dengan bunyi dering. Melaporkan bug UI (floating bar tersangkut) di dashboard admin. **(SEMUA PERMINTAAN INI MASIH PENDING)**.
+
+**Project Health Check:**
+- **Broken:** Fitur utama (jadwal sholat) saat ini rusak karena sedang dalam proses refactor. Dashboard admin memiliki bug UI yang dilaporkan.
+- **Mocked:** Tidak ada. Agent sedang beralih dari data *hardcoded* ke solusi database yang lebih permanen.
+
+**3rd Party Integrations**
+- Tidak ada. Aplikasi ini dirancang untuk mandiri dengan menyimpan data jadwal sholat di database internalnya sendiri sesuai permintaan pengguna.
+
+**Testing status**
+  - Testing agent used after significant changes: YES (namun belum untuk perubahan terbaru yang sedang berjalan).
+  - Troubleshoot agent used after agent stuck in loop: NO
+  - Test files created: []
+  - Known regressions: Tampilan jadwal sholat utama kemungkinan besar tidak berfungsi karena refactor yang sedang berlangsung.
+
+**Credentials to test flow:**
+Registrasi pengguna terbuka. Anda dapat membuat pengguna baru dari UI ( / ) untuk menguji fungsionalitas dashboard.
+
+**What agent forgot to execute**
+Agent telah mengidentifikasi semua permintaan dari pesan terakhir pengguna tetapi belum sempat mengimplementasikannya. Tugas-tugas berikut perlu segera dikerjakan:
+- Implementasi Countdown Adzan & Iqomah.
+- Penambahan notifikasi suara untuk countdown.
+- Perbaikan bug stuck floating bar di dashboard admin.</analysis>
