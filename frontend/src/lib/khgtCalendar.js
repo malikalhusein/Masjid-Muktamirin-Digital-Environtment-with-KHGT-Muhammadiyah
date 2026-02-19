@@ -22,11 +22,15 @@ export const KHGT_1447_CALENDAR = {
 };
 
 // Fungsi untuk menghitung tanggal Hijriyah KHGT dari tanggal Masehi
-export function getKHGTHijriDate(gregorianDate = new Date()) {
-    // Gunakan tanggal lokal, bukan UTC
-    const year = gregorianDate.getFullYear();
-    const month = gregorianDate.getMonth(); // 0-indexed
-    const day = gregorianDate.getDate();
+// Menggunakan timezone WIB (UTC+7) untuk Indonesia
+export function getKHGTHijriDate(gregorianDate = new Date(), timezoneOffset = 7) {
+    // Konversi ke waktu lokal Indonesia (WIB = UTC+7)
+    const utcTime = gregorianDate.getTime() + (gregorianDate.getTimezoneOffset() * 60000);
+    const localTime = new Date(utcTime + (timezoneOffset * 3600000));
+    
+    const year = localTime.getFullYear();
+    const month = localTime.getMonth(); // 0-indexed
+    const day = localTime.getDate();
     
     // Buat tanggal untuk perbandingan (tanpa timezone issues)
     const targetDate = new Date(year, month, day, 12, 0, 0); // noon untuk avoid timezone issues
