@@ -1,19 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Marquee from 'react-fast-marquee';
 import { MapPin } from 'lucide-react';
-import { prayerAPI, mosqueAPI, settingsAPI, contentAPI, agendaAPI, runningTextAPI } from '../lib/api';
 import { 
     formatTime, 
     formatCountdown, 
     getCurrentAndNextPrayer, 
-    parseTimeToday, 
-    getTimeDiffSeconds,
     formatDateIndonesian,
     PRAYER_NAMES,
-    playBellSound
 } from '../lib/utils';
-import { getKHGTHijriDate, formatKHGTHijriDate, getNextIslamicEvent, isRamadan } from '../lib/khgtCalendar';
+import { getKHGTHijriDate, isRamadan } from '../lib/khgtCalendar';
 
 // Quotes for display
 const ISLAMIC_QUOTES = [
@@ -23,7 +19,7 @@ const ISLAMIC_QUOTES = [
 ];
 
 // Content Slideshow Component
-const ContentSlideshow = ({ contents }) => {
+const ContentSlideshow = ({ contents, layoutSettings }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     
     useEffect(() => {
@@ -39,12 +35,14 @@ const ContentSlideshow = ({ contents }) => {
         return () => clearTimeout(timer);
     }, [currentIndex, contents]);
     
+    // Default content if none available
+    const defaultBg = layoutSettings?.background_image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80';
+    
     if (contents.length === 0) {
-        // Show default nature/mosque image
         return (
             <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl">
                 <img 
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80"
+                    src={defaultBg}
                     alt="Nature"
                     className="w-full h-full object-cover"
                 />
@@ -106,17 +104,28 @@ const PrayerTimePill = ({ name, time, isActive, isNext }) => {
     );
 };
 
-// Main Layout 2 Component (Similar to Al Iftitar ITDA style)
-export default function TVDisplayLayout2() {
-    const [currentTime, setCurrentTime] = useState(new Date());
-    const [prayerTimes, setPrayerTimes] = useState(null);
-    const [mosqueIdentity, setMosqueIdentity] = useState(null);
-    const [prayerSettings, setPrayerSettings] = useState(null);
-    const [contents, setContents] = useState([]);
-    const [runningTexts, setRunningTexts] = useState([]);
-    const [countdownSeconds, setCountdownSeconds] = useState(0);
-    const [countdownMode, setCountdownMode] = useState('adzan');
-    const [bellPlayed, setBellPlayed] = useState(false);
+// Main Layout 2 Component - Receives props from parent
+export default function TVDisplayLayout2({
+    currentTime: propCurrentTime,
+    prayerTimes: propPrayerTimes,
+    mosqueIdentity: propMosqueIdentity,
+    prayerSettings: propPrayerSettings,
+    layoutSettings: propLayoutSettings,
+    contents: propContents,
+    runningTexts: propRunningTexts,
+    countdownSeconds: propCountdownSeconds,
+    countdownMode: propCountdownMode,
+}) {
+    // Use props if available
+    const currentTime = propCurrentTime || new Date();
+    const prayerTimes = propPrayerTimes;
+    const mosqueIdentity = propMosqueIdentity;
+    const layoutSettings = propLayoutSettings;
+    const contents = propContents || [];
+    const runningTexts = propRunningTexts || [];
+    const countdownSeconds = propCountdownSeconds || 0;
+    const countdownMode = propCountdownMode || 'adzan';
+    
     const [quoteIndex, setQuoteIndex] = useState(0);
     
     // Rotate quotes
@@ -126,67 +135,6 @@ export default function TVDisplayLayout2() {
         }, 20000);
         return () => clearInterval(timer);
     }, []);
-    
-    // Fetch data
-    const fetchData = useCallback(async () => {
-        try {
-            const [prayerRes, mosqueRes, settingsRes, contentRes, textRes] = await Promise.all([
-                prayerAPI.getTimes(),
-                mosqueAPI.getIdentity(),
-                settingsAPI.getPrayer(),
-                contentAPI.getAll(true),
-                runningTextAPI.getAll(true),
-            ]);
-            
-            setPrayerTimes(prayerRes.data);
-            setMosqueIdentity(mosqueRes.data);
-            setPrayerSettings(settingsRes.data);
-            setContents(contentRes.data);
-            setRunningTexts(textRes.data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    }, []);
-    
-    useEffect(() => {
-        fetchData();
-        const interval = setInterval(fetchData, 5 * 60 * 1000);
-        return () => clearInterval(interval);
-    }, [fetchData]);
-    
-    // Update clock
-    useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-        return () => clearInterval(timer);
-    }, []);
-    
-    // Calculate countdown
-    useEffect(() => {
-        if (!prayerTimes || !prayerSettings) return;
-        
-        const { nextPrayer, nextPrayerTime } = getCurrentAndNextPrayer(prayerTimes);
-        
-        if (nextPrayerTime) {
-            const diff = getTimeDiffSeconds(nextPrayerTime, currentTime);
-            
-            if (diff <= 0 && diff > -60 * (prayerSettings[`iqomah_${nextPrayer}`] || 10)) {
-                setCountdownMode('iqomah');
-                const iqomahSeconds = (prayerSettings[`iqomah_${nextPrayer}`] || 10) * 60 + diff;
-                setCountdownSeconds(Math.max(0, iqomahSeconds));
-            } else if (diff > 0) {
-                setCountdownMode('adzan');
-                setCountdownSeconds(diff);
-                
-                if (prayerSettings.bell_enabled && diff <= prayerSettings.bell_before_minutes * 60 && diff > (prayerSettings.bell_before_minutes * 60 - 2) && !bellPlayed) {
-                    playBellSound();
-                    setBellPlayed(true);
-                }
-            } else {
-                setCountdownMode('adzan');
-                setBellPlayed(false);
-            }
-        }
-    }, [currentTime, prayerTimes, prayerSettings, bellPlayed]);
     
     const { currentPrayer, nextPrayer } = prayerTimes ? getCurrentAndNextPrayer(prayerTimes) : {};
     const hijriDate = getKHGTHijriDate(currentTime);
@@ -246,8 +194,10 @@ export default function TVDisplayLayout2() {
                     </div>
                 </div>
                 
-                {/* Debug badge - Right */}
-                <div className="bg-red-500 text-white text-xs px-2 py-1 rounded">DEBUG</div>
+                {/* Settings link */}
+                <a href="/connect" className="bg-emerald-500 text-white text-xs px-3 py-1 rounded hover:bg-emerald-600">
+                    Settings
+                </a>
             </header>
             
             {/* Main Content */}
@@ -279,7 +229,7 @@ export default function TVDisplayLayout2() {
                 
                 {/* Right Panel - Content Slideshow */}
                 <div className="flex-1">
-                    <ContentSlideshow contents={contents} />
+                    <ContentSlideshow contents={contents} layoutSettings={layoutSettings} />
                 </div>
             </div>
             

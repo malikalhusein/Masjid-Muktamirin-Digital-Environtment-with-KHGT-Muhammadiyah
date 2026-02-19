@@ -1,22 +1,18 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Marquee from 'react-fast-marquee';
 import { MapPin, Volume2, Settings } from 'lucide-react';
-import { prayerAPI, mosqueAPI, settingsAPI, contentAPI, agendaAPI, runningTextAPI } from '../lib/api';
 import { 
     formatTime, 
     formatCountdown, 
     getCurrentAndNextPrayer, 
-    parseTimeToday, 
-    getTimeDiffSeconds,
     formatDateIndonesian,
     PRAYER_NAMES,
-    playBellSound
 } from '../lib/utils';
-import { getKHGTHijriDate, formatKHGTHijriDate, getNextIslamicEvent, isRamadan } from '../lib/khgtCalendar';
+import { getKHGTHijriDate, isRamadan, getNextIslamicEvent } from '../lib/khgtCalendar';
 
-// Background images untuk slideshow
-const BACKGROUND_IMAGES = [
+// Default background images untuk slideshow
+const DEFAULT_BACKGROUNDS = [
     'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=1920&q=80', // Blue Mosque
     'https://images.unsplash.com/photo-1564769625905-50e93615e769?w=1920&q=80', // Mosque sunset
     'https://images.unsplash.com/photo-1519817650390-64a93db51149?w=1920&q=80', // Mosque interior
@@ -91,87 +87,44 @@ const ClassicSlideshow = ({ contents }) => {
     );
 };
 
-// Main Classic Layout Component
-export default function TVDisplayClassic() {
-    const [currentTime, setCurrentTime] = useState(new Date());
-    const [prayerTimes, setPrayerTimes] = useState(null);
-    const [mosqueIdentity, setMosqueIdentity] = useState(null);
-    const [prayerSettings, setPrayerSettings] = useState(null);
-    const [contents, setContents] = useState([]);
-    const [runningTexts, setRunningTexts] = useState([]);
-    const [countdownSeconds, setCountdownSeconds] = useState(0);
-    const [countdownMode, setCountdownMode] = useState('adzan');
-    const [bellPlayed, setBellPlayed] = useState(false);
+// Main Classic Layout Component - Receives props from parent
+export default function TVDisplayClassic({ 
+    currentTime: propCurrentTime,
+    prayerTimes: propPrayerTimes,
+    mosqueIdentity: propMosqueIdentity,
+    prayerSettings: propPrayerSettings,
+    layoutSettings: propLayoutSettings,
+    contents: propContents,
+    runningTexts: propRunningTexts,
+    countdownSeconds: propCountdownSeconds,
+    countdownMode: propCountdownMode,
+}) {
+    // Use props if available, otherwise use local state for standalone mode
+    const currentTime = propCurrentTime || new Date();
+    const prayerTimes = propPrayerTimes;
+    const mosqueIdentity = propMosqueIdentity;
+    const prayerSettings = propPrayerSettings;
+    const layoutSettings = propLayoutSettings;
+    const contents = propContents || [];
+    const runningTexts = propRunningTexts || [];
+    const countdownSeconds = propCountdownSeconds || 0;
+    const countdownMode = propCountdownMode || 'adzan';
+    
     const [bgIndex, setBgIndex] = useState(0);
     
-    // Rotate background
+    // Get background images - use custom if set, otherwise defaults
+    const backgroundImages = layoutSettings?.background_image 
+        ? [layoutSettings.background_image]
+        : DEFAULT_BACKGROUNDS;
+    
+    // Rotate background only if multiple images
     useEffect(() => {
+        if (backgroundImages.length <= 1) return;
         const timer = setInterval(() => {
-            setBgIndex((prev) => (prev + 1) % BACKGROUND_IMAGES.length);
-        }, 30000); // Change every 30 seconds
+            setBgIndex((prev) => (prev + 1) % backgroundImages.length);
+        }, 30000);
         return () => clearInterval(timer);
-    }, []);
-    
-    // Fetch data
-    const fetchData = useCallback(async () => {
-        try {
-            const [prayerRes, mosqueRes, settingsRes, contentRes, textRes] = await Promise.all([
-                prayerAPI.getTimes(),
-                mosqueAPI.getIdentity(),
-                settingsAPI.getPrayer(),
-                contentAPI.getAll(true),
-                runningTextAPI.getAll(true),
-            ]);
-            
-            setPrayerTimes(prayerRes.data);
-            setMosqueIdentity(mosqueRes.data);
-            setPrayerSettings(settingsRes.data);
-            setContents(contentRes.data);
-            setRunningTexts(textRes.data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    }, []);
-    
-    useEffect(() => {
-        fetchData();
-        const interval = setInterval(fetchData, 5 * 60 * 1000);
-        return () => clearInterval(interval);
-    }, [fetchData]);
-    
-    // Update clock
-    useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-        return () => clearInterval(timer);
-    }, []);
-    
-    // Calculate countdown
-    useEffect(() => {
-        if (!prayerTimes || !prayerSettings) return;
-        
-        const { nextPrayer, nextPrayerTime } = getCurrentAndNextPrayer(prayerTimes);
-        
-        if (nextPrayerTime) {
-            const diff = getTimeDiffSeconds(nextPrayerTime, currentTime);
-            
-            if (diff <= 0 && diff > -60 * (prayerSettings[`iqomah_${nextPrayer}`] || 10)) {
-                setCountdownMode('iqomah');
-                const iqomahSeconds = (prayerSettings[`iqomah_${nextPrayer}`] || 10) * 60 + diff;
-                setCountdownSeconds(Math.max(0, iqomahSeconds));
-            } else if (diff > 0) {
-                setCountdownMode('adzan');
-                setCountdownSeconds(diff);
-                
-                if (prayerSettings.bell_enabled && diff <= prayerSettings.bell_before_minutes * 60 && diff > (prayerSettings.bell_before_minutes * 60 - 2) && !bellPlayed) {
-                    playBellSound();
-                    setBellPlayed(true);
-                }
-            } else {
-                setCountdownMode('adzan');
-                setBellPlayed(false);
-            }
-        }
-    }, [currentTime, prayerTimes, prayerSettings, bellPlayed]);
+    }, [backgroundImages.length]);
     
     const { currentPrayer, nextPrayer } = prayerTimes ? getCurrentAndNextPrayer(prayerTimes) : {};
     const hijriDate = getKHGTHijriDate(currentTime);
@@ -185,7 +138,7 @@ export default function TVDisplayClassic() {
     // Prayer times array for bottom bar (including Imsak for Ramadan)
     const prayerList = inRamadan 
         ? [
-            { key: 'imsak', name: 'Imsak', time: prayerTimes?.subuh ? `${parseInt(prayerTimes.subuh.split(':')[0]).toString().padStart(2, '0')}:${(parseInt(prayerTimes.subuh.split(':')[1]) - 10).toString().padStart(2, '0')}` : '--:--' },
+            { key: 'imsak', name: 'Imsak', time: prayerTimes?.subuh ? `${parseInt(prayerTimes.subuh.split(':')[0]).toString().padStart(2, '0')}:${Math.max(0, parseInt(prayerTimes.subuh.split(':')[1]) - 10).toString().padStart(2, '0')}` : '--:--' },
             { key: 'subuh', name: 'Subuh', time: prayerTimes?.subuh },
             { key: 'terbit', name: 'Syuruq', time: prayerTimes?.terbit },
             { key: 'dzuhur', name: 'Dzuhur', time: prayerTimes?.dzuhur },
@@ -209,7 +162,7 @@ export default function TVDisplayClassic() {
                 <AnimatePresence mode="wait">
                     <motion.img
                         key={bgIndex}
-                        src={BACKGROUND_IMAGES[bgIndex]}
+                        src={backgroundImages[bgIndex]}
                         alt="Background"
                         className="absolute inset-0 w-full h-full object-cover"
                         initial={{ opacity: 0 }}
@@ -293,9 +246,9 @@ export default function TVDisplayClassic() {
                         )}
                         
                         {/* Settings Button */}
-                        <button className="bg-white/80 backdrop-blur-sm text-gray-700 rounded-full p-3 hover:bg-white transition-colors shadow-lg">
+                        <a href="/connect" className="bg-white/80 backdrop-blur-sm text-gray-700 rounded-full p-3 hover:bg-white transition-colors shadow-lg">
                             <Settings className="w-6 h-6" />
-                        </button>
+                        </a>
                     </div>
                 </div>
                 
