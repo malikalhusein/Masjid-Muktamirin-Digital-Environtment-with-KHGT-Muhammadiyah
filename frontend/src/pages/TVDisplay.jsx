@@ -10,10 +10,10 @@ import {
     parseTimeToday, 
     getTimeDiffSeconds,
     formatDateIndonesian,
-    getApproximateHijriDate,
     PRAYER_NAMES,
     playBellSound
 } from '../lib/utils';
+import { getKHGTHijriDate, isRamadan, getNextIslamicEvent } from '../lib/khgtCalendar';
 
 // Prayer Card Component
 const PrayerCard = ({ name, time, isActive, isNext, arabicName }) => {
@@ -253,7 +253,9 @@ export default function TVDisplay() {
     }, [currentTime, prayerTimes, prayerSettings, bellPlayed]);
     
     const { currentPrayer, nextPrayer } = prayerTimes ? getCurrentAndNextPrayer(prayerTimes) : {};
-    const hijriDate = getApproximateHijriDate(currentTime);
+    const hijriDate = getKHGTHijriDate(currentTime);
+    const inRamadan = isRamadan(currentTime);
+    const nextEvent = getNextIslamicEvent(currentTime);
     
     // Prepare running text
     const marqueeText = runningTexts.length > 0 
@@ -297,6 +299,9 @@ export default function TVDisplay() {
                     <p className="font-arabic text-xl lg:text-2xl text-emerald-400 mt-1" data-testid="hijri-date">
                         {hijriDate.day} {hijriDate.monthNameAr} {hijriDate.year} هـ
                     </p>
+                    {inRamadan && (
+                        <p className="text-gold-400 text-sm mt-1">Ramadan Mubarak!</p>
+                    )}
                 </div>
             </header>
             
