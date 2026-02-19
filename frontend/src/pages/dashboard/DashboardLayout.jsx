@@ -104,7 +104,7 @@ export default function DashboardLayout() {
                             target="_blank"
                             className="flex items-center gap-3 px-4 py-3 rounded-lg font-body text-sm text-gold-400 bg-gold-900/20 hover:bg-gold-900/30 transition-colors"
                         >
-                            <Clock className="w-5 h-5" />
+                            <Tv className="w-5 h-5" />
                             Lihat Display TV
                         </Link>
                     </div>
