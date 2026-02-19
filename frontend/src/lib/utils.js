@@ -143,26 +143,99 @@ export function isRamadhan() {
     return hijri.month === 9;
 }
 
-// Play bell sound
-export function playBellSound() {
-    try {
-        // Create a simple beep using Web Audio API
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.value = 800;
-        oscillator.type = 'sine';
-        
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.5);
-    } catch (e) {
-        console.error('Error playing bell sound:', e);
+// Audio notification types
+export const SOUND_TYPES = {
+    PRE_ADZAN: 'pre_adzan',      // Peringatan sebelum adzan
+    ADZAN: 'adzan',              // Waktu adzan tiba
+    PRE_IQAMAH: 'pre_iqamah',    // Peringatan sebelum iqamah
+    IQAMAH: 'iqamah',            // Waktu iqamah
+};
+
+// Create audio context singleton
+let audioContext = null;
+function getAudioContext() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
+    return audioContext;
+}
+
+// Play notification sound based on type
+export function playNotificationSound(type = SOUND_TYPES.ADZAN) {
+    try {
+        const ctx = getAudioContext();
+        
+        // Resume context if suspended (browser autoplay policy)
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+        
+        const soundConfigs = {
+            [SOUND_TYPES.PRE_ADZAN]: {
+                // Gentle bell chime - 3 soft notes
+                notes: [523, 659, 784], // C5, E5, G5
+                duration: 0.3,
+                gap: 0.15,
+                volume: 0.25,
+                type: 'sine'
+            },
+            [SOUND_TYPES.ADZAN]: {
+                // Strong attention getter - ascending pattern
+                notes: [440, 554, 659, 880], // A4, C#5, E5, A5
+                duration: 0.4,
+                gap: 0.1,
+                volume: 0.35,
+                type: 'triangle'
+            },
+            [SOUND_TYPES.PRE_IQAMAH]: {
+                // Soft reminder - 2 tones
+                notes: [587, 698], // D5, F5
+                duration: 0.25,
+                gap: 0.2,
+                volume: 0.2,
+                type: 'sine'
+            },
+            [SOUND_TYPES.IQAMAH]: {
+                // Clear signal - single strong tone with vibrato
+                notes: [659, 659, 784], // E5, E5, G5
+                duration: 0.5,
+                gap: 0.05,
+                volume: 0.4,
+                type: 'triangle'
+            },
+        };
+        
+        const config = soundConfigs[type] || soundConfigs[SOUND_TYPES.ADZAN];
+        let startTime = ctx.currentTime;
+        
+        config.notes.forEach((freq, i) => {
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            
+            oscillator.frequency.value = freq;
+            oscillator.type = config.type;
+            
+            const noteStart = startTime + (i * (config.duration + config.gap));
+            
+            gainNode.gain.setValueAtTime(0, noteStart);
+            gainNode.gain.linearRampToValueAtTime(config.volume, noteStart + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, noteStart + config.duration);
+            
+            oscillator.start(noteStart);
+            oscillator.stop(noteStart + config.duration + 0.1);
+        });
+        
+        return true;
+    } catch (e) {
+        console.error('Error playing notification sound:', e);
+        return false;
+    }
+}
+
+// Legacy bell sound function (uses new system)
+export function playBellSound() {
+    return playNotificationSound(SOUND_TYPES.PRE_ADZAN);
 }
