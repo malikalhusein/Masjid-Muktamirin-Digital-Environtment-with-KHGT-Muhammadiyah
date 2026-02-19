@@ -98,3 +98,34 @@ Kecamatan Galur, Kulon Progo, Yogyakarta
 - Admin Login: /connect
 - Dashboard: /connect/dashboard
 - Settings: /connect/settings
+
+---
+
+## Update: 19 Februari 2026 - Layout Options & Hijri Calendar Fix
+
+### New Features
+1. **3 Layout Options untuk TV Display:**
+   - **Modern** (`/`) - Dark theme minimalis
+   - **Classic** (`/classic`) - Background foto masjid seperti referensi
+   - **Layout2** (`/layout2`) - Sidebar dengan quote dan countdown
+
+2. **Kalender Hijriyah KHGT Akurat:**
+   - Menggunakan tabel konversi KHGT 1447 H resmi
+   - Menampilkan tanggal Ramadan dengan benar (bukan Sya'ban)
+   - 18 Feb 2026 = 1 Ramadan 1447 H
+
+3. **Fitur Ramadan:**
+   - Waktu Imsak otomatis muncul saat Ramadan
+   - Badge "Ramadan Mubarak!"
+   - Countdown ke hari besar Islam (Nuzulul Quran, Idul Fitri)
+
+### Files Added
+- `/app/frontend/src/lib/khgtCalendar.js` - Tabel konversi KHGT 1447 H
+- `/app/frontend/src/pages/TVDisplayClassic.jsx` - Layout klasik
+- `/app/frontend/src/pages/TVDisplayLayout2.jsx` - Layout sidebar
+
+### Routes
+- `/` - Modern dark layout
+- `/classic` - Classic dengan foto masjid
+- `/layout2` - Sidebar layout
+- `/connect` - Dashboard admin
