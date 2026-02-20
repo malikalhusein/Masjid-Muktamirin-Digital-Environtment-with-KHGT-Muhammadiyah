@@ -104,7 +104,3 @@ Proyek ini open-source dengan lisensi MIT. Silakan gunakan, modifikasi, dan kemb
 
 ---
 ```
-
----
-
-README ini sudah siap dipakai di GitHub. Mau saya tambahkan juga **contoh screenshot mockup layout** (misalnya wireframe tampilan jam sholat digital + dashboard) sebagai bagian dari README agar lebih menarik bagi developer/kontributor?
