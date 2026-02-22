@@ -46,13 +46,21 @@ function App() {
                 <Toaster position="top-right" richColors />
                 <BrowserRouter>
                     <Routes>
-                        {/* TV Display - Main public page (layout determined by settings) */}
+                        {/* TV Display - Main public page (jamsholat subdomain) */}
                         <Route path="/" element={<TVDisplay />} />
+                        
+                        {/* Website Homepage (main domain) */}
+                        <Route path="/homepage" element={<HomePage />} />
+                        <Route path="/homepage/agenda" element={<AgendaPage />} />
+                        <Route path="/homepage/about" element={<AboutPage />} />
+                        
+                        {/* Ramadan Channel (ramadan subdomain) */}
+                        <Route path="/ramadan" element={<RamadanPage />} />
                         
                         {/* Admin Login */}
                         <Route path="/connect" element={<Login />} />
                         
-                        {/* Protected Dashboard Routes */}
+                        {/* Protected Dashboard Routes (admin subdomain) */}
                         <Route 
                             path="/connect" 
                             element={
@@ -66,6 +74,7 @@ function App() {
                             <Route path="display-content" element={<DisplayContentPage />} />
                             <Route path="layout" element={<LayoutPage />} />
                             <Route path="prayer-settings" element={<PrayerSettingsPage />} />
+                            <Route path="ramadan" element={<RamadanAdminPage />} />
                         </Route>
                         
                         {/* Fallback */}
