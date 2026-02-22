@@ -3,14 +3,21 @@
 ## Original Problem Statement
 Bangun sebuah Web App Jam Sholat Digital berbasis KHGT Muhammadiyah, siap di-deploy di VPS/self-hosted, dengan panel dashboard untuk konfigurasi dan manajemen konten. Web App ini akan ditampilkan di TV masjid melalui STB Android TV Box dalam mode fullscreen.
 
+**Extended Scope:** Proyek berkembang menjadi ekosistem website masjid lengkap dengan:
+- TV Display (jamsholat.masjidmuktamirin.web.id)
+- Website Publik (masjidmuktamirin.web.id)
+- Channel Ramadan (ramadhan.masjidmuktamirin.web.id)
+- Dashboard Admin (admin.masjidmuktamirin.web.id)
+
 ## User Personas
 1. **Takmir/Pengurus Masjid** - Admin yang mengelola konten, jadwal, dan pengaturan via dashboard
-2. **Jamaah Masjid** - Pengguna yang melihat display TV di masjid
+2. **Jamaah Masjid** - Pengguna yang melihat display TV di masjid atau website
 3. **Muadzin** - Menggunakan countdown iqomah setelah adzan
+4. **Pengunjung Website** - Melihat jadwal sholat, agenda, dan info masjid online
 
 ## Core Requirements (Static)
 - Display jadwal sholat 5 waktu dari KHGT Muhammadiyah
-- Countdown waktu adzan dan iqomah
+- Countdown waktu adzan dan iqamah
 - Identitas masjid (nama, logo, alamat)
 - Kalender Hijriyah dan Masehi
 - Konten slideshow (poster, pengumuman)
@@ -19,12 +26,16 @@ Bangun sebuah Web App Jam Sholat Digital berbasis KHGT Muhammadiyah, siap di-dep
 - Panel dashboard admin dengan JWT auth
 - Kalibrasi manual untuk waktu sholat
 - Notifikasi suara/dering
+- Website publik dengan halaman Home, Agenda, About
+- Channel Ramadan dengan jadwal imam dan penceramah
+- **Docker deployment files untuk self-hosted**
 
 ## Tech Stack
 - Backend: FastAPI, MongoDB, Motor (async)
-- Frontend: React 19, Tailwind CSS, Framer Motion
+- Frontend: React 19, Tailwind CSS, Framer Motion, Shadcn/UI
 - Auth: JWT (PyJWT, bcrypt)
 - Data KHGT: Hardcoded dari hisabmu.com
+- Deployment: Docker, Docker Compose, Nginx
 
 ## Default Location
 Kecamatan Galur, Kulon Progo, Yogyakarta
@@ -32,87 +43,96 @@ Kecamatan Galur, Kulon Progo, Yogyakarta
 - Longitude: 110.2357
 - Timezone: UTC+7 (WIB)
 
-## URLs
+## URLs (Development)
 - TV Display: /
+- Homepage: /homepage
+- Agenda: /homepage/agenda
+- About Us: /homepage/about
+- Ramadan Channel: /ramadan
 - Admin Login: /connect
 - Dashboard: /connect/dashboard
-- Kalibrasi: /connect/calibration
-- Settings: /connect/settings
 
 ---
 
 ## What's Been Implemented ✅
 
-### Update: 19 Februari 2026 - Kalibrasi & Notifikasi Suara
+### Update: 22 Desember 2025 - Docker Deployment & Website AboutPage
 
 #### New Features
-1. **Menu Kalibrasi di Dashboard:**
-   - Route `/connect/calibration` dengan 2 tab
-   - Tab "Kalibrasi per Waktu": Pengaturan per waktu sholat (Subuh, Dzuhur, Ashar, Maghrib, Isya)
-   - Setiap waktu memiliki 4 field: pre_adzan, jeda_adzan, pre_iqamah, jeda_sholat
-   - Tab "Bunyi Notifikasi": 4 toggle untuk kontrol suara
+1. **Docker Deployment Files:**
+   - `/app/backend/Dockerfile` - Python FastAPI container
+   - `/app/frontend/Dockerfile` - Multi-stage build (Node -> Nginx)
+   - `/app/frontend/nginx.conf` - Nginx config untuk React SPA
+   - `/app/docker-compose.yml` - Orchestration (MongoDB, Backend, Frontend)
+   - `/app/.env.example`, `/app/backend/.env.example`, `/app/frontend/.env.example` - Environment templates
+   - `/app/DEPLOYMENT.md` - Dokumentasi deployment lengkap
 
-2. **Sistem Notifikasi Suara:**
-   - `SOUND_TYPES`: PRE_ADZAN, ADZAN, PRE_IQAMAH, IQAMAH
-   - Setiap tipe memiliki karakteristik audio berbeda (frekuensi, durasi, pattern)
-   - Menggunakan Web Audio API
-   - Tombol test sound di halaman kalibrasi
+2. **Health Check Endpoint:**
+   - `GET /api/health` - Returns database connection status
+   - Digunakan oleh Docker healthcheck
 
-3. **Countdown System dengan Mode:**
-   - Mode `adzan`: Menuju waktu adzan
-   - Mode `jeda_adzan`: Adzan berkumandang
-   - Mode `iqomah`: Countdown menuju iqamah
-   - Label dinamis dengan emoji indikator
+3. **AboutPage Complete (Tentang Kami):**
+   - Profil Masjid dengan statistik
+   - Daftar Pengumuman (mock data, siap API)
+   - Form Kontak (nama, email, HP, pesan)
+   - Info Kontak (telepon, email, alamat)
+   - Modul Donasi QRIS (placeholder + rekening bank)
+   - Struktur Pengurus Takmir
+   - Navigation & Footer konsisten dengan halaman lain
 
-4. **Bug Fix - Floating Bar Sidebar:**
-   - Mengubah struktur sidebar dari `position: absolute` ke `flex`
-   - User info di bagian bawah tidak lagi overlap dengan menu
-   - Navigation area sekarang scrollable
+4. **Website Pages Complete:**
+   - HomePage: Hero, jadwal sholat bar, agenda terdekat
+   - AgendaPage: Kalender interaktif, jadwal sholat lengkap
+   - RamadanPage: Program Ramadan dengan jadwal imam
+   - AboutPage: Info masjid, donasi, kontak
 
-5. **Bug Fix - Infinite Loop useEffect:**
-   - Ditemukan oleh testing agent
-   - Penyebab: `soundsPlayed` di dependency array sambil dimodifikasi dalam effect
-   - Solusi: Menggunakan callback pattern untuk state updates
+#### Files Created/Modified
+- `/app/backend/Dockerfile` - NEW
+- `/app/backend/server.py` - Added health endpoint
+- `/app/frontend/Dockerfile` - NEW
+- `/app/frontend/nginx.conf` - NEW
+- `/app/docker-compose.yml` - NEW
+- `/app/.env.example` - NEW
+- `/app/backend/.env.example` - NEW
+- `/app/frontend/.env.example` - NEW
+- `/app/DEPLOYMENT.md` - NEW
+- `/app/frontend/src/pages/website/AboutPage.jsx` - Redesigned
 
-#### Files Modified
-- `/app/frontend/src/pages/TVDisplay.jsx` - Countdown & notifikasi
-- `/app/frontend/src/pages/dashboard/DashboardLayout.jsx` - Fix sidebar
-- `/app/frontend/src/pages/dashboard/CalibrationPage.jsx` - UI kalibrasi
-- `/app/frontend/src/lib/utils.js` - Sound system baru
-- `/app/frontend/src/App.js` - Route kalibrasi
-
-#### Backend (Already Complete)
-- JWT authentication
-- Mosque identity CRUD
-- Prayer times (KHGT data Feb-Mar 2026)
-- Prayer settings with calibration
-- Layout settings
-- Content, Agenda, Running text CRUD
+### Previous Updates
+- Dashboard refactor: Merged menus for clarity
+- TV Display: Cleanup, removed settings icon
+- Countdown system with adzan/iqomah modes
+- Sound notifications with Web Audio API
+- Background image management
+- Ramadan module with backend API
 
 ---
 
 ## Prioritized Backlog
 
 ### P0 - Critical (Completed ✅)
-- [x] Implementasi countdown waktu adzan
-- [x] Implementasi countdown waktu iqomah
+- [x] Implementasi countdown waktu adzan/iqomah
 - [x] Kalibrasi manual per waktu sholat
 - [x] Notifikasi suara untuk countdown
-- [x] Perbaikan bug floating bar sidebar
+- [x] Dashboard refactor
+- [x] Docker deployment files
+- [x] Website HomePage, AgendaPage, AboutPage
 
 ### P1 - High Priority
-- [ ] Expand KHGT data untuk bulan lain (Apr-Dec 2026, 2027)
-- [ ] Docker Compose deployment configuration
-- [ ] Nginx reverse proxy setup
-- [ ] Integration dengan GPS dari STB Android TV Box
+- [ ] Implement backend API for announcements/pengumuman
+- [ ] Implement backend API for contact form submissions
+- [ ] FullCalendar integration di AgendaPage
+- [ ] Upload QRIS image di dashboard
+- [ ] Expand KHGT data untuk bulan lain
 
 ### P2 - Medium Priority
-- [ ] Homepage masjid subdomain (profil, berita)
-- [ ] Kanal Ramadhan subdomain (imsakiyah, agenda tarawih)
-- [ ] Admin unified dashboard for all subdomains
-- [ ] Upload file audio kustom untuk notifikasi
+- [ ] Backend untuk articles/artikel kegiatan
+- [ ] Role-based access control (admin/editor)
+- [ ] Google Calendar sync
+- [ ] Subdomain routing configuration
 
 ### P3 - Low Priority
+- [ ] Live KHGT API integration
 - [ ] Video content support
 - [ ] Multi-language support
 - [ ] Offline mode/PWA
@@ -124,14 +144,20 @@ Kecamatan Galur, Kulon Progo, Yogyakarta
 - Password: `admin123`
 
 ## API Endpoints
-- `POST /api/auth/register`
-- `POST /api/auth/login`
+- `GET /api/health` - Health check
+- `POST /api/auth/register, login`
 - `GET /api/auth/me`
 - `GET, PUT /api/mosque/identity`
-- `GET, PUT /api/settings/prayer` (includes calibration)
+- `GET, PUT /api/settings/prayer`
 - `GET, PUT /api/settings/layout`
 - `GET /api/prayer-times`
 - `GET /api/prayer-times/monthly`
 - `GET, POST, PUT, DELETE /api/content`
 - `GET, POST, PUT, DELETE /api/agenda`
 - `GET, POST, PUT, DELETE /api/running-text`
+- `GET, POST, DELETE /api/ramadan-schedule/{date}`
+- `GET /api/stats`
+
+## Mocked Features
+- **Pengumuman**: Mock data di AboutPage.jsx (backend API belum ada)
+- **Contact Form**: Simulated submission (backend API belum ada)
