@@ -114,23 +114,24 @@ const Footer = ({ mosqueIdentity }) => (
     </footer>
 );
 
-// Contact Form Component
+// Contact Form Component - Redirect to WhatsApp
 const ContactForm = () => {
-    const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
-    const [sending, setSending] = useState(false);
+    const [formData, setFormData] = useState({ name: '', phone: '', message: '' });
     
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!formData.name || !formData.message) {
             toast.error('Nama dan pesan harus diisi');
             return;
         }
-        setSending(true);
-        // Simulate sending (can be replaced with actual API call)
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        toast.success('Pesan berhasil dikirim! Kami akan segera menghubungi Anda.');
-        setFormData({ name: '', email: '', phone: '', message: '' });
-        setSending(false);
+        
+        // Create WhatsApp message
+        const waMessage = `Halo, saya mau bertanya tentang program masjid.%0A%0ANama: ${encodeURIComponent(formData.name)}%0ANo. HP: ${encodeURIComponent(formData.phone || '-')}%0APesan: ${encodeURIComponent(formData.message)}`;
+        const waUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${waMessage}`;
+        
+        // Open WhatsApp
+        window.open(waUrl, '_blank');
+        toast.success('Mengarahkan ke WhatsApp...');
     };
     
     return (
@@ -144,17 +145,9 @@ const ContactForm = () => {
                     data-testid="contact-name-input"
                 />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
                 <Input 
-                    type="email"
-                    placeholder="Email" 
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="bg-white border-gray-200 focus:border-emerald-500"
-                    data-testid="contact-email-input"
-                />
-                <Input 
-                    placeholder="No. HP" 
+                    placeholder="No. HP (opsional)" 
                     value={formData.phone}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     className="bg-white border-gray-200 focus:border-emerald-500"
