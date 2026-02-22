@@ -6,45 +6,6 @@ import { getCurrentAndNextPrayer, PRAYER_NAMES } from '../../lib/utils';
 import { isRamadan } from '../../lib/khgtCalendar';
 import { WebsiteNavigation, WebsiteFooter } from '../../components/WebsiteNavigation';
 
-// Navigation component (same as HomePage)
-const Navigation = ({ activePage = 'agenda' }) => (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-                <Link to="/homepage" className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-emerald-900 flex items-center justify-center border-2 border-emerald-700">
-                        <span className="text-white font-bold text-lg">M</span>
-                    </div>
-                    <div>
-                        <span className="font-bold text-gray-800">Muktamirin</span>
-                        <p className="text-xs text-emerald-600">Sorogaten</p>
-                    </div>
-                </Link>
-                <div className="hidden md:flex items-center gap-1">
-                    {[
-                        { path: '/homepage', label: 'Home', key: 'home' },
-                        { path: '/homepage/agenda', label: 'Agenda', key: 'agenda' },
-                        { path: '/ramadan', label: 'Ramadan', key: 'ramadan' },
-                        { path: '/homepage/about', label: 'Tentang Kami', key: 'about' },
-                    ].map((item) => (
-                        <Link
-                            key={item.key}
-                            to={item.path}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                activePage === item.key
-                                    ? 'bg-emerald-900 text-white'
-                                    : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                        >
-                            {item.label}
-                        </Link>
-                    ))}
-                </div>
-            </div>
-        </div>
-    </nav>
-);
-
 // Prayer Schedule Card
 const PrayerScheduleCard = ({ prayerTimes, currentTime }) => {
     const { nextPrayer, nextPrayerTime } = getCurrentAndNextPrayer(prayerTimes);
