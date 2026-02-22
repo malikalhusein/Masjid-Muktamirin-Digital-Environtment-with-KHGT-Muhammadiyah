@@ -460,7 +460,7 @@ export default function HomePage() {
     
     return (
         <div className="min-h-screen bg-stone-100" data-testid="homepage-new">
-            <Navigation activePage="home" />
+            <Navigation activePage="home" mosqueIdentity={mosqueIdentity} />
             
             {/* Hero Section */}
             <section className="relative h-[70vh] min-h-[500px] bg-emerald-900">
