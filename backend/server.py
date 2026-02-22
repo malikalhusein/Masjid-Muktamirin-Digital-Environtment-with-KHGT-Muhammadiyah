@@ -1386,11 +1386,11 @@ class RamadanScheduleCreate(BaseModel):
     penyedia_takjil: Optional[str] = None
     penyedia_jaburan: Optional[str] = None
 
-@api_router.get("/ramadan/schedule", response_model=List[RamadanDaySchedule])
+@api_router.get("/ramadan/schedule")
 async def get_ramadan_schedule():
     """Get all Ramadan schedule data"""
     schedules = await db.ramadan_schedules.find({}, {"_id": 0}).sort("date", 1).to_list(100)
-    return [RamadanDaySchedule(**s) for s in schedules]
+    return schedules
 
 @api_router.get("/ramadan/today")
 async def get_ramadan_today():
