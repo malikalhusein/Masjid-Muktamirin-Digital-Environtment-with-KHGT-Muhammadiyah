@@ -1,359 +1,264 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-    Moon, 
-    Sun, 
-    Calendar, 
-    Clock, 
-    Users, 
-    Utensils,
-    Book,
-    Star,
-    ChevronRight,
-    MapPin,
-    ExternalLink,
-    Home
-} from 'lucide-react';
-import { prayerAPI, mosqueAPI, agendaAPI } from '../../lib/api';
-import { formatDateIndonesian, PRAYER_NAMES } from '../../lib/utils';
-import { getKHGTHijriDate, isRamadan } from '../../lib/khgtCalendar';
+import { Moon, Sun, Users, Book, Calendar, Clock, Star, Heart, Utensils, MapPin } from 'lucide-react';
+import { prayerAPI, mosqueAPI } from '../../lib/api';
+import { formatDateIndonesian } from '../../lib/utils';
+import { getKHGTHijriDate } from '../../lib/khgtCalendar';
 
-// Daily Ramadan Card - Shows imam, penceramah, takjil info
-const DailyRamadanCard = ({ date, data }) => {
+const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+// Navigation component
+const Navigation = ({ activePage = 'ramadan' }) => (
+    <nav className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+                <Link to="/homepage" className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-900 flex items-center justify-center border-2 border-emerald-700">
+                        <span className="text-white font-bold text-lg">M</span>
+                    </div>
+                    <div>
+                        <span className="font-bold text-gray-800">Muktamirin</span>
+                        <p className="text-xs text-emerald-600">Sorogaten</p>
+                    </div>
+                </Link>
+                <div className="hidden md:flex items-center gap-1">
+                    {[
+                        { path: '/homepage', label: 'Home', key: 'home' },
+                        { path: '/homepage/agenda', label: 'Agenda', key: 'agenda' },
+                        { path: '/ramadan', label: 'Ramadan', key: 'ramadan' },
+                        { path: '/homepage/about', label: 'Tentang Kami', key: 'about' },
+                    ].map((item) => (
+                        <Link
+                            key={item.key}
+                            to={item.path}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                activePage === item.key
+                                    ? 'bg-emerald-900 text-white'
+                                    : 'text-gray-600 hover:bg-gray-100'
+                            }`}
+                        >
+                            {item.label}
+                        </Link>
+                    ))}
+                </div>
+            </div>
+        </div>
+    </nav>
+);
+
+// Program Card Component
+const ProgramCard = ({ icon: Icon, title, description }) => (
+    <div className="bg-white rounded-xl p-5 border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mb-4">
+            <Icon className="w-6 h-6 text-emerald-700" />
+        </div>
+        <h3 className="font-semibold text-gray-800 mb-2">{title}</h3>
+        <p className="text-sm text-gray-500">{description}</p>
+    </div>
+);
+
+// Event Card Component  
+const EventCard = ({ title, date, description }) => (
+    <div className="bg-white rounded-xl p-5 border border-gray-100 flex items-start gap-4">
+        <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+            <Star className="w-5 h-5 text-amber-600" />
+        </div>
+        <div>
+            <h3 className="font-semibold text-gray-800">{title}</h3>
+            <p className="text-sm text-amber-600">{date}</p>
+            <p className="text-sm text-gray-500 mt-1">{description}</p>
+        </div>
+    </div>
+);
+
+// Daily Schedule Card
+const DailyScheduleCard = ({ date, data, loading }) => {
     const hijri = getKHGTHijriDate(date);
+    const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    
+    const fields = [
+        { key: 'imam_subuh', label: 'Imam Subuh', icon: Sun },
+        { key: 'penceramah_subuh', label: 'Penceramah Subuh', icon: Book },
+        { key: 'penceramah_berbuka', label: 'Penceramah Berbuka', icon: Book },
+        { key: 'imam_tarawih', label: 'Imam Tarawih', icon: Moon },
+        { key: 'penyedia_takjil', label: 'Penyedia Takjil', icon: Utensils },
+        { key: 'penyedia_jaburan', label: 'Jaburan Tadarus', icon: Users },
+    ];
     
     return (
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-lg overflow-hidden"
-        >
-            {/* Header */}
-            <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-amber-100 text-sm">{formatDateIndonesian(date)}</p>
-                        <p className="text-xl font-bold">{hijri.day} Ramadan {hijri.year} H</p>
-                    </div>
-                    <Moon className="w-10 h-10 text-amber-200" />
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="bg-stone-100 px-6 py-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                    <h3 className="font-bold text-gray-800">Petugas Hari Ini</h3>
+                    <p className="text-sm text-amber-600">
+                        {dayNames[date.getDay()]}, {date.getDate()} {['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][date.getMonth()]} {date.getFullYear()}
+                    </p>
                 </div>
             </div>
             
-            {/* Content Grid */}
-            <div className="p-4 space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                    {/* Imam Subuh */}
-                    <div className="bg-emerald-50 rounded-xl p-3">
-                        <div className="flex items-center gap-2 text-emerald-700 mb-1">
-                            <Sun className="w-4 h-4" />
-                            <span className="text-xs font-medium">Imam Subuh</span>
-                        </div>
-                        <p className="font-semibold text-gray-800">{data?.imam_subuh || '-'}</p>
-                    </div>
-                    
-                    {/* Penceramah Subuh */}
-                    <div className="bg-blue-50 rounded-xl p-3">
-                        <div className="flex items-center gap-2 text-blue-700 mb-1">
-                            <Book className="w-4 h-4" />
-                            <span className="text-xs font-medium">Kultum Subuh</span>
-                        </div>
-                        <p className="font-semibold text-gray-800">{data?.penceramah_subuh || '-'}</p>
-                    </div>
-                    
-                    {/* Penceramah Berbuka */}
-                    <div className="bg-orange-50 rounded-xl p-3">
-                        <div className="flex items-center gap-2 text-orange-700 mb-1">
-                            <Utensils className="w-4 h-4" />
-                            <span className="text-xs font-medium">Ceramah Berbuka</span>
-                        </div>
-                        <p className="font-semibold text-gray-800">{data?.penceramah_berbuka || '-'}</p>
-                    </div>
-                    
-                    {/* Imam Tarawih */}
-                    <div className="bg-purple-50 rounded-xl p-3">
-                        <div className="flex items-center gap-2 text-purple-700 mb-1">
-                            <Star className="w-4 h-4" />
-                            <span className="text-xs font-medium">Imam Tarawih</span>
-                        </div>
-                        <p className="font-semibold text-gray-800">{data?.imam_tarawih || '-'}</p>
-                    </div>
+            {loading ? (
+                <div className="p-8 text-center text-gray-400">
+                    <div className="animate-spin w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full mx-auto mb-2" />
+                    <p>Memuat jadwal...</p>
                 </div>
-                
-                {/* Takjil & Jaburan */}
-                <div className="border-t pt-3 space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 flex items-center gap-1">
-                            <Utensils className="w-3 h-3" /> Penyedia Takjil
-                        </span>
-                        <span className="font-medium text-gray-800">{data?.penyedia_takjil || '-'}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 flex items-center gap-1">
-                            <Users className="w-3 h-3" /> Jaburan Tadarus
-                        </span>
-                        <span className="font-medium text-gray-800">{data?.penyedia_jaburan || '-'}</span>
-                    </div>
+            ) : (
+                <div className="divide-y divide-gray-100">
+                    {fields.map((field) => (
+                        <div key={field.key} className="px-6 py-3 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <field.icon className="w-4 h-4 text-emerald-600" />
+                                <span className="text-gray-600 text-sm">{field.label}</span>
+                            </div>
+                            <span className="font-medium text-gray-800">
+                                {data?.[field.key] || '-'}
+                            </span>
+                        </div>
+                    ))}
                 </div>
-            </div>
-        </motion.div>
+            )}
+        </div>
     );
 };
 
-// Event Card for special Ramadan events
-const SpecialEventCard = ({ event }) => (
-    <div className="bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl p-4 border border-amber-200">
-        <div className="flex items-start gap-3">
-            <div className="bg-amber-500 text-white rounded-lg p-2">
-                <Star className="w-5 h-5" />
-            </div>
-            <div className="flex-1">
-                <h3 className="font-semibold text-gray-800">{event.title}</h3>
-                <p className="text-sm text-gray-600 mt-1">{event.description}</p>
-                <div className="flex items-center gap-3 mt-2 text-xs text-amber-700">
-                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{event.date}</span>
-                    {event.time && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{event.time}</span>}
-                </div>
-            </div>
+// Footer
+const Footer = () => (
+    <footer className="bg-emerald-950 text-white py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <Moon className="w-8 h-8 mx-auto mb-3 text-amber-400" />
+            <p className="text-emerald-300 text-sm">&copy; {new Date().getFullYear()} Kanal Ramadan - Masjid Muktamirin Sorogaten</p>
+            <p className="text-emerald-400 text-xs mt-1">Jam Sholat Digital KHGT Muhammadiyah</p>
         </div>
-    </div>
-);
-
-// Ramadan Schedule Section
-const RamadanScheduleSection = ({ prayerTimes }) => (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-amber-500" />
-            Jadwal Imsakiyah Hari Ini
-        </h3>
-        <div className="grid grid-cols-4 gap-3">
-            <div className="text-center p-3 bg-slate-900 rounded-xl text-white">
-                <p className="text-xs text-slate-400">Imsak</p>
-                <p className="text-xl font-bold">{prayerTimes?.imsak || '--:--'}</p>
-            </div>
-            <div className="text-center p-3 bg-emerald-600 rounded-xl text-white">
-                <p className="text-xs text-emerald-200">Subuh</p>
-                <p className="text-xl font-bold">{prayerTimes?.subuh || '--:--'}</p>
-            </div>
-            <div className="text-center p-3 bg-orange-500 rounded-xl text-white">
-                <p className="text-xs text-orange-200">Maghrib</p>
-                <p className="text-xl font-bold">{prayerTimes?.maghrib || '--:--'}</p>
-            </div>
-            <div className="text-center p-3 bg-purple-600 rounded-xl text-white">
-                <p className="text-xs text-purple-200">Isya</p>
-                <p className="text-xl font-bold">{prayerTimes?.isya || '--:--'}</p>
-            </div>
-        </div>
-    </div>
-);
-
-// Activity Section
-const ActivitySection = ({ title, items, icon: Icon }) => (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Icon className="w-5 h-5 text-amber-500" />
-            {title}
-        </h3>
-        <ul className="space-y-2">
-            {items.map((item, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-gray-600">
-                    <ChevronRight className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                    <span>{item}</span>
-                </li>
-            ))}
-        </ul>
-    </div>
+    </footer>
 );
 
 export default function RamadanPage() {
     const [currentDate] = useState(new Date());
-    const [prayerTimes, setPrayerTimes] = useState(null);
-    const [mosqueIdentity, setMosqueIdentity] = useState(null);
     const [ramadanData, setRamadanData] = useState(null);
     const [loading, setLoading] = useState(true);
     
     const fetchData = useCallback(async () => {
         try {
-            const [prayerRes, mosqueRes] = await Promise.all([
-                prayerAPI.getTimes(),
-                mosqueAPI.getIdentity(),
-            ]);
-            setPrayerTimes(prayerRes.data);
-            setMosqueIdentity(mosqueRes.data);
-            
-            // Try to fetch Ramadan data
-            try {
-                const ramadanRes = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/ramadan/today`);
-                if (ramadanRes.ok) {
-                    const data = await ramadanRes.json();
-                    setRamadanData(data);
-                }
-            } catch (e) {
-                // Ramadan data not available, use placeholder
+            const res = await fetch(`${API_URL}/api/ramadan/today`);
+            if (res.ok) {
+                const data = await res.json();
+                setRamadanData(data);
             }
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error('Error fetching Ramadan data:', error);
         } finally {
             setLoading(false);
         }
     }, []);
     
-    useEffect(() => { fetchData(); }, [fetchData]);
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
     
     const hijriDate = getKHGTHijriDate(currentDate);
-    const inRamadan = isRamadan(currentDate);
     
-    // Special events during Ramadan
-    const specialEvents = [
-        { title: 'Nuzulul Quran', description: 'Peringatan turunnya Al-Quran dengan pengajian akbar', date: '3 Maret 2026', time: 'Ba\'da Maghrib', speaker: 'Toyib Hidayat' },
-        { title: 'Khatmil Quran', description: 'Khataman Al-Quran dan doa bersama', date: '28 Ramadan', time: 'Ba\'da Tarawih' },
-        { title: 'Takbiran Idul Fitri', description: 'Malam takbiran menyambut Hari Raya', date: '29 Ramadan', time: '20:00 WIB' },
+    const programs = [
+        { icon: Moon, title: 'Tarawih Berjamaah', description: 'Setiap malam Ramadan, 20 rakaat + witir. Ba\'da Isya.' },
+        { icon: Book, title: 'Tadarus Al-Qur\'an', description: 'Ba\'da tarawih, target khatam 30 juz selama Ramadan.' },
+        { icon: Book, title: 'Kultum Subuh', description: 'Ceramah singkat setelah sholat Subuh berjamaah.' },
+        { icon: Sun, title: 'Syuruq', description: 'Sholat Dhuha berjamaah setelah Subuh.' },
+        { icon: Users, title: 'Buka Bersama', description: 'Internal (Senin-Sabtu), Eksternal donatur (Ahad).' },
+        { icon: Book, title: 'TPA Anak-anak', description: 'Program hafalan dan muraja\'ah untuk anak-anak.' },
+        { icon: Heart, title: 'I\'tikaf', description: '10 hari terakhir Ramadan, termasuk info sahur.' },
+        { icon: Calendar, title: 'Santunan Yatim & Dhuafa', description: 'Penyaluran bantuan untuk yatim piatu dan dhuafa.' },
     ];
     
-    // Ramadan activities
-    const activities = {
-        tarawih: ['Tarawih 20 rakaat + witir 3 rakaat', 'Imam bergantian setiap malam', 'Kultum singkat sebelum witir'],
-        tadarus: ['Tadarus Al-Quran ba\'da Tarawih', 'Target khatam 30 juz', 'Jaburan disediakan jamaah'],
-        bukber: ['Buka bersama internal (Senin-Sabtu)', 'Buka bersama eksternal (Ahad)', 'Menu takjil bergantian'],
-        anak: ['TPA Ramadan setiap sore', 'Pesantren kilat akhir pekan', 'Lomba hafalan surat pendek'],
-    };
-    
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
-                <div className="animate-spin w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full" />
-            </div>
-        );
-    }
+    const specialEvents = [
+        { title: 'Nuzulul Qur\'an', date: 'Selasa, 3 Maret 2026', description: 'Peringatan turunnya Al-Qur\'an, pemateri: Toyib Hidayat' },
+        { title: 'Khatmil Qur\'an', date: 'Jumat, 27 Maret 2026', description: 'Khataman Al-Qur\'an bersama' },
+        { title: 'Takbiran Idul Fitri', date: 'Rabu, 18 Maret 2026', description: 'Malam takbiran menyambut Hari Raya' },
+        { title: 'Syawalan', date: 'Kamis, 19 Maret 2026', description: 'Halal bihalal jamaah masjid' },
+    ];
     
     return (
-        <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50" data-testid="ramadan-page">
-            {/* Navigation */}
-            <nav className="bg-white shadow-sm sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                                <Moon className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                                <span className="font-bold text-gray-800">Kanal Ramadan</span>
-                                <p className="text-xs text-amber-600">{mosqueIdentity?.name || 'Masjid Muktamirin'}</p>
-                            </div>
-                        </div>
-                        <div className="hidden md:flex items-center gap-6">
-                            <Link to="/homepage" className="text-gray-600 hover:text-amber-600 flex items-center gap-1">
-                                <Home className="w-4 h-4" />Home
-                            </Link>
-                            <Link to="/homepage/agenda" className="text-gray-600 hover:text-amber-600">Agenda</Link>
-                            <Link to="/ramadan" className="text-amber-600 font-medium">Ramadan</Link>
-                            <Link to="/" target="_blank" className="text-gray-400 hover:text-gray-600 flex items-center gap-1">
-                                <ExternalLink className="w-4 h-4" />TV Display
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+        <div className="min-h-screen bg-stone-100" data-testid="ramadan-page-new">
+            <Navigation activePage="ramadan" />
             
             {/* Hero */}
-            <div className="bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 text-white py-12 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-20">
-                    <div className="absolute inset-0" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M20 0L0 20l20 20 20-20L20 0zm0 5l15 15-15 15L5 20 20 5z" fill="%23ffffff" fill-opacity="0.4" fill-rule="evenodd"/%3E%3C/svg%3E")' }} />
+            <div className="bg-emerald-900 text-white py-16 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute inset-0" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0zm0 36c-8.837 0-16-7.163-16-16S11.163 4 20 4s16 7.163 16 16-7.163 16-16 16z" fill="%23ffffff" fill-opacity="0.4"/%3E%3C/svg%3E")' }} />
                 </div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-                    <div className="text-center">
-                        <motion.div 
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-2 mb-4"
-                        >
-                            <Moon className="w-5 h-5" />
-                            <span>Ramadan {hijriDate.year} H / {currentDate.getFullYear()} M</span>
-                        </motion.div>
-                        <motion.h1 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="text-4xl md:text-5xl font-bold mb-4"
-                        >
-                            Marhaban Ya Ramadan
-                        </motion.h1>
-                        <motion.p 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                            className="text-amber-100 text-lg max-w-2xl mx-auto"
-                        >
-                            Selamat menjalankan ibadah puasa. Mari ramaikan masjid dengan berbagai kegiatan Ramadan penuh berkah.
-                        </motion.p>
-                    </div>
+                
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                    >
+                        <Moon className="w-12 h-12 mx-auto mb-4 text-amber-400" />
+                        <h1 className="text-4xl md:text-5xl font-bold mb-2">
+                            Ramadan <span className="text-amber-400">{hijriDate.year} H</span>
+                        </h1>
+                        <p className="text-emerald-200 text-lg max-w-2xl mx-auto">
+                            Rangkaian kegiatan ibadah dan dakwah Masjid Muktamirin Sorogaten selama bulan suci Ramadan.
+                        </p>
+                    </motion.div>
                 </div>
             </div>
             
-            {/* Main Content */}
+            {/* Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left Column - Daily Card & Schedule */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Today's Card */}
+                {/* Daily Schedule */}
+                <div className="mb-12">
+                    <DailyScheduleCard date={currentDate} data={ramadanData} loading={loading} />
+                </div>
+                
+                {/* Programs */}
+                <div className="mb-12">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">Program Kegiatan</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {programs.map((program, idx) => (
+                            <ProgramCard key={idx} {...program} />
+                        ))}
+                    </div>
+                </div>
+                
+                {/* Special Events */}
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">Event Khusus</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {specialEvents.map((event, idx) => (
+                            <EventCard key={idx} {...event} />
+                        ))}
+                    </div>
+                </div>
+                
+                {/* Zakat Info */}
+                <div className="mt-12 bg-emerald-900 rounded-2xl p-8 text-white">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-amber-500" />
-                                Kegiatan Hari Ini
-                            </h2>
-                            <DailyRamadanCard date={currentDate} data={ramadanData} />
-                        </div>
-                        
-                        {/* Prayer Schedule */}
-                        <RamadanScheduleSection prayerTimes={prayerTimes} />
-                        
-                        {/* Special Events */}
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <Star className="w-5 h-5 text-amber-500" />
-                                Event Khusus Ramadan
-                            </h2>
-                            <div className="space-y-3">
-                                {specialEvents.map((event, idx) => (
-                                    <SpecialEventCard key={idx} event={event} />
-                                ))}
+                            <h2 className="text-2xl font-bold mb-4">Zakat Fitrah & Mal</h2>
+                            <p className="text-emerald-200 mb-4">
+                                Tunaikan zakat Anda melalui masjid. Penyaluran tepat sasaran kepada mustahik di lingkungan Sorogaten.
+                            </p>
+                            <div className="bg-emerald-800/50 rounded-xl p-4 inline-block">
+                                <p className="text-emerald-300 text-sm">Zakat Fitrah</p>
+                                <p className="text-2xl font-bold">Rp 45.000<span className="text-sm font-normal text-emerald-300">/jiwa</span></p>
+                                <p className="text-emerald-400 text-xs mt-1">atau setara 2.5 kg beras</p>
                             </div>
                         </div>
-                    </div>
-                    
-                    {/* Right Column - Activities */}
-                    <div className="space-y-6">
-                        <ActivitySection title="Tarawih & Witir" items={activities.tarawih} icon={Moon} />
-                        <ActivitySection title="Tadarus Al-Quran" items={activities.tadarus} icon={Book} />
-                        <ActivitySection title="Buka Bersama" items={activities.bukber} icon={Utensils} />
-                        <ActivitySection title="Program Anak TPA" items={activities.anak} icon={Users} />
-                        
-                        {/* Zakat Info */}
-                        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-6 text-white">
-                            <h3 className="font-semibold mb-3 flex items-center gap-2">
-                                <Star className="w-5 h-5" />
-                                Zakat Fitrah & Mal
-                            </h3>
-                            <p className="text-emerald-100 text-sm mb-4">
-                                Tunaikan zakat Anda melalui masjid. Penyaluran tepat sasaran kepada mustahik.
-                            </p>
-                            <div className="bg-white/20 rounded-lg p-3 text-sm">
-                                <p className="font-medium">Zakat Fitrah: Rp 45.000/jiwa</p>
-                                <p className="text-emerald-200 text-xs mt-1">atau 2.5 kg beras</p>
+                        <div className="text-center">
+                            <div className="bg-white rounded-xl p-6 text-gray-800 inline-block">
+                                <p className="text-sm text-gray-500 mb-2">Transfer ke:</p>
+                                <p className="font-bold text-emerald-700">BSI (Bank Syariah Indonesia)</p>
+                                <p className="text-2xl font-mono my-2">XXX-XXXX-XXX</p>
+                                <p className="text-sm text-gray-500">a.n. Masjid Muktamirin</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            {/* Footer */}
-            <footer className="bg-amber-900 text-white py-8 mt-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <Moon className="w-8 h-8 mx-auto mb-3 text-amber-300" />
-                    <p className="text-amber-300 text-sm">&copy; {currentDate.getFullYear()} Kanal Ramadan - {mosqueIdentity?.name || 'Masjid Muktamirin'}</p>
-                    <p className="text-amber-400 text-xs mt-1">Jam Sholat Digital KHGT Muhammadiyah</p>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 }
