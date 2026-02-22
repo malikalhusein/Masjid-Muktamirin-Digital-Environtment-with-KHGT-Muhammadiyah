@@ -103,4 +103,64 @@ export const statsAPI = {
     get: () => api.get('/stats'),
 };
 
+// ZIS (Zakat, Infaq, Shodaqoh) API
+export const zisAPI = {
+    getAll: (month, year, type) => api.get('/zis', { params: { month, year, type } }),
+    getSummary: (month, year) => api.get('/zis/summary', { params: { month, year } }),
+    getMonthlyChart: (year) => api.get('/zis/monthly-chart', { params: { year } }),
+    create: (data) => api.post('/zis', data),
+    update: (id, data) => api.put(`/zis/${id}`, data),
+    delete: (id) => api.delete(`/zis/${id}`),
+};
+
+// Announcements API
+export const announcementAPI = {
+    getAll: (activeOnly = false) => api.get('/announcements', { params: { active_only: activeOnly } }),
+    create: (data) => api.post('/announcements', data),
+    update: (id, data) => api.put(`/announcements/${id}`, data),
+    delete: (id) => api.delete(`/announcements/${id}`),
+};
+
+// Pengurus API
+export const pengurusAPI = {
+    getAll: (activeOnly = false) => api.get('/pengurus', { params: { active_only: activeOnly } }),
+    create: (data) => api.post('/pengurus', data),
+    update: (id, data) => api.put(`/pengurus/${id}`, data),
+    delete: (id) => api.delete(`/pengurus/${id}`),
+};
+
+// Special Events API
+export const specialEventAPI = {
+    getAll: (activeOnly = false, upcomingOnly = false) => 
+        api.get('/special-events', { params: { active_only: activeOnly, upcoming_only: upcomingOnly } }),
+    create: (data) => api.post('/special-events', data),
+    update: (id, data) => api.put(`/special-events/${id}`, data),
+    delete: (id) => api.delete(`/special-events/${id}`),
+};
+
+// Gallery API
+export const galleryAPI = {
+    getAll: (activeOnly = false) => api.get('/gallery', { params: { active_only: activeOnly } }),
+    create: (data) => api.post('/gallery', data),
+    update: (id, data) => api.put(`/gallery/${id}`, data),
+    delete: (id) => api.delete(`/gallery/${id}`),
+};
+
+// Islamic Quotes API
+export const quoteAPI = {
+    getAll: (activeOnly = false) => api.get('/quotes', { params: { active_only: activeOnly } }),
+    getRandom: () => api.get('/quotes/random'),
+    create: (data) => api.post('/quotes', data),
+    update: (id, data) => api.put(`/quotes/${id}`, data),
+    delete: (id) => api.delete(`/quotes/${id}`),
+};
+
+// Ramadan API
+export const ramadanAPI = {
+    getSchedule: () => api.get('/ramadan/schedule'),
+    getToday: () => api.get('/ramadan/today'),
+    saveSchedule: (data) => api.post('/ramadan/schedule', data),
+    deleteSchedule: (date) => api.delete(`/ramadan/schedule/${date}`),
+};
+
 export default api;
