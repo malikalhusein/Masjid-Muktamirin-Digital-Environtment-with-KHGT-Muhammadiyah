@@ -35,7 +35,7 @@ import AnnouncementsPage from "@/pages/dashboard/AnnouncementsPage";
 import ArticlesPage from "@/pages/dashboard/ArticlesPage";
 import PengurusPage from "@/pages/dashboard/PengurusPage";
 import SpecialEventsPage from "@/pages/dashboard/SpecialEventsPage";
-import GalleryPage from "@/pages/dashboard/GalleryPage";
+import AdminGalleryPage from "@/pages/dashboard/GalleryPage";
 import QuotesPage from "@/pages/dashboard/QuotesPage";
 import QRISSettingsPage from "@/pages/dashboard/QRISSettingsPage";
 
@@ -44,7 +44,7 @@ import HomePage from "@/pages/website/HomePage";
 import AgendaPage from "@/pages/website/AgendaPage";
 import AboutPage from "@/pages/website/AboutPage";
 import InformasiPage from "@/pages/website/InformasiPage";
-import GalleryPage from "@/pages/website/GalleryPage";
+import PublicGalleryPage from "@/pages/website/GalleryPage";
 
 // Pages - Ramadan
 import RamadanPage from "@/pages/ramadan/RamadanPage";
