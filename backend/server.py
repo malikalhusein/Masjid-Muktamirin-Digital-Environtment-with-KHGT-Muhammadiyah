@@ -911,6 +911,338 @@ async def get_dashboard_stats(user: dict = Depends(get_current_user)):
         "active_running_texts": running_texts_count,
     }
 
+# ==================== ZIS (Zakat, Infaq, Shodaqoh) ROUTES ====================
+
+@api_router.get("/zis")
+async def get_zis_reports(month: Optional[int] = None, year: Optional[int] = None, type: Optional[str] = None):
+    """Get ZIS reports with optional filters"""
+    query = {}
+    if month:
+        query["month"] = month
+    if year:
+        query["year"] = year
+    if type:
+        query["type"] = type
+    
+    reports = await db.zis_reports.find(query, {"_id": 0}).sort("date", -1).to_list(1000)
+    return reports
+
+@api_router.get("/zis/summary")
+async def get_zis_summary(month: Optional[int] = None, year: Optional[int] = None):
+    """Get ZIS summary (total per type)"""
+    now = datetime.now(timezone.utc)
+    target_month = month or now.month
+    target_year = year or now.year
+    
+    pipeline = [
+        {"$match": {"month": target_month, "year": target_year}},
+        {"$group": {
+            "_id": "$type",
+            "total": {"$sum": "$amount"},
+            "count": {"$sum": 1}
+        }}
+    ]
+    
+    results = await db.zis_reports.aggregate(pipeline).to_list(10)
+    summary = {
+        "month": target_month,
+        "year": target_year,
+        "zakat": {"total": 0, "count": 0},
+        "infaq": {"total": 0, "count": 0},
+        "shodaqoh": {"total": 0, "count": 0}
+    }
+    
+    for r in results:
+        if r["_id"] in summary:
+            summary[r["_id"]] = {"total": r["total"], "count": r["count"]}
+    
+    summary["grand_total"] = summary["zakat"]["total"] + summary["infaq"]["total"] + summary["shodaqoh"]["total"]
+    return summary
+
+@api_router.get("/zis/monthly-chart")
+async def get_zis_monthly_chart(year: Optional[int] = None):
+    """Get ZIS data for chart (last 12 months or specific year)"""
+    target_year = year or datetime.now(timezone.utc).year
+    
+    pipeline = [
+        {"$match": {"year": target_year}},
+        {"$group": {
+            "_id": {"month": "$month", "type": "$type"},
+            "total": {"$sum": "$amount"}
+        }},
+        {"$sort": {"_id.month": 1}}
+    ]
+    
+    results = await db.zis_reports.aggregate(pipeline).to_list(100)
+    
+    # Initialize chart data
+    chart_data = []
+    month_names = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+    
+    for i in range(1, 13):
+        month_data = {"month": month_names[i-1], "zakat": 0, "infaq": 0, "shodaqoh": 0}
+        for r in results:
+            if r["_id"]["month"] == i:
+                month_data[r["_id"]["type"]] = r["total"]
+        chart_data.append(month_data)
+    
+    return chart_data
+
+@api_router.post("/zis")
+async def create_zis_report(data: ZISReportCreate, user: dict = Depends(get_current_user)):
+    """Create new ZIS report"""
+    # Parse date to get month and year
+    date_obj = datetime.strptime(data.date, "%Y-%m-%d")
+    
+    report = ZISReport(
+        type=data.type,
+        amount=data.amount,
+        description=data.description,
+        date=data.date,
+        month=date_obj.month,
+        year=date_obj.year,
+        donor_name=data.donor_name
+    )
+    doc = report.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.zis_reports.insert_one(doc)
+    return report
+
+@api_router.put("/zis/{report_id}")
+async def update_zis_report(report_id: str, data: ZISReportUpdate, user: dict = Depends(get_current_user)):
+    """Update ZIS report"""
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    
+    # Update month/year if date changed
+    if "date" in update_data:
+        date_obj = datetime.strptime(update_data["date"], "%Y-%m-%d")
+        update_data["month"] = date_obj.month
+        update_data["year"] = date_obj.year
+    
+    result = await db.zis_reports.update_one({"id": report_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Report not found")
+    
+    updated = await db.zis_reports.find_one({"id": report_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/zis/{report_id}")
+async def delete_zis_report(report_id: str, user: dict = Depends(get_current_user)):
+    """Delete ZIS report"""
+    result = await db.zis_reports.delete_one({"id": report_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return {"message": "Report deleted"}
+
+# ==================== ANNOUNCEMENT ROUTES ====================
+
+@api_router.get("/announcements")
+async def get_announcements(active_only: bool = False):
+    """Get all announcements"""
+    query = {"is_active": True} if active_only else {}
+    items = await db.announcements.find(query, {"_id": 0}).sort([("priority", -1), ("created_at", -1)]).to_list(100)
+    return items
+
+@api_router.post("/announcements")
+async def create_announcement(data: AnnouncementCreate, user: dict = Depends(get_current_user)):
+    """Create new announcement"""
+    item = Announcement(**data.model_dump())
+    doc = item.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.announcements.insert_one(doc)
+    return item
+
+@api_router.put("/announcements/{item_id}")
+async def update_announcement(item_id: str, data: AnnouncementUpdate, user: dict = Depends(get_current_user)):
+    """Update announcement"""
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    result = await db.announcements.update_one({"id": item_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Announcement not found")
+    updated = await db.announcements.find_one({"id": item_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/announcements/{item_id}")
+async def delete_announcement(item_id: str, user: dict = Depends(get_current_user)):
+    """Delete announcement"""
+    result = await db.announcements.delete_one({"id": item_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Announcement not found")
+    return {"message": "Announcement deleted"}
+
+# ==================== PENGURUS ROUTES ====================
+
+@api_router.get("/pengurus")
+async def get_pengurus(active_only: bool = False):
+    """Get all pengurus"""
+    query = {"is_active": True} if active_only else {}
+    items = await db.pengurus.find(query, {"_id": 0}).sort("order", 1).to_list(100)
+    return items
+
+@api_router.post("/pengurus")
+async def create_pengurus(data: PengurusCreate, user: dict = Depends(get_current_user)):
+    """Create new pengurus"""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can manage pengurus")
+    
+    item = Pengurus(**data.model_dump())
+    doc = item.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.pengurus.insert_one(doc)
+    return item
+
+@api_router.put("/pengurus/{item_id}")
+async def update_pengurus(item_id: str, data: PengurusUpdate, user: dict = Depends(get_current_user)):
+    """Update pengurus"""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can manage pengurus")
+    
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    result = await db.pengurus.update_one({"id": item_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Pengurus not found")
+    updated = await db.pengurus.find_one({"id": item_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/pengurus/{item_id}")
+async def delete_pengurus(item_id: str, user: dict = Depends(get_current_user)):
+    """Delete pengurus"""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can manage pengurus")
+    
+    result = await db.pengurus.delete_one({"id": item_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Pengurus not found")
+    return {"message": "Pengurus deleted"}
+
+# ==================== SPECIAL EVENT ROUTES ====================
+
+@api_router.get("/special-events")
+async def get_special_events(active_only: bool = False, upcoming_only: bool = False):
+    """Get all special events"""
+    query = {}
+    if active_only:
+        query["is_active"] = True
+    if upcoming_only:
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        query["event_date"] = {"$gte": today}
+    
+    items = await db.special_events.find(query, {"_id": 0}).sort("event_date", 1).to_list(100)
+    return items
+
+@api_router.post("/special-events")
+async def create_special_event(data: SpecialEventCreate, user: dict = Depends(get_current_user)):
+    """Create new special event"""
+    item = SpecialEvent(**data.model_dump())
+    doc = item.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.special_events.insert_one(doc)
+    return item
+
+@api_router.put("/special-events/{item_id}")
+async def update_special_event(item_id: str, data: SpecialEventUpdate, user: dict = Depends(get_current_user)):
+    """Update special event"""
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    result = await db.special_events.update_one({"id": item_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Event not found")
+    updated = await db.special_events.find_one({"id": item_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/special-events/{item_id}")
+async def delete_special_event(item_id: str, user: dict = Depends(get_current_user)):
+    """Delete special event"""
+    result = await db.special_events.delete_one({"id": item_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return {"message": "Event deleted"}
+
+# ==================== GALLERY ROUTES ====================
+
+@api_router.get("/gallery")
+async def get_gallery(active_only: bool = False):
+    """Get all gallery items"""
+    query = {"is_active": True} if active_only else {}
+    items = await db.gallery.find(query, {"_id": 0}).sort([("order", 1), ("created_at", -1)]).to_list(100)
+    return items
+
+@api_router.post("/gallery")
+async def create_gallery_item(data: GalleryItemCreate, user: dict = Depends(get_current_user)):
+    """Create new gallery item"""
+    item = GalleryItem(**data.model_dump())
+    doc = item.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.gallery.insert_one(doc)
+    return item
+
+@api_router.put("/gallery/{item_id}")
+async def update_gallery_item(item_id: str, data: GalleryItemUpdate, user: dict = Depends(get_current_user)):
+    """Update gallery item"""
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    result = await db.gallery.update_one({"id": item_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Gallery item not found")
+    updated = await db.gallery.find_one({"id": item_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/gallery/{item_id}")
+async def delete_gallery_item(item_id: str, user: dict = Depends(get_current_user)):
+    """Delete gallery item"""
+    result = await db.gallery.delete_one({"id": item_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Gallery item not found")
+    return {"message": "Gallery item deleted"}
+
+# ==================== ISLAMIC QUOTES ROUTES ====================
+
+@api_router.get("/quotes")
+async def get_quotes(active_only: bool = False):
+    """Get all Islamic quotes"""
+    query = {"is_active": True} if active_only else {}
+    items = await db.quotes.find(query, {"_id": 0}).sort("order", 1).to_list(100)
+    return items
+
+@api_router.get("/quotes/random")
+async def get_random_quote():
+    """Get a random active Islamic quote"""
+    pipeline = [
+        {"$match": {"is_active": True}},
+        {"$sample": {"size": 1}}
+    ]
+    results = await db.quotes.aggregate(pipeline).to_list(1)
+    if results:
+        result = results[0]
+        result.pop("_id", None)
+        return result
+    return None
+
+@api_router.post("/quotes")
+async def create_quote(data: IslamicQuoteCreate, user: dict = Depends(get_current_user)):
+    """Create new Islamic quote"""
+    item = IslamicQuote(**data.model_dump())
+    doc = item.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.quotes.insert_one(doc)
+    return item
+
+@api_router.put("/quotes/{item_id}")
+async def update_quote(item_id: str, data: IslamicQuoteUpdate, user: dict = Depends(get_current_user)):
+    """Update Islamic quote"""
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    result = await db.quotes.update_one({"id": item_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Quote not found")
+    updated = await db.quotes.find_one({"id": item_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/quotes/{item_id}")
+async def delete_quote(item_id: str, user: dict = Depends(get_current_user)):
+    """Delete Islamic quote"""
+    result = await db.quotes.delete_one({"id": item_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Quote not found")
+    return {"message": "Quote deleted"}
+
 # ==================== RAMADAN SCHEDULE ====================
 
 class RamadanDaySchedule(BaseModel):
