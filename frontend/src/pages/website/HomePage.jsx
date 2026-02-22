@@ -5,7 +5,7 @@ import { Clock, MapPin, Calendar, Phone, ChevronRight, Moon, BookOpen, Users, Ar
 import { prayerAPI, mosqueAPI, agendaAPI, zisAPI, quoteAPI, galleryAPI } from '../../lib/api';
 import { formatCountdown, getCurrentAndNextPrayer, PRAYER_NAMES } from '../../lib/utils';
 import { getKHGTHijriDate, isRamadan } from '../../lib/khgtCalendar';
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '../../components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '../../components/ui/sheet';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '../../components/ui/carousel';
 
 // QRIS Image URL
