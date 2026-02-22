@@ -190,6 +190,81 @@ export default function IdentityPage() {
                     </CardContent>
                 </Card>
                 
+                {/* Profile Description */}
+                <Card className="bg-slate-900/80 border-slate-800 lg:col-span-3">
+                    <CardHeader>
+                        <CardTitle className="font-heading text-xl text-white flex items-center gap-2">
+                            <FileText className="w-5 h-5 text-emerald-400" />
+                            Profil & Sejarah Masjid
+                        </CardTitle>
+                        <CardDescription className="text-slate-400">
+                            Teks ini akan ditampilkan di halaman "Tentang Kami" website
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* Profile Image Upload */}
+                            <div className="space-y-4">
+                                <Label className="text-slate-300">Foto Profil Masjid</Label>
+                                <div className="aspect-video rounded-lg overflow-hidden bg-slate-800 border border-slate-700">
+                                    {identity.profile_image_url ? (
+                                        <img 
+                                            src={identity.profile_image_url} 
+                                            alt="Foto Profil Masjid" 
+                                            className="w-full h-full object-cover"
+                                            data-testid="profile-image"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <Image className="w-12 h-12 text-slate-600" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleProfileImageUpload}
+                                        className="hidden"
+                                        id="profile-image-upload"
+                                        data-testid="profile-image-upload-input"
+                                    />
+                                    <Button 
+                                        variant="outline" 
+                                        className="w-full border-slate-700 text-slate-300"
+                                        onClick={() => document.getElementById('profile-image-upload').click()}
+                                        disabled={uploadingProfile}
+                                    >
+                                        {uploadingProfile ? (
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        ) : (
+                                            <Upload className="w-4 h-4 mr-2" />
+                                        )}
+                                        {uploadingProfile ? 'Mengunggah...' : 'Upload Foto Profil'}
+                                    </Button>
+                                </div>
+                            </div>
+                            
+                            {/* Description Textarea */}
+                            <div className="lg:col-span-2 space-y-2">
+                                <Label htmlFor="description" className="text-slate-300">Deskripsi / Sejarah Masjid</Label>
+                                <Textarea
+                                    id="description"
+                                    data-testid="mosque-description-input"
+                                    value={identity.description || ''}
+                                    onChange={(e) => setIdentity(prev => ({ ...prev, description: e.target.value }))}
+                                    placeholder="Tulis deskripsi atau sejarah masjid di sini..."
+                                    className="bg-slate-800 border-slate-700 text-white min-h-[200px] resize-y"
+                                    rows={10}
+                                />
+                                <p className="text-xs text-slate-500">
+                                    Tips: Gunakan baris baru (Enter) untuk membuat paragraf baru
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                
                 {/* Location Settings */}
                 <Card className="bg-slate-900/80 border-slate-800 lg:col-span-3">
                     <CardHeader>
