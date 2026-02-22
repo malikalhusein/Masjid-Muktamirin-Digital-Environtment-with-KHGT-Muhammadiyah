@@ -292,6 +292,116 @@ const AgendaCard = ({ agenda, icon: Icon }) => {
     );
 };
 
+// Gallery Slider Component
+const GallerySlider = ({ galleries }) => {
+    if (!galleries || galleries.length === 0) return null;
+    
+    return (
+        <section className="py-12 bg-white" data-testid="gallery-section">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-800">Galeri Kegiatan</h2>
+                        <p className="text-gray-500 text-sm mt-1">Dokumentasi kegiatan masjid terbaru</p>
+                    </div>
+                    <Link to="/homepage/about" className="text-emerald-600 text-sm flex items-center gap-1 hover:text-emerald-700">
+                        Lihat semua <ChevronRight className="w-4 h-4" />
+                    </Link>
+                </div>
+                
+                <Carousel 
+                    opts={{ align: "start", loop: galleries.length > 3 }}
+                    className="w-full"
+                >
+                    <CarouselContent className="-ml-2 md:-ml-4">
+                        {galleries.map((item, idx) => (
+                            <CarouselItem key={item.id || idx} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
+                                <div className="relative group overflow-hidden rounded-xl aspect-[4/3] bg-gray-100">
+                                    <img 
+                                        src={item.image_url} 
+                                        alt={item.title || `Galeri ${idx + 1}`}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform">
+                                        <h3 className="font-semibold text-sm">{item.title || 'Kegiatan Masjid'}</h3>
+                                        {item.description && (
+                                            <p className="text-xs text-white/80 mt-1 line-clamp-2">{item.description}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                    {galleries.length > 3 && (
+                        <>
+                            <CarouselPrevious className="hidden sm:flex -left-4 bg-white border-gray-200 hover:bg-gray-50" />
+                            <CarouselNext className="hidden sm:flex -right-4 bg-white border-gray-200 hover:bg-gray-50" />
+                        </>
+                    )}
+                </Carousel>
+            </div>
+        </section>
+    );
+};
+
+// Weekly Agenda Compact Component
+const WeeklyAgendaCompact = ({ agendas }) => {
+    // Get agenda for this week
+    const today = new Date();
+    const endOfWeek = new Date(today);
+    endOfWeek.setDate(today.getDate() + 7);
+    
+    const weeklyAgendas = agendas.filter(a => {
+        const eventDate = new Date(a.event_date);
+        return eventDate >= today && eventDate <= endOfWeek;
+    }).slice(0, 5);
+    
+    const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    
+    if (weeklyAgendas.length === 0) return null;
+    
+    return (
+        <div className="bg-white rounded-2xl p-6 shadow-sm" data-testid="weekly-agenda">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-blue-700" />
+                    </div>
+                    <div>
+                        <h2 className="font-bold text-gray-800">Agenda Minggu Ini</h2>
+                        <p className="text-sm text-gray-500">7 hari ke depan</p>
+                    </div>
+                </div>
+                <Link to="/homepage/agenda" className="text-emerald-600 text-sm hover:text-emerald-700">
+                    Kalender
+                </Link>
+            </div>
+            
+            <div className="space-y-2">
+                {weeklyAgendas.map((agenda, idx) => {
+                    const eventDate = new Date(agenda.event_date);
+                    return (
+                        <div 
+                            key={agenda.id || idx} 
+                            className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                            <div className="w-12 text-center flex-shrink-0">
+                                <p className="text-xs text-gray-500 uppercase">{dayNames[eventDate.getDay()]}</p>
+                                <p className="text-lg font-bold text-emerald-700">{eventDate.getDate()}</p>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="font-medium text-gray-800 truncate">{agenda.title}</p>
+                                <p className="text-xs text-gray-500">{agenda.event_time}</p>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
 export default function HomePage() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [prayerTimes, setPrayerTimes] = useState(null);
