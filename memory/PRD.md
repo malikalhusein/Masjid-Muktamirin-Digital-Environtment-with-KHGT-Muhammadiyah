@@ -15,149 +15,145 @@ Bangun sebuah Web App Jam Sholat Digital berbasis KHGT Muhammadiyah, siap di-dep
 3. **Muadzin** - Menggunakan countdown iqomah setelah adzan
 4. **Pengunjung Website** - Melihat jadwal sholat, agenda, dan info masjid online
 
-## Core Requirements (Static)
-- Display jadwal sholat 5 waktu dari KHGT Muhammadiyah
-- Countdown waktu adzan dan iqamah
-- Identitas masjid (nama, logo, alamat)
-- Kalender Hijriyah dan Masehi
-- Konten slideshow (poster, pengumuman)
-- Agenda masjid
-- Running text
-- Panel dashboard admin dengan JWT auth
-- Kalibrasi manual untuk waktu sholat
-- Notifikasi suara/dering
-- Website publik dengan halaman Home, Agenda, About
-- Channel Ramadan dengan jadwal imam dan penceramah
-- **Docker deployment files untuk self-hosted**
-
 ## Tech Stack
 - Backend: FastAPI, MongoDB, Motor (async)
-- Frontend: React 19, Tailwind CSS, Framer Motion, Shadcn/UI
-- Auth: JWT (PyJWT, bcrypt)
-- Data KHGT: Hardcoded dari hisabmu.com
+- Frontend: React 19, Tailwind CSS, Framer Motion, Shadcn/UI, Recharts
+- Auth: JWT (PyJWT, bcrypt), Role-based (admin/editor)
 - Deployment: Docker, Docker Compose, Nginx
-
-## Default Location
-Kecamatan Galur, Kulon Progo, Yogyakarta
-- Latitude: -7.9404
-- Longitude: 110.2357
-- Timezone: UTC+7 (WIB)
-
-## URLs (Development)
-- TV Display: /
-- Homepage: /homepage
-- Agenda: /homepage/agenda
-- About Us: /homepage/about
-- Ramadan Channel: /ramadan
-- Admin Login: /connect
-- Dashboard: /connect/dashboard
 
 ---
 
 ## What's Been Implemented ✅
 
-### Update: 22 Desember 2025 - Docker Deployment & Website AboutPage
+### Update: 22 Desember 2025 - Fitur Lengkap Website & Dashboard
 
-#### New Features
-1. **Docker Deployment Files:**
-   - `/app/backend/Dockerfile` - Python FastAPI container
-   - `/app/frontend/Dockerfile` - Multi-stage build (Node -> Nginx)
-   - `/app/frontend/nginx.conf` - Nginx config untuk React SPA
-   - `/app/docker-compose.yml` - Orchestration (MongoDB, Backend, Frontend)
-   - `/app/.env.example`, `/app/backend/.env.example`, `/app/frontend/.env.example` - Environment templates
-   - `/app/DEPLOYMENT.md` - Dokumentasi deployment lengkap
+#### 1. Backend API (Semua CRUD + Auth)
+- **ZIS (Zakat, Infaq, Shodaqoh)**
+  - `GET, POST, PUT, DELETE /api/zis`
+  - `GET /api/zis/summary` - Ringkasan bulanan
+  - `GET /api/zis/monthly-chart` - Data grafik tahunan
+- **Announcements/Pengumuman**
+  - `GET, POST, PUT, DELETE /api/announcements`
+- **Pengurus (Struktur Takmir)**
+  - `GET, POST, PUT, DELETE /api/pengurus`
+  - Role-based: hanya admin yang bisa edit
+- **Special Events (Event Khusus)**
+  - `GET, POST, PUT, DELETE /api/special-events`
+- **Gallery**
+  - `GET, POST, PUT, DELETE /api/gallery`
+- **Islamic Quotes**
+  - `GET, POST, PUT, DELETE /api/quotes`
+  - `GET /api/quotes/random` - Random quote untuk homepage
 
-2. **Health Check Endpoint:**
-   - `GET /api/health` - Returns database connection status
-   - Digunakan oleh Docker healthcheck
+#### 2. Dashboard Admin (Semua Menu Baru)
+- **Laporan ZIS** - Tabel + Grafik Recharts, Filter bulan/tahun
+- **Pengumuman** - CRUD dengan kategori dan prioritas
+- **Struktur Pengurus** - CRUD dengan foto, jabatan, periode
+- **Event Khusus** - CRUD untuk Nuzulul Quran, Syawalan, dll
+- **Galeri Foto** - CRUD dengan upload gambar
+- **Quote Islami** - CRUD dengan teks Arab dan terjemahan
+- **Role-based Access** - Admin: full access, Editor: konten saja
 
-3. **AboutPage Complete (Tentang Kami):**
-   - Profil Masjid dengan statistik
-   - Daftar Pengumuman (mock data, siap API)
-   - Form Kontak (nama, email, HP, pesan)
-   - Info Kontak (telepon, email, alamat)
-   - Modul Donasi QRIS (placeholder + rekening bank)
-   - Struktur Pengurus Takmir
-   - Navigation & Footer konsisten dengan halaman lain
+#### 3. Website Publik
+- **Homepage**
+  - Card ringkasan ZIS bulan ini
+  - Quote Islami random
+  - Widget Donasi Cepat dengan QRIS
+  - Countdown sholat berikutnya
+- **AboutPage (Tentang Kami)**
+  - QRIS real (gambar dari user)
+  - Form kontak → **WhatsApp redirect** (628121554551)
+  - Daftar pengumuman dari API
+  - Struktur pengurus dari API
+  - Info rekening BSI
 
-4. **Website Pages Complete:**
-   - HomePage: Hero, jadwal sholat bar, agenda terdekat
-   - AgendaPage: Kalender interaktif, jadwal sholat lengkap
-   - RamadanPage: Program Ramadan dengan jadwal imam
-   - AboutPage: Info masjid, donasi, kontak
+#### 4. Docker Deployment
+- `backend/Dockerfile` - Python 3.11 + FastAPI
+- `frontend/Dockerfile` - Multi-stage (Node → Nginx)
+- `frontend/nginx.conf` - React SPA config
+- `docker-compose.yml` - MongoDB + Backend + Frontend
+- `.env.example` files untuk semua services
+- `DEPLOYMENT.md` - Dokumentasi lengkap
+- `GET /api/health` - Health check endpoint
 
-#### Files Created/Modified
-- `/app/backend/Dockerfile` - NEW
-- `/app/backend/server.py` - Added health endpoint
-- `/app/frontend/Dockerfile` - NEW
-- `/app/frontend/nginx.conf` - NEW
-- `/app/docker-compose.yml` - NEW
-- `/app/.env.example` - NEW
-- `/app/backend/.env.example` - NEW
-- `/app/frontend/.env.example` - NEW
-- `/app/DEPLOYMENT.md` - NEW
-- `/app/frontend/src/pages/website/AboutPage.jsx` - Redesigned
+---
 
-### Previous Updates
-- Dashboard refactor: Merged menus for clarity
-- TV Display: Cleanup, removed settings icon
-- Countdown system with adzan/iqomah modes
-- Sound notifications with Web Audio API
-- Background image management
-- Ramadan module with backend API
+## Database Models
+
+```
+users: {username, password_hash, name, role}
+zis_reports: {type, amount, date, month, year, donor_name, description}
+announcements: {title, content, category, is_active, priority}
+pengurus: {name, position, period, photo_url, phone, order}
+special_events: {title, event_date, event_time, location, category, imam, speaker}
+gallery: {title, image_url, description, event_date, order}
+quotes: {arabic_text, translation, source, order}
+```
+
+---
+
+## API Endpoints
+
+### Auth
+- `POST /api/auth/register` (with role)
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+
+### Mosque
+- `GET, PUT /api/mosque/identity`
+- `GET, PUT /api/settings/*`
+
+### Content
+- `GET, POST, PUT, DELETE /api/zis`
+- `GET /api/zis/summary`, `/api/zis/monthly-chart`
+- `GET, POST, PUT, DELETE /api/announcements`
+- `GET, POST, PUT, DELETE /api/pengurus`
+- `GET, POST, PUT, DELETE /api/special-events`
+- `GET, POST, PUT, DELETE /api/gallery`
+- `GET, POST, PUT, DELETE /api/quotes`
+- `GET /api/quotes/random`
+- `GET, POST, PUT, DELETE /api/ramadan-schedule`
 
 ---
 
 ## Prioritized Backlog
 
-### P0 - Critical (Completed ✅)
-- [x] Implementasi countdown waktu adzan/iqomah
-- [x] Kalibrasi manual per waktu sholat
-- [x] Notifikasi suara untuk countdown
-- [x] Dashboard refactor
+### P0 - Critical ✅ COMPLETED
+- [x] ZIS Report Channel dengan grafik
+- [x] Dashboard admin untuk semua fitur
+- [x] Homepage dengan ZIS card dan QRIS
+- [x] AboutPage dengan WhatsApp redirect
 - [x] Docker deployment files
-- [x] Website HomePage, AgendaPage, AboutPage
+- [x] Role-based access control
 
-### P1 - High Priority
-- [ ] Implement backend API for announcements/pengumuman
-- [ ] Implement backend API for contact form submissions
-- [ ] FullCalendar integration di AgendaPage
-- [ ] Upload QRIS image di dashboard
-- [ ] Expand KHGT data untuk bulan lain
+### P1 - High Priority (Next)
+- [ ] Import data Ramadan dari PDF (30 hari jadwal)
+- [ ] FullCalendar di AgendaPage
+- [ ] Tab Informasi/Laporan ZIS di halaman khusus
+- [ ] Upload QRIS dari dashboard admin
 
 ### P2 - Medium Priority
-- [ ] Backend untuk articles/artikel kegiatan
-- [ ] Role-based access control (admin/editor)
-- [ ] Google Calendar sync
-- [ ] Subdomain routing configuration
+- [ ] Artikel kegiatan masjid
+- [ ] Subdomain routing untuk production
+- [ ] Gallery slider di homepage
 
-### P3 - Low Priority
+### P3 - Future
 - [ ] Live KHGT API integration
-- [ ] Video content support
-- [ ] Multi-language support
-- [ ] Offline mode/PWA
+- [ ] Google Calendar sync
+- [ ] Backup otomatis
 
 ---
 
 ## Test Credentials
-- Username: `admin`
-- Password: `admin123`
+- **Admin:** username=`admin`, password=`admin123` (role: admin)
+- **Editor:** Can be created via register (role: editor)
 
-## API Endpoints
-- `GET /api/health` - Health check
-- `POST /api/auth/register, login`
-- `GET /api/auth/me`
-- `GET, PUT /api/mosque/identity`
-- `GET, PUT /api/settings/prayer`
-- `GET, PUT /api/settings/layout`
-- `GET /api/prayer-times`
-- `GET /api/prayer-times/monthly`
-- `GET, POST, PUT, DELETE /api/content`
-- `GET, POST, PUT, DELETE /api/agenda`
-- `GET, POST, PUT, DELETE /api/running-text`
-- `GET, POST, DELETE /api/ramadan-schedule/{date}`
-- `GET /api/stats`
+## QRIS Info
+- Image URL: `https://customer-assets.emergentagent.com/.../QRIS%20Modif%4010x-100%20Large.jpeg`
+- Bank: BSI (Bank Syariah Indonesia)
+- Rekening: 7148254552
+- a.n. Masjid Muktamirin
 
-## Mocked Features
-- **Pengumuman**: Mock data di AboutPage.jsx (backend API belum ada)
-- **Contact Form**: Simulated submission (backend API belum ada)
+## WhatsApp Contact
+- Number: 628121554551
+- Format: `https://api.whatsapp.com/send?phone=628121554551&text=...`
