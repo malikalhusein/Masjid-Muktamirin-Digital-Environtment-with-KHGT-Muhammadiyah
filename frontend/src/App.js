@@ -86,10 +86,12 @@ function App() {
                             <Route path="prayer-settings" element={<PrayerSettingsPage />} />
                             <Route path="zis" element={<ZISPage />} />
                             <Route path="announcements" element={<AnnouncementsPage />} />
+                            <Route path="articles" element={<ArticlesPage />} />
                             <Route path="pengurus" element={<PengurusPage />} />
                             <Route path="special-events" element={<SpecialEventsPage />} />
                             <Route path="gallery" element={<GalleryPage />} />
                             <Route path="quotes" element={<QuotesPage />} />
+                            <Route path="qris" element={<QRISSettingsPage />} />
                             <Route path="ramadan" element={<RamadanAdminPage />} />
                         </Route>
                         
