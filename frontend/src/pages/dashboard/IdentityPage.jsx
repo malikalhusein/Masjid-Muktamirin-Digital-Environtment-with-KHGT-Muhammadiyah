@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, MapPin, Save, Upload, Loader2 } from 'lucide-react';
+import { Building2, MapPin, Save, Upload, Loader2, FileText, Image } from 'lucide-react';
 import { mosqueAPI, uploadAPI } from '../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { Textarea } from '../../components/ui/textarea';
 import { toast } from 'sonner';
 
 export default function IdentityPage() {
@@ -13,6 +14,8 @@ export default function IdentityPage() {
         name: '',
         address: '',
         logo_url: '',
+        description: '',
+        profile_image_url: '',
         latitude: -7.9404,
         longitude: 110.2357,
         elevation: 50,
@@ -21,6 +24,7 @@ export default function IdentityPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [uploadingProfile, setUploadingProfile] = useState(false);
     
     useEffect(() => {
         fetchIdentity();
