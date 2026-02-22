@@ -163,4 +163,20 @@ export const ramadanAPI = {
     deleteSchedule: (date) => api.delete(`/ramadan/schedule/${date}`),
 };
 
+// Article API
+export const articleAPI = {
+    getAll: (publishedOnly = false, category = null) => 
+        api.get('/articles', { params: { published_only: publishedOnly, category } }),
+    getOne: (id) => api.get(`/articles/${id}`),
+    create: (data) => api.post('/articles', data),
+    update: (id, data) => api.put(`/articles/${id}`, data),
+    delete: (id) => api.delete(`/articles/${id}`),
+};
+
+// QRIS Settings API
+export const qrisAPI = {
+    getSettings: () => api.get('/qris-settings'),
+    updateSettings: (data) => api.put('/qris-settings', data),
+};
+
 export default api;
