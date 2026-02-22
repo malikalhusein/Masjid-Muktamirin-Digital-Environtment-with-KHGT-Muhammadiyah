@@ -432,14 +432,14 @@ async def register(user: UserCreate):
         raise HTTPException(status_code=400, detail="Username already exists")
     
     hashed = hash_password(user.password)
-    user_obj = User(username=user.username, name=user.name)
+    user_obj = User(username=user.username, name=user.name, role=user.role)
     doc = user_obj.model_dump()
     doc["password"] = hashed
     doc["created_at"] = doc["created_at"].isoformat()
     
     await db.users.insert_one(doc)
     token = create_token(user_obj.id, user_obj.username)
-    return {"token": token, "user": {"id": user_obj.id, "username": user_obj.username, "name": user_obj.name}}
+    return {"token": token, "user": {"id": user_obj.id, "username": user_obj.username, "name": user_obj.name, "role": user_obj.role}}
 
 @api_router.post("/auth/login")
 async def login(user: UserLogin):
