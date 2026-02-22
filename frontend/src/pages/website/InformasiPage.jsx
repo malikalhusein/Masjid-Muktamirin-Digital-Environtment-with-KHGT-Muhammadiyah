@@ -73,7 +73,7 @@ export default function InformasiPage() {
 
     return (
         <div className="min-h-screen bg-stone-100" data-testid="informasi-page">
-            <Navigation activePage="informasi" />
+            <WebsiteNavigation activePage="informasi" mosqueIdentity={mosqueIdentity} />
             
             {/* Header */}
             <div className="bg-emerald-900 text-white py-8">
