@@ -4,6 +4,7 @@ import { Calendar, Clock, MapPin, Moon, BookOpen, Users, Star, ChevronLeft, Chev
 import { prayerAPI, mosqueAPI, agendaAPI } from '../../lib/api';
 import { getCurrentAndNextPrayer, PRAYER_NAMES } from '../../lib/utils';
 import { isRamadan } from '../../lib/khgtCalendar';
+import { WebsiteNavigation, WebsiteFooter } from '../../components/WebsiteNavigation';
 
 // Navigation component (same as HomePage)
 const Navigation = ({ activePage = 'agenda' }) => (
