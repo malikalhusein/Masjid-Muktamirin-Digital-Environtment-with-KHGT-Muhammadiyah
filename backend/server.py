@@ -394,6 +394,47 @@ class IslamicQuoteUpdate(BaseModel):
     is_active: Optional[bool] = None
     order: Optional[int] = None
 
+# ==================== ARTICLE MODELS ====================
+
+class Article(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    content: str
+    excerpt: Optional[str] = None
+    category: str = "kegiatan"  # kegiatan, pembangunan, kajian, pengumuman
+    image_url: Optional[str] = None
+    author: Optional[str] = None
+    is_published: bool = True
+    views: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ArticleCreate(BaseModel):
+    title: str
+    content: str
+    excerpt: Optional[str] = None
+    category: str = "kegiatan"
+    image_url: Optional[str] = None
+    author: Optional[str] = None
+    is_published: bool = True
+
+class ArticleUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    excerpt: Optional[str] = None
+    category: Optional[str] = None
+    image_url: Optional[str] = None
+    author: Optional[str] = None
+    is_published: Optional[bool] = None
+
+# ==================== QRIS SETTINGS ====================
+
+class QRISSettings(BaseModel):
+    qris_image_url: Optional[str] = None
+    bank_name: str = "BSI (Bank Syariah Indonesia)"
+    account_number: str = "7148254552"
+    account_name: str = "Masjid Muktamirin"
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
