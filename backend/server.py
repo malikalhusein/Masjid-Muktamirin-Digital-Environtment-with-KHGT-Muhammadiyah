@@ -1284,6 +1284,81 @@ async def delete_quote(item_id: str, user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Quote not found")
     return {"message": "Quote deleted"}
 
+# ==================== ARTICLE ROUTES ====================
+
+@api_router.get("/articles")
+async def get_articles(published_only: bool = False, category: Optional[str] = None):
+    """Get all articles"""
+    query = {}
+    if published_only:
+        query["is_published"] = True
+    if category:
+        query["category"] = category
+    
+    items = await db.articles.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return items
+
+@api_router.get("/articles/{article_id}")
+async def get_article(article_id: str):
+    """Get single article by ID"""
+    article = await db.articles.find_one({"id": article_id}, {"_id": 0})
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    # Increment views
+    await db.articles.update_one({"id": article_id}, {"$inc": {"views": 1}})
+    article["views"] = article.get("views", 0) + 1
+    return article
+
+@api_router.post("/articles")
+async def create_article(data: ArticleCreate, user: dict = Depends(get_current_user)):
+    """Create new article"""
+    item = Article(**data.model_dump())
+    doc = item.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    # Auto-generate excerpt if not provided
+    if not doc["excerpt"] and doc["content"]:
+        doc["excerpt"] = doc["content"][:150] + "..." if len(doc["content"]) > 150 else doc["content"]
+    await db.articles.insert_one(doc)
+    return item
+
+@api_router.put("/articles/{article_id}")
+async def update_article(article_id: str, data: ArticleUpdate, user: dict = Depends(get_current_user)):
+    """Update article"""
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    result = await db.articles.update_one({"id": article_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Article not found")
+    updated = await db.articles.find_one({"id": article_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/articles/{article_id}")
+async def delete_article(article_id: str, user: dict = Depends(get_current_user)):
+    """Delete article"""
+    result = await db.articles.delete_one({"id": article_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return {"message": "Article deleted"}
+
+# ==================== QRIS SETTINGS ROUTES ====================
+
+@api_router.get("/qris-settings")
+async def get_qris_settings():
+    """Get QRIS settings"""
+    settings = await db.qris_settings.find_one({}, {"_id": 0})
+    if not settings:
+        # Return default settings
+        return QRISSettings().model_dump()
+    return settings
+
+@api_router.put("/qris-settings")
+async def update_qris_settings(data: QRISSettings, user: dict = Depends(get_current_user)):
+    """Update QRIS settings"""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can update QRIS settings")
+    
+    await db.qris_settings.update_one({}, {"$set": data.model_dump()}, upsert=True)
+    return data
+
 # ==================== RAMADAN SCHEDULE ====================
 
 class RamadanDaySchedule(BaseModel):
