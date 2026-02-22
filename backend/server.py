@@ -727,6 +727,71 @@ async def get_dashboard_stats(user: dict = Depends(get_current_user)):
         "active_running_texts": running_texts_count,
     }
 
+# ==================== RAMADAN SCHEDULE ====================
+
+class RamadanDaySchedule(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    date: str  # YYYY-MM-DD
+    imam_subuh: Optional[str] = None
+    penceramah_subuh: Optional[str] = None
+    penceramah_berbuka: Optional[str] = None
+    imam_tarawih: Optional[str] = None
+    penyedia_takjil: Optional[str] = None
+    penyedia_jaburan: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class RamadanScheduleCreate(BaseModel):
+    date: str
+    imam_subuh: Optional[str] = None
+    penceramah_subuh: Optional[str] = None
+    penceramah_berbuka: Optional[str] = None
+    imam_tarawih: Optional[str] = None
+    penyedia_takjil: Optional[str] = None
+    penyedia_jaburan: Optional[str] = None
+
+@api_router.get("/ramadan/schedule", response_model=List[RamadanDaySchedule])
+async def get_ramadan_schedule():
+    """Get all Ramadan schedule data"""
+    schedules = await db.ramadan_schedules.find({}, {"_id": 0}).sort("date", 1).to_list(100)
+    return [RamadanDaySchedule(**s) for s in schedules]
+
+@api_router.get("/ramadan/today")
+async def get_ramadan_today():
+    """Get today's Ramadan schedule"""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    schedule = await db.ramadan_schedules.find_one({"date": today}, {"_id": 0})
+    if not schedule:
+        return None
+    return RamadanDaySchedule(**schedule)
+
+@api_router.post("/ramadan/schedule", response_model=RamadanDaySchedule)
+async def save_ramadan_schedule(data: RamadanScheduleCreate, user: dict = Depends(get_current_user)):
+    """Save or update Ramadan schedule for a specific date"""
+    existing = await db.ramadan_schedules.find_one({"date": data.date})
+    
+    if existing:
+        # Update existing
+        update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+        await db.ramadan_schedules.update_one({"date": data.date}, {"$set": update_data})
+        updated = await db.ramadan_schedules.find_one({"date": data.date}, {"_id": 0})
+        return RamadanDaySchedule(**updated)
+    else:
+        # Create new
+        schedule_obj = RamadanDaySchedule(**data.model_dump())
+        doc = schedule_obj.model_dump()
+        doc["created_at"] = doc["created_at"].isoformat()
+        await db.ramadan_schedules.insert_one(doc)
+        return schedule_obj
+
+@api_router.delete("/ramadan/schedule/{date}")
+async def delete_ramadan_schedule(date: str, user: dict = Depends(get_current_user)):
+    """Delete Ramadan schedule for a specific date"""
+    result = await db.ramadan_schedules.delete_one({"date": date})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    return {"message": "Schedule deleted"}
+
 # ==================== ROOT ====================
 
 @api_router.get("/")
