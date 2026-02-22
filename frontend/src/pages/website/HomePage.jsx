@@ -547,6 +547,9 @@ export default function HomePage() {
                         
                         {/* Right Column */}
                         <div className="space-y-6">
+                            {/* Weekly Agenda Compact */}
+                            {allAgendas.length > 0 && <WeeklyAgendaCompact agendas={allAgendas} />}
+                            
                             {/* Quote Islami */}
                             {randomQuote && (
                                 <div className="bg-gradient-to-br from-emerald-800 to-emerald-900 rounded-2xl p-6 text-white">
