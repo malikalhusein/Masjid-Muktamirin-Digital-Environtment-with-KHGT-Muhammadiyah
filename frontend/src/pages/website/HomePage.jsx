@@ -638,6 +638,9 @@ export default function HomePage() {
                 </div>
             </section>
             
+            {/* Gallery Slider Section */}
+            <GallerySlider galleries={galleries} />
+            
             <Footer mosqueIdentity={mosqueIdentity} />
         </div>
     );
