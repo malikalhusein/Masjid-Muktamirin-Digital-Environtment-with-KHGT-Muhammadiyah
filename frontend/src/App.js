@@ -44,6 +44,7 @@ import HomePage from "@/pages/website/HomePage";
 import AgendaPage from "@/pages/website/AgendaPage";
 import AboutPage from "@/pages/website/AboutPage";
 import InformasiPage from "@/pages/website/InformasiPage";
+import GalleryPage from "@/pages/website/GalleryPage";
 
 // Pages - Ramadan
 import RamadanPage from "@/pages/ramadan/RamadanPage";
@@ -63,6 +64,7 @@ function App() {
                         <Route path="/homepage/agenda" element={<AgendaPage />} />
                         <Route path="/homepage/about" element={<AboutPage />} />
                         <Route path="/homepage/informasi" element={<InformasiPage />} />
+                        <Route path="/homepage/gallery" element={<GalleryPage />} />
                         
                         {/* Ramadan Channel (ramadan subdomain) */}
                         <Route path="/ramadan" element={<RamadanPage />} />
