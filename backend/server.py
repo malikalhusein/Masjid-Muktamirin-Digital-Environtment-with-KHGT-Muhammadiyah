@@ -212,6 +212,188 @@ class RunningTextUpdate(BaseModel):
     is_active: Optional[bool] = None
     order: Optional[int] = None
 
+# ==================== ZIS (Zakat, Infaq, Shodaqoh) MODELS ====================
+
+class ZISReport(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    type: str  # zakat, infaq, shodaqoh
+    amount: float
+    description: Optional[str] = None
+    date: str  # YYYY-MM-DD
+    month: int  # 1-12
+    year: int
+    donor_name: Optional[str] = None  # Optional, bisa anonim
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ZISReportCreate(BaseModel):
+    type: str
+    amount: float
+    description: Optional[str] = None
+    date: str
+    donor_name: Optional[str] = None
+
+class ZISReportUpdate(BaseModel):
+    type: Optional[str] = None
+    amount: Optional[float] = None
+    description: Optional[str] = None
+    date: Optional[str] = None
+    donor_name: Optional[str] = None
+
+# ==================== ANNOUNCEMENT MODELS ====================
+
+class Announcement(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    content: str
+    category: str = "umum"  # umum, penting, kegiatan
+    is_active: bool = True
+    priority: int = 0  # Higher = more important
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class AnnouncementCreate(BaseModel):
+    title: str
+    content: str
+    category: str = "umum"
+    is_active: bool = True
+    priority: int = 0
+
+class AnnouncementUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    category: Optional[str] = None
+    is_active: Optional[bool] = None
+    priority: Optional[int] = None
+
+# ==================== PENGURUS (Committee) MODELS ====================
+
+class Pengurus(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    position: str  # Ketua, Wakil Ketua, Sekretaris, Bendahara, etc.
+    period: str  # e.g., "2024-2027"
+    photo_url: Optional[str] = None
+    phone: Optional[str] = None
+    order: int = 0
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PengurusCreate(BaseModel):
+    name: str
+    position: str
+    period: str
+    photo_url: Optional[str] = None
+    phone: Optional[str] = None
+    order: int = 0
+    is_active: bool = True
+
+class PengurusUpdate(BaseModel):
+    name: Optional[str] = None
+    position: Optional[str] = None
+    period: Optional[str] = None
+    photo_url: Optional[str] = None
+    phone: Optional[str] = None
+    order: Optional[int] = None
+    is_active: Optional[bool] = None
+
+# ==================== SPECIAL EVENT MODELS ====================
+
+class SpecialEvent(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: Optional[str] = None
+    event_date: str  # YYYY-MM-DD
+    event_time: Optional[str] = None  # HH:MM
+    location: str = "Masjid Muktamirin"
+    category: str = "kegiatan"  # nuzulul_quran, khatmil_quran, syawalan, isra_miraj, etc.
+    imam: Optional[str] = None
+    speaker: Optional[str] = None
+    image_url: Optional[str] = None
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class SpecialEventCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    event_date: str
+    event_time: Optional[str] = None
+    location: str = "Masjid Muktamirin"
+    category: str = "kegiatan"
+    imam: Optional[str] = None
+    speaker: Optional[str] = None
+    image_url: Optional[str] = None
+    is_active: bool = True
+
+class SpecialEventUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    event_date: Optional[str] = None
+    event_time: Optional[str] = None
+    location: Optional[str] = None
+    category: Optional[str] = None
+    imam: Optional[str] = None
+    speaker: Optional[str] = None
+    image_url: Optional[str] = None
+    is_active: Optional[bool] = None
+
+# ==================== GALLERY MODELS ====================
+
+class GalleryItem(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    image_url: str
+    description: Optional[str] = None
+    event_date: Optional[str] = None
+    order: int = 0
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class GalleryItemCreate(BaseModel):
+    title: str
+    image_url: str
+    description: Optional[str] = None
+    event_date: Optional[str] = None
+    order: int = 0
+    is_active: bool = True
+
+class GalleryItemUpdate(BaseModel):
+    title: Optional[str] = None
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+    event_date: Optional[str] = None
+    order: Optional[int] = None
+    is_active: Optional[bool] = None
+
+# ==================== ISLAMIC QUOTE MODELS ====================
+
+class IslamicQuote(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    arabic_text: Optional[str] = None
+    translation: str
+    source: str  # e.g., "HR. Bukhari", "QS. Al-Baqarah: 183"
+    is_active: bool = True
+    order: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class IslamicQuoteCreate(BaseModel):
+    arabic_text: Optional[str] = None
+    translation: str
+    source: str
+    is_active: bool = True
+    order: int = 0
+
+class IslamicQuoteUpdate(BaseModel):
+    arabic_text: Optional[str] = None
+    translation: Optional[str] = None
+    source: Optional[str] = None
+    is_active: Optional[bool] = None
+    order: Optional[int] = None
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
