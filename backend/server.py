@@ -798,6 +798,26 @@ async def delete_ramadan_schedule(date: str, user: dict = Depends(get_current_us
 async def root():
     return {"message": "Jam Sholat Digital KHGT API", "version": "1.0.0"}
 
+# ==================== HEALTH CHECK ====================
+
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint for Docker/Kubernetes"""
+    try:
+        # Check MongoDB connection
+        await client.admin.command('ping')
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "service": "Jam Sholat Digital KHGT"
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e)
+        }
+
 # Include router and middleware
 app.include_router(api_router)
 
