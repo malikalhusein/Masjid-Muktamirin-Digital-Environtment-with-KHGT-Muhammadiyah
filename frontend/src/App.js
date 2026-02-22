@@ -64,7 +64,7 @@ function App() {
                         <Route path="/homepage/agenda" element={<AgendaPage />} />
                         <Route path="/homepage/about" element={<AboutPage />} />
                         <Route path="/homepage/informasi" element={<InformasiPage />} />
-                        <Route path="/homepage/gallery" element={<GalleryPage />} />
+                        <Route path="/homepage/gallery" element={<PublicGalleryPage />} />
                         
                         {/* Ramadan Channel (ramadan subdomain) */}
                         <Route path="/ramadan" element={<RamadanPage />} />
@@ -91,7 +91,7 @@ function App() {
                             <Route path="articles" element={<ArticlesPage />} />
                             <Route path="pengurus" element={<PengurusPage />} />
                             <Route path="special-events" element={<SpecialEventsPage />} />
-                            <Route path="gallery" element={<GalleryPage />} />
+                            <Route path="gallery" element={<AdminGalleryPage />} />
                             <Route path="quotes" element={<QuotesPage />} />
                             <Route path="qris" element={<QRISSettingsPage />} />
                             <Route path="ramadan" element={<RamadanAdminPage />} />
