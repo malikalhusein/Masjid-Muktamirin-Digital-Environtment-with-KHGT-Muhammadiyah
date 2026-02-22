@@ -216,18 +216,24 @@ export default function HomePage() {
     const [prayerTimes, setPrayerTimes] = useState(null);
     const [mosqueIdentity, setMosqueIdentity] = useState(null);
     const [agendas, setAgendas] = useState([]);
+    const [zisSummary, setZisSummary] = useState(null);
+    const [randomQuote, setRandomQuote] = useState(null);
     const [loading, setLoading] = useState(true);
     
     const fetchData = useCallback(async () => {
         try {
-            const [prayerRes, mosqueRes, agendaRes] = await Promise.all([
+            const [prayerRes, mosqueRes, agendaRes, zisRes, quoteRes] = await Promise.all([
                 prayerAPI.getTimes(),
                 mosqueAPI.getIdentity(),
                 agendaAPI.getAll(true, true),
+                zisAPI.getSummary().catch(() => ({ data: null })),
+                quoteAPI.getRandom().catch(() => ({ data: null })),
             ]);
             setPrayerTimes(prayerRes.data);
             setMosqueIdentity(mosqueRes.data);
             setAgendas(agendaRes.data.slice(0, 4));
+            setZisSummary(zisRes.data);
+            setRandomQuote(quoteRes.data);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
