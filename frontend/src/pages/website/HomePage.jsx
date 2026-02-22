@@ -77,6 +77,7 @@ const Navigation = ({ activePage = 'home', mosqueIdentity }) => {
                         </SheetTrigger>
                         <SheetContent side="right" className="w-72 bg-white">
                             <SheetTitle className="sr-only">Menu Navigasi</SheetTitle>
+                            <SheetDescription className="sr-only">Menu navigasi website Masjid Muktamirin</SheetDescription>
                             <div className="flex flex-col h-full">
                                 {/* Mobile Header */}
                                 <div className="flex items-center gap-3 pb-6 border-b border-gray-100">
