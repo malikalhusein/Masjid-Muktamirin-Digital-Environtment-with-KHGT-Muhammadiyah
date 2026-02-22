@@ -175,7 +175,7 @@ const Footer = ({ mosqueIdentity }) => (
                     </p>
                     <div className="bg-emerald-900/50 rounded-lg p-4 border border-emerald-800">
                         <p className="font-medium text-sm">BSI (Bank Syariah Indonesia)</p>
-                        <p className="text-lg font-mono text-emerald-300 my-1">XXX-XXXX-XXX</p>
+                        <p className="text-lg font-mono text-emerald-300 my-1">7148254552</p>
                         <p className="text-xs text-emerald-400">a.n. Masjid Muktamirin</p>
                     </div>
                 </div>
