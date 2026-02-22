@@ -62,6 +62,7 @@ function App() {
                         <Route path="/homepage" element={<HomePage />} />
                         <Route path="/homepage/agenda" element={<AgendaPage />} />
                         <Route path="/homepage/about" element={<AboutPage />} />
+                        <Route path="/homepage/informasi" element={<InformasiPage />} />
                         
                         {/* Ramadan Channel (ramadan subdomain) */}
                         <Route path="/ramadan" element={<RamadanPage />} />
