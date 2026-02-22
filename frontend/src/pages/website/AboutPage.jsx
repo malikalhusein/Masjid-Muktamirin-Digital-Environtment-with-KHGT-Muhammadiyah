@@ -388,8 +388,8 @@ const ContactSection = () => (
     </div>
 );
 
-// Pengurus Section
-const PengurusSection = () => (
+// Pengurus Section - Dynamic
+const PengurusSection = ({ pengurusList }) => (
     <div className="bg-white rounded-2xl shadow-sm p-6" data-testid="pengurus-section">
         <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
@@ -402,20 +402,32 @@ const PengurusSection = () => (
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-                { jabatan: 'Ketua Takmir', nama: 'Bpk. [Nama]' },
-                { jabatan: 'Wakil Ketua', nama: 'Bpk. [Nama]' },
-                { jabatan: 'Sekretaris', nama: 'Bpk. [Nama]' },
-                { jabatan: 'Bendahara', nama: 'Bpk. [Nama]' },
-            ].map((pengurus, idx) => (
-                <div key={idx} className="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
-                    <div className="w-14 h-14 bg-emerald-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                        <Users className="w-6 h-6 text-emerald-600" />
+            {pengurusList.length > 0 ? (
+                pengurusList.map((pengurus, idx) => (
+                    <div key={pengurus.id || idx} className="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
+                        {pengurus.photo_url ? (
+                            <img src={pengurus.photo_url} alt={pengurus.name} className="w-14 h-14 rounded-full mx-auto mb-3 object-cover" />
+                        ) : (
+                            <div className="w-14 h-14 bg-emerald-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                <span className="text-emerald-600 font-bold text-lg">{pengurus.name?.[0] || 'P'}</span>
+                            </div>
+                        )}
+                        <p className="font-medium text-gray-800 text-sm">{pengurus.name}</p>
+                        <p className="text-xs text-gray-500">{pengurus.position}</p>
                     </div>
-                    <p className="font-medium text-gray-800 text-sm">{pengurus.nama}</p>
-                    <p className="text-xs text-gray-500">{pengurus.jabatan}</p>
-                </div>
-            ))}
+                ))
+            ) : (
+                // Placeholder jika belum ada data
+                ['Ketua Takmir', 'Wakil Ketua', 'Sekretaris', 'Bendahara'].map((jabatan, idx) => (
+                    <div key={idx} className="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
+                        <div className="w-14 h-14 bg-emerald-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <Users className="w-6 h-6 text-emerald-600" />
+                        </div>
+                        <p className="font-medium text-gray-800 text-sm">Bpk. [Nama]</p>
+                        <p className="text-xs text-gray-500">{jabatan}</p>
+                    </div>
+                ))
+            )}
         </div>
     </div>
 );
