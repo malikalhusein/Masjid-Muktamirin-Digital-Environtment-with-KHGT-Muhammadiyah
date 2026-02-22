@@ -4,7 +4,6 @@ import {
     LayoutDashboard, 
     Building2, 
     Image, 
-    Settings, 
     Palette,
     LogOut,
     Menu,
@@ -12,7 +11,13 @@ import {
     Clock,
     Tv,
     Moon,
-    Globe
+    Globe,
+    Wallet,
+    Bell,
+    Users,
+    CalendarHeart,
+    ImageIcon,
+    BookOpen
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
@@ -33,6 +38,12 @@ const navGroups = [
         title: 'Website Masjid',
         items: [
             { path: '/connect/identity', icon: Building2, label: 'Identitas Masjid' },
+            { path: '/connect/zis', icon: Wallet, label: 'Laporan ZIS' },
+            { path: '/connect/announcements', icon: Bell, label: 'Pengumuman' },
+            { path: '/connect/pengurus', icon: Users, label: 'Struktur Pengurus' },
+            { path: '/connect/special-events', icon: CalendarHeart, label: 'Event Khusus' },
+            { path: '/connect/gallery', icon: ImageIcon, label: 'Galeri Foto' },
+            { path: '/connect/quotes', icon: BookOpen, label: 'Quote Islami' },
             { path: '/connect/ramadan', icon: Moon, label: 'Kelola Ramadan' },
         ]
     }
