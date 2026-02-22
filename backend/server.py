@@ -40,6 +40,7 @@ class UserCreate(BaseModel):
     username: str
     password: str
     name: str
+    role: str = "editor"  # admin or editor
 
 class UserLogin(BaseModel):
     username: str
@@ -50,6 +51,7 @@ class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     username: str
     name: str
+    role: str = "editor"  # admin = full access, editor = content only
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class MosqueIdentity(BaseModel):
