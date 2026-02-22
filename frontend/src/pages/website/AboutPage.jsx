@@ -21,6 +21,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { toast } from 'sonner';
+import { WebsiteNavigation, WebsiteFooter } from '../../components/WebsiteNavigation';
 
 // QRIS Image URL (uploaded by user)
 const QRIS_IMAGE_URL = "https://customer-assets.emergentagent.com/job_bc2fce28-e700-491a-980a-47d0af39ffe4/artifacts/tunkmt2e_QRIS%20Modif%4010x-100%20Large.jpeg";
