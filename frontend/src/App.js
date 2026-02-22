@@ -32,15 +32,18 @@ import PrayerSettingsPage from "@/pages/dashboard/PrayerSettingsPage";
 import RamadanAdminPage from "@/pages/dashboard/RamadanAdminPage";
 import ZISPage from "@/pages/dashboard/ZISPage";
 import AnnouncementsPage from "@/pages/dashboard/AnnouncementsPage";
+import ArticlesPage from "@/pages/dashboard/ArticlesPage";
 import PengurusPage from "@/pages/dashboard/PengurusPage";
 import SpecialEventsPage from "@/pages/dashboard/SpecialEventsPage";
 import GalleryPage from "@/pages/dashboard/GalleryPage";
 import QuotesPage from "@/pages/dashboard/QuotesPage";
+import QRISSettingsPage from "@/pages/dashboard/QRISSettingsPage";
 
 // Pages - Website
 import HomePage from "@/pages/website/HomePage";
 import AgendaPage from "@/pages/website/AgendaPage";
 import AboutPage from "@/pages/website/AboutPage";
+import InformasiPage from "@/pages/website/InformasiPage";
 
 // Pages - Ramadan
 import RamadanPage from "@/pages/ramadan/RamadanPage";
