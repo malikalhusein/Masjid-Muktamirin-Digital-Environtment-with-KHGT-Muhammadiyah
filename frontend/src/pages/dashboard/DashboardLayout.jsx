@@ -40,10 +40,12 @@ const navGroups = [
             { path: '/connect/identity', icon: Building2, label: 'Identitas Masjid' },
             { path: '/connect/zis', icon: Wallet, label: 'Laporan ZIS' },
             { path: '/connect/announcements', icon: Bell, label: 'Pengumuman' },
+            { path: '/connect/articles', icon: Globe, label: 'Artikel' },
             { path: '/connect/pengurus', icon: Users, label: 'Struktur Pengurus' },
             { path: '/connect/special-events', icon: CalendarHeart, label: 'Event Khusus' },
             { path: '/connect/gallery', icon: ImageIcon, label: 'Galeri Foto' },
             { path: '/connect/quotes', icon: BookOpen, label: 'Quote Islami' },
+            { path: '/connect/qris', icon: Wallet, label: 'Pengaturan QRIS' },
             { path: '/connect/ramadan', icon: Moon, label: 'Kelola Ramadan' },
         ]
     }
