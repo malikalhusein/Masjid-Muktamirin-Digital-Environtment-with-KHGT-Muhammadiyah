@@ -164,12 +164,11 @@ const ContactForm = () => {
             />
             <Button 
                 type="submit" 
-                disabled={sending} 
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                 data-testid="contact-submit-btn"
             >
                 <Send className="w-4 h-4 mr-2" />
-                {sending ? 'Mengirim...' : 'Kirim Pesan'}
+                Kirim via WhatsApp
             </Button>
         </form>
     );
@@ -178,10 +177,10 @@ const ContactForm = () => {
 // QRIS Donation Section
 const QRISSection = () => {
     const [copied, setCopied] = useState(false);
-    const bankAccount = 'XXX-XXXX-XXX';
+    const bankAccount = '7148254552';
     
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(bankAccount.replace(/-/g, ''));
+        navigator.clipboard.writeText(bankAccount);
         setCopied(true);
         toast.success('Nomor rekening disalin!');
         setTimeout(() => setCopied(false), 2000);
@@ -199,13 +198,15 @@ const QRISSection = () => {
                 </div>
             </div>
             
-            {/* QRIS Code Placeholder */}
-            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 text-center mb-6">
-                <div className="bg-white rounded-lg p-6 border-2 border-dashed border-emerald-300 inline-block mb-4">
-                    <QrCode className="w-32 h-32 text-emerald-600 mx-auto" />
-                    <p className="text-xs text-gray-400 mt-2">QRIS akan ditampilkan di sini</p>
-                </div>
-                <div className="flex justify-center gap-2 flex-wrap">
+            {/* QRIS Code - Real Image */}
+            <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 text-center mb-6">
+                <img 
+                    src={QRIS_IMAGE_URL} 
+                    alt="QRIS Masjid Muktamirin" 
+                    className="w-full max-w-[250px] mx-auto rounded-lg shadow-md"
+                    data-testid="qris-image"
+                />
+                <div className="flex justify-center gap-2 flex-wrap mt-4">
                     <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm">Infaq Masjid</span>
                     <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm">Zakat</span>
                     <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">Sedekah</span>
