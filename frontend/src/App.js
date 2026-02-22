@@ -18,15 +18,26 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
-// Pages
+// Pages - TV Display
 import TVDisplay from "@/pages/TVDisplay";
 import Login from "@/pages/Login";
+
+// Pages - Dashboard Admin
 import DashboardLayout from "@/pages/dashboard/DashboardLayout";
 import DashboardHome from "@/pages/dashboard/DashboardHome";
 import IdentityPage from "@/pages/dashboard/IdentityPage";
 import DisplayContentPage from "@/pages/dashboard/DisplayContentPage";
 import LayoutPage from "@/pages/dashboard/LayoutPage";
 import PrayerSettingsPage from "@/pages/dashboard/PrayerSettingsPage";
+import RamadanAdminPage from "@/pages/dashboard/RamadanAdminPage";
+
+// Pages - Website
+import HomePage from "@/pages/website/HomePage";
+import AgendaPage from "@/pages/website/AgendaPage";
+import AboutPage from "@/pages/website/AboutPage";
+
+// Pages - Ramadan
+import RamadanPage from "@/pages/ramadan/RamadanPage";
 
 function App() {
     return (
