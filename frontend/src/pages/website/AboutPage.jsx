@@ -403,7 +403,7 @@ export default function AboutPage() {
     
     return (
         <div className="min-h-screen bg-stone-100" data-testid="about-page">
-            <Navigation activePage="about" />
+            <WebsiteNavigation activePage="about" mosqueIdentity={mosqueIdentity} />
             
             {/* Header */}
             <div className="bg-emerald-900 text-white py-8">
@@ -436,7 +436,7 @@ export default function AboutPage() {
                 </div>
             </div>
             
-            <Footer mosqueIdentity={mosqueIdentity} />
+            <WebsiteFooter mosqueIdentity={mosqueIdentity} />
         </div>
     );
 }
