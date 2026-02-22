@@ -313,7 +313,7 @@ export default function AgendaPage() {
     
     return (
         <div className="min-h-screen bg-stone-100" data-testid="agenda-page-new">
-            <Navigation activePage="agenda" />
+            <WebsiteNavigation activePage="agenda" mosqueIdentity={mosqueIdentity} />
             
             {/* Header */}
             <div className="bg-emerald-900 text-white py-8">
@@ -372,7 +372,7 @@ export default function AgendaPage() {
                 </div>
             </div>
             
-            <Footer />
+            <WebsiteFooter mosqueIdentity={mosqueIdentity} />
         </div>
     );
 }
