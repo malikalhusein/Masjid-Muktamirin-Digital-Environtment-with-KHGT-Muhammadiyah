@@ -117,28 +117,32 @@ export default function DashboardLayout() {
                             </div>
                         ))}
                     </nav>
-                                        isActive 
-                                            ? "bg-emerald-900/50 text-emerald-400 border-l-2 border-emerald-500" 
-                                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                                    )}
-                                    data-testid={`nav-${item.label.toLowerCase().replace(' ', '-')}`}
-                                >
-                                    <item.icon className="w-5 h-5" />
-                                    {item.label}
-                                </Link>
-                            );
-                        })}
-                    </nav>
                     
-                    {/* Preview Link */}
-                    <div className="px-4 pb-4">
+                    {/* Preview Links */}
+                    <div className="px-4 pb-4 space-y-2">
+                        <Link
+                            to="/homepage"
+                            target="_blank"
+                            className="flex items-center gap-3 px-4 py-2 rounded-lg font-body text-sm text-blue-400 bg-blue-900/20 hover:bg-blue-900/30 transition-colors"
+                        >
+                            <Globe className="w-4 h-4" />
+                            Lihat Homepage
+                        </Link>
+                        <Link
+                            to="/ramadan"
+                            target="_blank"
+                            className="flex items-center gap-3 px-4 py-2 rounded-lg font-body text-sm text-amber-400 bg-amber-900/20 hover:bg-amber-900/30 transition-colors"
+                        >
+                            <Moon className="w-4 h-4" />
+                            Kanal Ramadan
+                        </Link>
                         <Link
                             to="/"
                             target="_blank"
-                            className="flex items-center gap-3 px-4 py-3 rounded-lg font-body text-sm text-gold-400 bg-gold-900/20 hover:bg-gold-900/30 transition-colors"
+                            className="flex items-center gap-3 px-4 py-2 rounded-lg font-body text-sm text-gold-400 bg-gold-900/20 hover:bg-gold-900/30 transition-colors"
                         >
-                            <Tv className="w-5 h-5" />
-                            Lihat Display TV
+                            <Tv className="w-4 h-4" />
+                            Display TV
                         </Link>
                     </div>
                 </div>
