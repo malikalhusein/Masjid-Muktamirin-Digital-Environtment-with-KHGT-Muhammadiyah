@@ -435,22 +435,36 @@ const PengurusSection = ({ pengurusList }) => (
 export default function AboutPage() {
     const [mosqueIdentity, setMosqueIdentity] = useState(null);
     const [announcements, setAnnouncements] = useState([]);
+    const [pengurusList, setPengurusList] = useState([]);
     const [loading, setLoading] = useState(true);
     
     const fetchData = useCallback(async () => {
         try {
-            const mosqueRes = await mosqueAPI.getIdentity();
+            // Fetch all data in parallel
+            const [mosqueRes, announcementRes, pengurusRes] = await Promise.all([
+                mosqueAPI.getIdentity(),
+                announcementAPI.getAll(true).catch(() => ({ data: [] })),
+                pengurusAPI.getAll(true).catch(() => ({ data: [] }))
+            ]);
+            
             setMosqueIdentity(mosqueRes.data);
-            // Using mock announcements data (can be replaced with API when available)
-            const mockAnnouncements = [
-                { id: '1', title: 'Jadwal Sholat Jumat', content: 'Khatib Jumat pekan ini adalah Ustadz Ahmad. Jamaah diharapkan hadir 15 menit sebelum khutbah.', created_at: new Date().toISOString() },
-                { id: '2', title: 'Pengajian Rutin Ahad Pagi', content: 'Pengajian rutin setiap Ahad pagi pukul 06.00 WIB setelah Subuh. Tema: Fiqih Ibadah.', created_at: new Date(Date.now() - 86400000).toISOString() },
-                { id: '3', title: 'Donasi Pembangunan Masjid', content: 'Donasi untuk renovasi lantai 2 masjid masih dibuka. Salurkan melalui QRIS atau rekening BSI.', created_at: new Date(Date.now() - 172800000).toISOString() },
-            ];
-            setAnnouncements(mockAnnouncements);
+            
+            // Use API data or fallback to mock
+            if (announcementRes.data && announcementRes.data.length > 0) {
+                setAnnouncements(announcementRes.data);
+            } else {
+                // Fallback mock data
+                setAnnouncements([
+                    { id: '1', title: 'Jadwal Sholat Jumat', content: 'Khatib Jumat pekan ini adalah Ustadz Ahmad. Jamaah diharapkan hadir 15 menit sebelum khutbah.', created_at: new Date().toISOString() },
+                    { id: '2', title: 'Pengajian Rutin Ahad Pagi', content: 'Pengajian rutin setiap Ahad pagi pukul 06.00 WIB setelah Subuh. Tema: Fiqih Ibadah.', created_at: new Date(Date.now() - 86400000).toISOString() },
+                    { id: '3', title: 'Donasi Pembangunan Masjid', content: 'Donasi untuk renovasi lantai 2 masjid masih dibuka. Salurkan melalui QRIS atau rekening BSI.', created_at: new Date(Date.now() - 172800000).toISOString() },
+                ]);
+            }
+            
+            setPengurusList(pengurusRes.data || []);
         } catch (error) {
             console.error('Error fetching data:', error);
-            // Set mock announcements on error
+            // Set fallback mock announcements on error
             setAnnouncements([
                 { id: '1', title: 'Jadwal Sholat Jumat', content: 'Khatib Jumat pekan ini adalah Ustadz Ahmad. Jamaah diharapkan hadir 15 menit sebelum khutbah.', created_at: new Date().toISOString() },
                 { id: '2', title: 'Pengajian Rutin Ahad Pagi', content: 'Pengajian rutin setiap Ahad pagi pukul 06.00 WIB setelah Subuh. Tema: Fiqih Ibadah.', created_at: new Date(Date.now() - 86400000).toISOString() },
@@ -496,7 +510,7 @@ export default function AboutPage() {
                     <div className="lg:col-span-2 space-y-6">
                         <ProfileSection mosqueIdentity={mosqueIdentity} />
                         <PengumumanSection announcements={announcements} />
-                        <PengurusSection />
+                        <PengurusSection pengurusList={pengurusList} />
                     </div>
                     
                     {/* Right Column - QRIS & Contact */}
