@@ -237,7 +237,7 @@ export default function InformasiPage() {
                 </div>
             </div>
             
-            <Footer />
+            <WebsiteFooter mosqueIdentity={mosqueIdentity} />
         </div>
     );
 }
