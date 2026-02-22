@@ -115,6 +115,8 @@ const Footer = ({ mosqueIdentity }) => (
     </footer>
 );
 
+import { WebsiteNavigation, WebsiteFooter } from '../../components/WebsiteNavigation';
+
 // Contact Form Component - Redirect to WhatsApp
 const ContactForm = () => {
     const [formData, setFormData] = useState({ name: '', phone: '', message: '' });
