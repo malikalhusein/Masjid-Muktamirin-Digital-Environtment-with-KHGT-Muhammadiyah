@@ -1,53 +1,133 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, MapPin, Calendar, Phone, ChevronRight, Moon, BookOpen, Users, ArrowRight, Heart, QrCode, Quote } from 'lucide-react';
-import { prayerAPI, mosqueAPI, agendaAPI, zisAPI, quoteAPI } from '../../lib/api';
+import { Clock, MapPin, Calendar, Phone, ChevronRight, Moon, BookOpen, Users, ArrowRight, Heart, QrCode, Quote, Menu, X, Image } from 'lucide-react';
+import { prayerAPI, mosqueAPI, agendaAPI, zisAPI, quoteAPI, galleryAPI } from '../../lib/api';
 import { formatCountdown, getCurrentAndNextPrayer, PRAYER_NAMES } from '../../lib/utils';
 import { getKHGTHijriDate, isRamadan } from '../../lib/khgtCalendar';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '../../components/ui/sheet';
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '../../components/ui/carousel';
 
 // QRIS Image URL
 const QRIS_IMAGE_URL = "https://customer-assets.emergentagent.com/job_bc2fce28-e700-491a-980a-47d0af39ffe4/artifacts/tunkmt2e_QRIS%20Modif%4010x-100%20Large.jpeg";
 
-// Navigation component
-const Navigation = ({ activePage = 'home' }) => (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-                <Link to="/homepage" className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-emerald-900 flex items-center justify-center border-2 border-emerald-700">
-                        <span className="text-white font-bold text-lg">M</span>
+// Navigation Links
+const NAV_LINKS = [
+    { path: '/homepage', label: 'Home', key: 'home' },
+    { path: '/homepage/agenda', label: 'Agenda', key: 'agenda' },
+    { path: '/ramadan', label: 'Ramadan', key: 'ramadan' },
+    { path: '/homepage/informasi', label: 'Informasi', key: 'informasi' },
+    { path: '/homepage/about', label: 'Tentang Kami', key: 'about' },
+];
+
+// Navigation component with responsive mobile menu
+const Navigation = ({ activePage = 'home', mosqueIdentity }) => {
+    const [mobileOpen, setMobileOpen] = useState(false);
+    
+    return (
+        <nav className="bg-white shadow-sm sticky top-0 z-50" data-testid="main-navbar">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
+                    {/* Logo & Name */}
+                    <Link to="/homepage" className="flex items-center gap-3" data-testid="navbar-logo">
+                        {mosqueIdentity?.logo_url ? (
+                            <img 
+                                src={mosqueIdentity.logo_url} 
+                                alt="Logo Masjid" 
+                                className="w-10 h-10 rounded-full object-cover border-2 border-emerald-700"
+                            />
+                        ) : (
+                            <div className="w-10 h-10 rounded-full bg-emerald-900 flex items-center justify-center border-2 border-emerald-700">
+                                <span className="text-white font-bold text-lg">M</span>
+                            </div>
+                        )}
+                        <div>
+                            <span className="font-bold text-gray-800">{mosqueIdentity?.name || 'Muktamirin'}</span>
+                            <p className="text-xs text-emerald-600">Sorogaten</p>
+                        </div>
+                    </Link>
+                    
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center gap-1">
+                        {NAV_LINKS.map((item) => (
+                            <Link
+                                key={item.key}
+                                to={item.path}
+                                data-testid={`nav-link-${item.key}`}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                    activePage === item.key
+                                        ? 'bg-emerald-900 text-white'
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                {item.label}
+                            </Link>
+                        ))}
                     </div>
-                    <div>
-                        <span className="font-bold text-gray-800">Muktamirin</span>
-                        <p className="text-xs text-emerald-600">Sorogaten</p>
-                    </div>
-                </Link>
-                <div className="hidden md:flex items-center gap-1">
-                    {[
-                        { path: '/homepage', label: 'Home', key: 'home' },
-                        { path: '/homepage/agenda', label: 'Agenda', key: 'agenda' },
-                        { path: '/ramadan', label: 'Ramadan', key: 'ramadan' },
-                        { path: '/homepage/informasi', label: 'Informasi', key: 'informasi' },
-                        { path: '/homepage/about', label: 'Tentang Kami', key: 'about' },
-                    ].map((item) => (
-                        <Link
-                            key={item.key}
-                            to={item.path}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                activePage === item.key
-                                    ? 'bg-emerald-900 text-white'
-                                    : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                        >
-                            {item.label}
-                        </Link>
-                    ))}
+                    
+                    {/* Mobile Menu Button */}
+                    <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                        <SheetTrigger asChild>
+                            <button 
+                                className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                data-testid="mobile-menu-button"
+                            >
+                                <Menu className="w-6 h-6 text-gray-700" />
+                            </button>
+                        </SheetTrigger>
+                        <SheetContent side="right" className="w-72 bg-white">
+                            <SheetTitle className="sr-only">Menu Navigasi</SheetTitle>
+                            <div className="flex flex-col h-full">
+                                {/* Mobile Header */}
+                                <div className="flex items-center gap-3 pb-6 border-b border-gray-100">
+                                    {mosqueIdentity?.logo_url ? (
+                                        <img 
+                                            src={mosqueIdentity.logo_url} 
+                                            alt="Logo Masjid" 
+                                            className="w-12 h-12 rounded-full object-cover border-2 border-emerald-700"
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-12 rounded-full bg-emerald-900 flex items-center justify-center border-2 border-emerald-700">
+                                            <span className="text-white font-bold text-xl">M</span>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <span className="font-bold text-gray-800">{mosqueIdentity?.name || 'Muktamirin'}</span>
+                                        <p className="text-xs text-emerald-600">Sorogaten</p>
+                                    </div>
+                                </div>
+                                
+                                {/* Mobile Navigation Links */}
+                                <nav className="flex-1 py-6 space-y-1">
+                                    {NAV_LINKS.map((item) => (
+                                        <Link
+                                            key={item.key}
+                                            to={item.path}
+                                            onClick={() => setMobileOpen(false)}
+                                            data-testid={`mobile-nav-${item.key}`}
+                                            className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${
+                                                activePage === item.key
+                                                    ? 'bg-emerald-900 text-white'
+                                                    : 'text-gray-700 hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            {item.label}
+                                        </Link>
+                                    ))}
+                                </nav>
+                                
+                                {/* Mobile Footer */}
+                                <div className="pt-6 border-t border-gray-100 text-center">
+                                    <p className="text-xs text-gray-400">Masjid Muktamirin Sorogaten</p>
+                                </div>
+                            </div>
+                        </SheetContent>
+                    </Sheet>
                 </div>
             </div>
-        </div>
-    </nav>
-);
+        </nav>
+    );
+};
 
 // Footer component
 const Footer = ({ mosqueIdentity }) => (
