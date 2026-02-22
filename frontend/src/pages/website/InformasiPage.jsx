@@ -29,19 +29,22 @@ export default function InformasiPage() {
     const [summary, setSummary] = useState(null);
     const [chartData, setChartData] = useState([]);
     const [qrisSettings, setQrisSettings] = useState(null);
+    const [mosqueIdentity, setMosqueIdentity] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
     const fetchData = useCallback(async () => {
         try {
-            const [summaryRes, chartRes, qrisRes] = await Promise.all([
+            const [summaryRes, chartRes, qrisRes, mosqueRes] = await Promise.all([
                 zisAPI.getSummary(),
                 zisAPI.getMonthlyChart(selectedYear),
-                qrisAPI.getSettings().catch(() => ({ data: null }))
+                qrisAPI.getSettings().catch(() => ({ data: null })),
+                mosqueAPI.getIdentity()
             ]);
             setSummary(summaryRes.data);
             setChartData(chartRes.data);
             setQrisSettings(qrisRes.data);
+            setMosqueIdentity(mosqueRes.data);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
