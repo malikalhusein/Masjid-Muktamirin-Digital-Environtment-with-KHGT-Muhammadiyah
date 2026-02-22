@@ -10,18 +10,32 @@ import {
     Menu,
     X,
     Clock,
-    Tv
+    Tv,
+    Moon,
+    Globe
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { cn } from '../../lib/utils';
 
-const navItems = [
-    { path: '/connect/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/connect/identity', icon: Building2, label: 'Identitas Masjid' },
-    { path: '/connect/display-content', icon: Image, label: 'Display Konten' },
-    { path: '/connect/layout', icon: Palette, label: 'Tampilan' },
-    { path: '/connect/prayer-settings', icon: Clock, label: 'Pengaturan Jadwal Sholat' },
+// Navigation items grouped by category
+const navGroups = [
+    {
+        title: 'Jam Sholat Digital',
+        items: [
+            { path: '/connect/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+            { path: '/connect/display-content', icon: Image, label: 'Display Konten' },
+            { path: '/connect/layout', icon: Palette, label: 'Tampilan' },
+            { path: '/connect/prayer-settings', icon: Clock, label: 'Pengaturan Jadwal' },
+        ]
+    },
+    {
+        title: 'Website Masjid',
+        items: [
+            { path: '/connect/identity', icon: Building2, label: 'Identitas Masjid' },
+            { path: '/connect/ramadan', icon: Moon, label: 'Kelola Ramadan' },
+        ]
+    }
 ];
 
 export default function DashboardLayout() {
