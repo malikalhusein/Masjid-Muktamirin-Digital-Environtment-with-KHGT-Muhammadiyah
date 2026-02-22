@@ -72,6 +72,23 @@ export default function IdentityPage() {
         }
     };
     
+    const handleProfileImageUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        setUploadingProfile(true);
+        try {
+            const res = await uploadAPI.upload(file);
+            setIdentity(prev => ({ ...prev, profile_image_url: res.data.url }));
+            toast.success('Foto profil berhasil diunggah');
+        } catch (error) {
+            console.error('Error uploading profile image:', error);
+            toast.error('Gagal mengunggah foto profil');
+        } finally {
+            setUploadingProfile(false);
+        }
+    };
+    
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
