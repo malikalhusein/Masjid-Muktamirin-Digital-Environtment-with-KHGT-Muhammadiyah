@@ -305,7 +305,7 @@ const GallerySlider = ({ galleries }) => {
                         <h2 className="text-2xl font-bold text-gray-800">Galeri Kegiatan</h2>
                         <p className="text-gray-500 text-sm mt-1">Dokumentasi kegiatan masjid terbaru</p>
                     </div>
-                    <Link to="/homepage/about" className="text-emerald-600 text-sm flex items-center gap-1 hover:text-emerald-700">
+                    <Link to="/homepage/gallery" className="text-emerald-600 text-sm flex items-center gap-1 hover:text-emerald-700">
                         Lihat semua <ChevronRight className="w-4 h-4" />
                     </Link>
                 </div>
@@ -317,7 +317,7 @@ const GallerySlider = ({ galleries }) => {
                     <CarouselContent className="-ml-2 md:-ml-4">
                         {galleries.map((item, idx) => (
                             <CarouselItem key={item.id || idx} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
-                                <div className="relative group overflow-hidden rounded-xl aspect-[4/3] bg-gray-100">
+                                <Link to="/homepage/gallery" className="block relative group overflow-hidden rounded-xl aspect-[4/3] bg-gray-100">
                                     <img 
                                         src={item.image_url} 
                                         alt={item.title || `Galeri ${idx + 1}`}
@@ -330,7 +330,7 @@ const GallerySlider = ({ galleries }) => {
                                             <p className="text-xs text-white/80 mt-1 line-clamp-2">{item.description}</p>
                                         )}
                                     </div>
-                                </div>
+                                </Link>
                             </CarouselItem>
                         ))}
                     </CarouselContent>
