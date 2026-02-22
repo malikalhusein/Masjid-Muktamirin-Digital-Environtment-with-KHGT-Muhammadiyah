@@ -88,16 +88,35 @@ export default function DashboardLayout() {
                 
                 {/* Navigation - Scrollable */}
                 <div className="flex-1 overflow-y-auto">
-                    <nav className="p-4 space-y-1">
-                        {navItems.map((item) => {
-                            const isActive = location.pathname === item.path;
-                            return (
-                                <Link
-                                    key={item.path}
-                                    to={item.path}
-                                    onClick={() => setSidebarOpen(false)}
-                                    className={cn(
-                                        "flex items-center gap-3 px-4 py-3 rounded-lg font-body text-sm transition-colors",
+                    <nav className="p-4 space-y-4">
+                        {navGroups.map((group) => (
+                            <div key={group.title}>
+                                <p className="text-xs text-slate-500 uppercase tracking-wider px-4 mb-2">{group.title}</p>
+                                <div className="space-y-1">
+                                    {group.items.map((item) => {
+                                        const isActive = location.pathname === item.path;
+                                        return (
+                                            <Link
+                                                key={item.path}
+                                                to={item.path}
+                                                onClick={() => setSidebarOpen(false)}
+                                                className={cn(
+                                                    "flex items-center gap-3 px-4 py-3 rounded-lg font-body text-sm transition-colors",
+                                                    isActive 
+                                                        ? "bg-emerald-900/50 text-emerald-400 border-l-2 border-emerald-500" 
+                                                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                                                )}
+                                                data-testid={`nav-${item.label.toLowerCase().replace(' ', '-')}`}
+                                            >
+                                                <item.icon className="w-5 h-5" />
+                                                {item.label}
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </nav>
                                         isActive 
                                             ? "bg-emerald-900/50 text-emerald-400 border-l-2 border-emerald-500" 
                                             : "text-slate-400 hover:bg-slate-800 hover:text-white"
