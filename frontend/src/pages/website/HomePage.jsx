@@ -28,6 +28,7 @@ const Navigation = ({ activePage = 'home' }) => (
                         { path: '/homepage', label: 'Home', key: 'home' },
                         { path: '/homepage/agenda', label: 'Agenda', key: 'agenda' },
                         { path: '/ramadan', label: 'Ramadan', key: 'ramadan' },
+                        { path: '/homepage/informasi', label: 'Informasi', key: 'informasi' },
                         { path: '/homepage/about', label: 'Tentang Kami', key: 'about' },
                     ].map((item) => (
                         <Link
