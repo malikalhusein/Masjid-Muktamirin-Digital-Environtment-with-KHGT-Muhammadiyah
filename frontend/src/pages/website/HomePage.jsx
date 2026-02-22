@@ -351,36 +351,69 @@ export default function HomePage() {
                         
                         {/* Right Column */}
                         <div className="space-y-6">
-                            {/* Informasi & Berita */}
+                            {/* Quote Islami */}
+                            {randomQuote && (
+                                <div className="bg-gradient-to-br from-emerald-800 to-emerald-900 rounded-2xl p-6 text-white">
+                                    <Quote className="w-8 h-8 text-emerald-400/50 mb-3" />
+                                    {randomQuote.arabic_text && (
+                                        <p className="text-right font-arabic text-lg text-emerald-100 mb-3">{randomQuote.arabic_text}</p>
+                                    )}
+                                    <p className="text-white italic">"{randomQuote.translation}"</p>
+                                    <p className="text-emerald-300 text-sm mt-3">— {randomQuote.source}</p>
+                                </div>
+                            )}
+                            
+                            {/* ZIS Summary Card */}
                             <div className="bg-white rounded-2xl p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                        <BookOpen className="w-5 h-5 text-emerald-700" />
+                                        <Heart className="w-5 h-5 text-emerald-700" />
                                     </div>
                                     <div>
-                                        <h2 className="font-bold text-gray-800">Informasi & Berita</h2>
-                                        <p className="text-sm text-gray-500">Pengumuman, artikel, update pembangunan</p>
+                                        <h2 className="font-bold text-gray-800">Perolehan ZIS Bulan Ini</h2>
+                                        <p className="text-sm text-gray-500">Zakat, Infaq, dan Shodaqoh</p>
                                     </div>
                                 </div>
+                                {zisSummary && (
+                                    <div className="grid grid-cols-3 gap-2 mb-4">
+                                        <div className="bg-emerald-50 rounded-lg p-3 text-center">
+                                            <p className="text-xs text-emerald-600">Zakat</p>
+                                            <p className="font-bold text-emerald-800">Rp {(zisSummary.zakat?.total || 0).toLocaleString('id-ID')}</p>
+                                        </div>
+                                        <div className="bg-blue-50 rounded-lg p-3 text-center">
+                                            <p className="text-xs text-blue-600">Infaq</p>
+                                            <p className="font-bold text-blue-800">Rp {(zisSummary.infaq?.total || 0).toLocaleString('id-ID')}</p>
+                                        </div>
+                                        <div className="bg-amber-50 rounded-lg p-3 text-center">
+                                            <p className="text-xs text-amber-600">Shodaqoh</p>
+                                            <p className="font-bold text-amber-800">Rp {(zisSummary.shodaqoh?.total || 0).toLocaleString('id-ID')}</p>
+                                        </div>
+                                    </div>
+                                )}
                                 <Link to="/homepage/about" className="text-emerald-600 text-sm flex items-center gap-1 hover:text-emerald-700">
-                                    Lihat selengkapnya <ArrowRight className="w-4 h-4" />
+                                    Lihat laporan lengkap <ArrowRight className="w-4 h-4" />
                                 </Link>
                             </div>
                             
-                            {/* Infaq & Zakat */}
+                            {/* Quick Donation (QRIS) */}
                             <div className="bg-white rounded-2xl p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                                        <ArrowRight className="w-5 h-5 text-amber-700" />
+                                        <QrCode className="w-5 h-5 text-amber-700" />
                                     </div>
                                     <div>
-                                        <h2 className="font-bold text-gray-800">Infaq & Zakat</h2>
-                                        <p className="text-sm text-gray-500">Salurkan donasi untuk masjid</p>
+                                        <h2 className="font-bold text-gray-800">Donasi Cepat</h2>
+                                        <p className="text-sm text-gray-500">Scan QRIS untuk berinfaq</p>
                                     </div>
                                 </div>
-                                <Link to="/homepage/about" className="text-emerald-600 text-sm flex items-center gap-1 hover:text-emerald-700">
-                                    Lihat selengkapnya <ArrowRight className="w-4 h-4" />
-                                </Link>
+                                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 text-center">
+                                    <img 
+                                        src={QRIS_IMAGE_URL} 
+                                        alt="QRIS Masjid Muktamirin" 
+                                        className="w-full max-w-[180px] mx-auto rounded-lg shadow-sm"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-2">Scan untuk donasi infaq/zakat</p>
+                                </div>
                             </div>
                             
                             {/* Ramadan Banner */}
