@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, MapPin, Calendar, Phone, ChevronRight, Moon, BookOpen, Users, ArrowRight } from 'lucide-react';
-import { prayerAPI, mosqueAPI, agendaAPI } from '../../lib/api';
+import { Clock, MapPin, Calendar, Phone, ChevronRight, Moon, BookOpen, Users, ArrowRight, Heart, QrCode, Quote } from 'lucide-react';
+import { prayerAPI, mosqueAPI, agendaAPI, zisAPI, quoteAPI } from '../../lib/api';
 import { formatCountdown, getCurrentAndNextPrayer, PRAYER_NAMES } from '../../lib/utils';
 import { getKHGTHijriDate, isRamadan } from '../../lib/khgtCalendar';
+
+// QRIS Image URL
+const QRIS_IMAGE_URL = "https://customer-assets.emergentagent.com/job_bc2fce28-e700-491a-980a-47d0af39ffe4/artifacts/tunkmt2e_QRIS%20Modif%4010x-100%20Large.jpeg";
 
 // Navigation component
 const Navigation = ({ activePage = 'home' }) => (
