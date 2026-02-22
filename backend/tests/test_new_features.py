@@ -10,7 +10,7 @@ import requests
 import os
 from datetime import datetime
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://prayer-times-display.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://islamic-cms.preview.emergentagent.com')
 API_URL = f"{BASE_URL}/api"
 
 

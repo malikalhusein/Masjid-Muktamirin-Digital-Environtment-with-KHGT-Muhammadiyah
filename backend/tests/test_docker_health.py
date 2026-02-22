@@ -9,7 +9,7 @@ import os
 # Get base URL from environment - no default to fail fast
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL:
-    BASE_URL = "https://prayer-times-display.preview.emergentagent.com"
+    BASE_URL = "https://islamic-cms.preview.emergentagent.com"
 
 
 class TestHealthEndpoint:
