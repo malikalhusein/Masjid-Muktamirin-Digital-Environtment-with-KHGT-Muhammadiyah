@@ -60,6 +60,8 @@ class MosqueIdentity(BaseModel):
     name: str = "Masjid Muktamirin"
     address: str = "Kec. Galur, Kab. Kulon Progo, DI Yogyakarta"
     logo_url: Optional[str] = None
+    description: Optional[str] = None  # Deskripsi/profil masjid (editable dari admin)
+    profile_image_url: Optional[str] = None  # Gambar profil masjid
     latitude: float = -7.9404
     longitude: float = 110.2357
     elevation: int = 50
@@ -69,6 +71,8 @@ class MosqueIdentityUpdate(BaseModel):
     name: Optional[str] = None
     address: Optional[str] = None
     logo_url: Optional[str] = None
+    description: Optional[str] = None
+    profile_image_url: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     elevation: Optional[int] = None
