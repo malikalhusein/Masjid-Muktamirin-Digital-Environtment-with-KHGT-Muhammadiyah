@@ -1,7 +1,7 @@
 # Jam Sholat Digital KHGT Muhammadiyah - PRD
 
 ## Original Problem Statement
-Bangun sebuah Web App Jam Sholat Digital berbasis KHGT Muhammadiyah, siap di-deploy di VPS/self-hosted, dengan panel dashboard untuk konfigurasi dan manajemen konten. Web App ini akan ditampilkan di TV masjid melalui STB Android TV Box dalam mode fullscreen.
+Bangun sebuah Web App Jam Sholat Digital berbasis KHGT Muhammadiyah, siap di-deploy di VPS/self-hosted, dengan panel dashboard untuk konfigurasi dan manajemen konten.
 
 **Extended Scope:** Proyek berkembang menjadi ekosistem website masjid lengkap dengan:
 - TV Display (jamsholat.masjidmuktamirin.web.id)
@@ -10,14 +10,13 @@ Bangun sebuah Web App Jam Sholat Digital berbasis KHGT Muhammadiyah, siap di-dep
 - Dashboard Admin (admin.masjidmuktamirin.web.id)
 
 ## User Personas
-1. **Takmir/Pengurus Masjid** - Admin yang mengelola konten, jadwal, dan pengaturan via dashboard
-2. **Jamaah Masjid** - Pengguna yang melihat display TV di masjid atau website
-3. **Muadzin** - Menggunakan countdown iqomah setelah adzan
-4. **Pengunjung Website** - Melihat jadwal sholat, agenda, dan info masjid online
+1. **Takmir/Pengurus Masjid** - Admin yang mengelola konten via dashboard
+2. **Jamaah Masjid** - Pengguna yang melihat display TV atau website
+3. **Pengunjung Website** - Melihat jadwal sholat, agenda, dan info masjid online
 
 ## Tech Stack
 - Backend: FastAPI, MongoDB, Motor (async)
-- Frontend: React 19, Tailwind CSS, Framer Motion, Shadcn/UI, Recharts, FullCalendar
+- Frontend: React 19, Tailwind CSS, Shadcn/UI, Framer Motion, Recharts, FullCalendar
 - Auth: JWT (PyJWT, bcrypt), Role-based (admin/editor)
 - Deployment: Docker, Docker Compose, Nginx
 
@@ -25,57 +24,54 @@ Bangun sebuah Web App Jam Sholat Digital berbasis KHGT Muhammadiyah, siap di-dep
 
 ## What's Been Implemented
 
-### Update: 22 Februari 2026 - P0 Features Complete
+### Update: 22 Februari 2026 - Major AboutPage Revamp & Documentation
 
-#### 1. Responsive Navigation & Mobile Menu
-- **Burger menu** untuk tampilan mobile/tablet (viewport < 768px)
-- **Sheet sidebar** dari Shadcn/UI untuk navigasi mobile
-- **WebsiteNavigation component** yang reusable untuk semua halaman
-- **WebsiteFooter component** yang reusable
-- Logo masjid sekarang menggunakan `mosqueIdentity.logo_url` dari API
+#### 1. README.md untuk GitHub
+- Dokumentasi lengkap untuk deployment
+- Quick Start guide untuk development
+- Docker deployment instructions
+- Nginx reverse proxy configuration
+- Troubleshooting guide
 
-#### 2. Homepage Gallery Slider
-- **Carousel component** untuk galeri foto kegiatan
-- Conditional rendering - hanya tampil jika ada data galeri
-- Hover effect dengan overlay dan caption
+#### 2. AboutPage dengan Tabs
+- **Tab Informasi**: Artikel & Berita, Pengumuman, Galeri Preview, Pengurus Takmir
+- **Tab Donasi & Infaq**: QRIS image, Bank BSI (7148254552), Program Infaq
+- **Tab Kontak**: Form kontak (redirect WhatsApp), Info kontak, Pengurus
 
-#### 3. Weekly Agenda Compact
-- Section ringkas agenda 7 hari ke depan
-- Conditional rendering - hanya tampil jika ada agenda
-- Tampilan kompak dengan tanggal dan judul
+#### 3. Sejarah Masjid Baru
+- Redaksi sejarah lengkap (berdiri 1907, renovasi 1977, kisah Pangeran Diponegoro)
+- **Highlight Cards**: Didirikan 1907, Renovasi Besar 1977, Terbuka 24/7
+- Profile section dengan foto (jika ada)
 
-#### 4. Footer Updates
-- Nomor rekening BSI yang benar: 7148254552
-- Link navigasi lengkap termasuk Informasi ZIS
+#### 4. Dedicated Gallery Page
+- Route: `/homepage/gallery`
+- Lightbox dengan navigasi (prev/next)
+- Back button ke About page
+- Tidak ada navbar (sesuai request)
+
+#### 5. Admin Dashboard - Identity Enhancement
+- Field **Deskripsi/Sejarah Masjid** (textarea)
+- Upload **Foto Profil Masjid**
+- Teks akan tampil di halaman "Tentang Kami"
 
 ---
 
-### Previous Implementation (22 Desember 2025)
+### Previous Implementation (22 Februari 2026 - Earlier)
 
-#### Backend API (Semua CRUD + Auth)
-- **ZIS (Zakat, Infaq, Shodaqoh)**: `GET, POST, PUT, DELETE /api/zis`, `/api/zis/summary`, `/api/zis/monthly-chart`
-- **Announcements/Pengumuman**: `GET, POST, PUT, DELETE /api/announcements`
-- **Pengurus (Struktur Takmir)**: `GET, POST, PUT, DELETE /api/pengurus`
-- **Special Events (Event Khusus)**: `GET, POST, PUT, DELETE /api/special-events`
-- **Gallery**: `GET, POST, PUT, DELETE /api/gallery`
-- **Islamic Quotes**: `GET, POST, PUT, DELETE /api/quotes`, `/api/quotes/random`
-- **QRIS Settings**: `GET, PUT /api/qris-settings`
-- **Ramadan Schedule**: `GET, POST, DELETE /api/ramadan/schedule`
+#### P0 Features (COMPLETED)
+- Responsive Navigation dengan burger menu
+- Logo dari API `mosqueIdentity.logo_url`
+- Gallery slider di homepage
+- Weekly agenda compact
 
-#### Dashboard Admin
-- Semua menu untuk modul baru
-- Role-based access (admin/editor)
+#### Backend API (All CRUD + Auth)
+- ZIS, Announcements, Pengurus, Events, Gallery, Quotes, Articles, QRIS
 
 #### Website Publik
-- Homepage dengan ZIS card, Quote Islami, QRIS
-- About Page dengan WhatsApp redirect
-- Informasi Page dengan grafik ZIS (Recharts)
-- Agenda Page dengan FullCalendar
+- Homepage, Agenda, About, Informasi (ZIS charts)
 
 #### Docker Deployment
-- Dockerfile untuk backend dan frontend
-- docker-compose.yml untuk orchestration
-- DEPLOYMENT.md dokumentasi
+- Dockerfile, docker-compose.yml, DEPLOYMENT.md
 
 ---
 
@@ -83,64 +79,30 @@ Bangun sebuah Web App Jam Sholat Digital berbasis KHGT Muhammadiyah, siap di-dep
 
 ```
 users: {username, password_hash, name, role}
-identity: {name, address, logo_url, latitude, longitude, elevation, timezone_offset}
-settings: {layout, iqomah_duration, ...}
+identity: {name, address, logo_url, description, profile_image_url, latitude, longitude, elevation, timezone_offset}
 zis_reports: {type, amount, date, month, year, donor_name, description}
 announcements: {title, content, category, is_active, priority}
 pengurus: {name, position, period, photo_url, phone, order}
-special_events: {title, event_date, event_time, location, category, imam, speaker}
 gallery: {title, image_url, description, event_date, order, is_active}
-quotes: {arabic_text, translation, source, order, is_active}
-agenda: {title, event_date, event_time, description, is_active}
-ramadan_schedules: {date, imam_subuh, ...}
+articles: {title, content, author, date}
 ```
-
----
-
-## API Endpoints
-
-### Auth
-- `POST /api/auth/register` (with role)
-- `POST /api/auth/login`
-- `GET /api/auth/me`
-
-### Mosque
-- `GET, PUT /api/mosque/identity`
-- `GET, PUT /api/settings/*`
-
-### Content Management
-- `GET, POST, PUT, DELETE /api/zis`
-- `GET /api/zis/summary`, `/api/zis/monthly-chart`
-- `GET, POST, PUT, DELETE /api/announcements`
-- `GET, POST, PUT, DELETE /api/pengurus`
-- `GET, POST, PUT, DELETE /api/special-events`
-- `GET, POST, PUT, DELETE /api/gallery`
-- `GET, POST, PUT, DELETE /api/quotes`
-- `GET /api/quotes/random`
-- `GET, POST, PUT, DELETE /api/agenda`
-- `GET, POST, DELETE /api/ramadan/schedule`
 
 ---
 
 ## Prioritized Backlog
 
 ### P0 - Critical (COMPLETED)
-- [x] ZIS Report Channel dengan grafik
-- [x] Dashboard admin untuk semua fitur
-- [x] Homepage dengan ZIS card dan QRIS
-- [x] AboutPage dengan WhatsApp redirect
-- [x] Docker deployment files
-- [x] Role-based access control (model level)
-- [x] Responsive Navigation dengan burger menu
-- [x] Logo masjid dari API
-- [x] Gallery slider (conditional)
-- [x] Weekly agenda compact (conditional)
+- [x] README.md dokumentasi untuk GitHub
+- [x] AboutPage dengan tabs (Informasi, Donasi, Kontak)
+- [x] Sejarah masjid dengan highlight cards
+- [x] Dedicated Gallery page `/homepage/gallery`
+- [x] Admin: Deskripsi masjid editable
+- [x] Admin: Profile image upload
 
 ### P1 - High Priority (Next)
 - [ ] Role-Based Access Control (RBAC) - protect API endpoints
 - [ ] RBAC - conditional UI rendering based on user role
-- [ ] Upload logo via dashboard and display on all pages
-- [ ] Add sample data for Gallery and Agenda via admin
+- [ ] Artikel detail page (click to read full article)
 
 ### P2 - Medium Priority
 - [ ] Subdomain routing untuk production
@@ -155,18 +117,12 @@ ramadan_schedules: {date, imam_subuh, ...}
 ---
 
 ## Test Credentials
-- **Admin:** username=`admin`, password=`admin123` (role: admin)
-- **Editor:** Can be created via register (role: editor)
+- **Admin:** username=`admin`, password=`admin123`
 
-## QRIS Info
-- Image URL: `https://customer-assets.emergentagent.com/.../QRIS%20Modif%4010x-100%20Large.jpeg`
-- Bank: BSI (Bank Syariah Indonesia)
-- Rekening: 7148254552
-- a.n. Masjid Muktamirin
-
-## WhatsApp Contact
-- Number: 628121554551
-- Format: `https://api.whatsapp.com/send?phone=628121554551&text=...`
+## Key Information
+- **QRIS**: BSI 7148254552 a.n. Masjid Muktamirin
+- **WhatsApp**: 628121554551
+- **Instagram**: @masjid_muktamirin_sorogaten
 
 ---
 
@@ -174,32 +130,33 @@ ramadan_schedules: {date, imam_subuh, ...}
 
 ```
 /app/
+├── README.md               # NEW: GitHub documentation
 ├── backend/
-│   ├── .env                # DB_NAME=masjid_db
-│   ├── requirements.txt
-│   ├── server.py           # All models and routes
-│   └── seed_ramadan.py     # Ramadan data seeder
+│   ├── server.py           # Updated: description, profile_image_url fields
+│   └── tests/
+│       └── test_new_features.py  # NEW: Test file
 ├── frontend/
-│   ├── .env
-│   ├── package.json
 │   └── src/
-│       ├── App.js
-│       ├── components/
-│       │   ├── WebsiteNavigation.jsx  # NEW: Shared Nav & Footer
-│       │   └── ui/                     # Shadcn components
-│       ├── lib/
-│       │   └── api.js
+│       ├── App.js          # Updated: GalleryPage routes
 │       └── pages/
 │           ├── website/
-│           │   ├── HomePage.jsx      # UPDATED: Gallery, Weekly Agenda
-│           │   ├── AboutPage.jsx     # UPDATED: WebsiteNavigation
-│           │   ├── AgendaPage.jsx    # UPDATED: WebsiteNavigation
-│           │   └── InformasiPage.jsx # UPDATED: WebsiteNavigation
+│           │   ├── AboutPage.jsx     # REWRITTEN: Tabs, history, cards
+│           │   └── GalleryPage.jsx   # NEW: Dedicated gallery
 │           └── Dashboard/
-├── memory/
-│   └── PRD.md
-├── test_reports/
-├── DEPLOYMENT.md
-├── docker-compose.yml
-└── Dockerfile
+│               └── IdentityPage.jsx  # Updated: description, profile upload
+└── memory/
+    └── PRD.md
 ```
+
+---
+
+## Changelog
+
+### 22 Februari 2026
+- Created README.md with deployment documentation
+- Rewrote AboutPage with Tabs (Informasi, Donasi & Infaq, Kontak)
+- Added mosque history with Pangeran Diponegoro story
+- Added highlight cards (1907, 1977, 24/7)
+- Created dedicated GalleryPage at /homepage/gallery
+- Updated IdentityPage with description textarea and profile image upload
+- Updated MosqueIdentity model with description and profile_image_url fields
