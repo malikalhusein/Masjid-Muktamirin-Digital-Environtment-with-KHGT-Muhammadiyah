@@ -1249,19 +1249,23 @@ class RamadanDaySchedule(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     date: str  # YYYY-MM-DD
+    ramadan_day: Optional[int] = None  # Hari ke-X Ramadan
     imam_subuh: Optional[str] = None
-    penceramah_subuh: Optional[str] = None
-    penceramah_berbuka: Optional[str] = None
+    penceramah_subuh: Optional[str] = None  # Kultum Subuh
+    penceramah_berbuka: Optional[str] = None  # Pembicara Buka Bersama
+    materi: Optional[str] = None  # Topik/Materi
     imam_tarawih: Optional[str] = None
     penyedia_takjil: Optional[str] = None
-    penyedia_jaburan: Optional[str] = None
+    penyedia_jaburan: Optional[str] = None  # Jaburan tadarus
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class RamadanScheduleCreate(BaseModel):
     date: str
+    ramadan_day: Optional[int] = None
     imam_subuh: Optional[str] = None
     penceramah_subuh: Optional[str] = None
     penceramah_berbuka: Optional[str] = None
+    materi: Optional[str] = None
     imam_tarawih: Optional[str] = None
     penyedia_takjil: Optional[str] = None
     penyedia_jaburan: Optional[str] = None
