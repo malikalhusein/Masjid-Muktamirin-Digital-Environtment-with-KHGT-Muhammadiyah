@@ -30,6 +30,12 @@ import DisplayContentPage from "@/pages/dashboard/DisplayContentPage";
 import LayoutPage from "@/pages/dashboard/LayoutPage";
 import PrayerSettingsPage from "@/pages/dashboard/PrayerSettingsPage";
 import RamadanAdminPage from "@/pages/dashboard/RamadanAdminPage";
+import ZISPage from "@/pages/dashboard/ZISPage";
+import AnnouncementsPage from "@/pages/dashboard/AnnouncementsPage";
+import PengurusPage from "@/pages/dashboard/PengurusPage";
+import SpecialEventsPage from "@/pages/dashboard/SpecialEventsPage";
+import GalleryPage from "@/pages/dashboard/GalleryPage";
+import QuotesPage from "@/pages/dashboard/QuotesPage";
 
 // Pages - Website
 import HomePage from "@/pages/website/HomePage";
@@ -74,6 +80,12 @@ function App() {
                             <Route path="display-content" element={<DisplayContentPage />} />
                             <Route path="layout" element={<LayoutPage />} />
                             <Route path="prayer-settings" element={<PrayerSettingsPage />} />
+                            <Route path="zis" element={<ZISPage />} />
+                            <Route path="announcements" element={<AnnouncementsPage />} />
+                            <Route path="pengurus" element={<PengurusPage />} />
+                            <Route path="special-events" element={<SpecialEventsPage />} />
+                            <Route path="gallery" element={<GalleryPage />} />
+                            <Route path="quotes" element={<QuotesPage />} />
                             <Route path="ramadan" element={<RamadanAdminPage />} />
                         </Route>
                         
