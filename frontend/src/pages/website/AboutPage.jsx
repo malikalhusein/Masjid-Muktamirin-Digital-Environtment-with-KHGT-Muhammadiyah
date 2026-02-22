@@ -15,7 +15,7 @@ import {
     Copy,
     Check
 } from 'lucide-react';
-import { mosqueAPI, announcementAPI } from '../../lib/api';
+import { mosqueAPI } from '../../lib/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
