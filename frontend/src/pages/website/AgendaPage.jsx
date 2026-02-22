@@ -255,62 +255,23 @@ const AgendaListCard = ({ agenda, icon: Icon }) => {
     );
 };
 
-// Footer (simplified)
-const Footer = () => (
-    <footer className="bg-emerald-950 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                    <h3 className="font-heading text-xl font-bold mb-4">Masjid Muktamirin</h3>
-                    <p className="text-emerald-200 text-sm">Sorogaten, Galur, Kulon Progo</p>
-                    <div className="space-y-2 text-sm text-emerald-300 mt-4">
-                        <p className="flex items-start gap-2">
-                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                            Jl. Sorogaten Dukuh, Sorogaten II, Karangsewu, Kec. Galur, Kab. Kulon Progo, DIY 55661
-                        </p>
-                    </div>
-                </div>
-                <div>
-                    <h3 className="font-heading text-lg font-bold mb-4">Navigasi</h3>
-                    <ul className="space-y-2 text-sm text-emerald-200">
-                        <li><Link to="/homepage" className="hover:text-white">Jadwal Sholat</Link></li>
-                        <li><Link to="/homepage/agenda" className="hover:text-white">Kalender Kegiatan</Link></li>
-                        <li><Link to="/ramadan" className="hover:text-white">Ramadan</Link></li>
-                        <li><Link to="/homepage/about" className="hover:text-white">Informasi</Link></li>
-                        <li><Link to="/homepage/about" className="hover:text-white">Kontak</Link></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 className="font-heading text-lg font-bold mb-4">Infaq & Donasi</h3>
-                    <p className="text-emerald-200 text-sm mb-4">Salurkan infaq dan sedekah Anda untuk kemakmuran masjid dan kegiatan dakwah.</p>
-                    <div className="bg-emerald-900/50 rounded-lg p-4 border border-emerald-800">
-                        <p className="font-medium text-sm">BSI (Bank Syariah Indonesia)</p>
-                        <p className="text-lg font-mono text-emerald-300 my-1">XXX-XXXX-XXX</p>
-                        <p className="text-xs text-emerald-400">a.n. Masjid Muktamirin</p>
-                    </div>
-                </div>
-            </div>
-            <div className="border-t border-emerald-800 mt-8 pt-8 text-center text-emerald-400 text-sm">
-                <p>&copy; {new Date().getFullYear()} Masjid Muktamirin Sorogaten. Hak cipta dilindungi.</p>
-            </div>
-        </div>
-    </footer>
-);
-
 export default function AgendaPage() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [prayerTimes, setPrayerTimes] = useState(null);
+    const [mosqueIdentity, setMosqueIdentity] = useState(null);
     const [agendas, setAgendas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState(null);
     
     const fetchData = useCallback(async () => {
         try {
-            const [prayerRes, agendaRes] = await Promise.all([
+            const [prayerRes, mosqueRes, agendaRes] = await Promise.all([
                 prayerAPI.getTimes(),
+                mosqueAPI.getIdentity(),
                 agendaAPI.getAll(true, true),
             ]);
             setPrayerTimes(prayerRes.data);
+            setMosqueIdentity(mosqueRes.data);
             setAgendas(agendaRes.data);
         } catch (error) {
             console.error('Error fetching data:', error);
