@@ -13,80 +13,10 @@ import {
 } from 'lucide-react';
 import { zisAPI, qrisAPI, mosqueAPI } from '../../lib/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { WebsiteNavigation, WebsiteFooter } from '../../components/WebsiteNavigation';
 
 // QRIS Image URL (fallback)
 const DEFAULT_QRIS_URL = "https://customer-assets.emergentagent.com/job_bc2fce28-e700-491a-980a-47d0af39ffe4/artifacts/tunkmt2e_QRIS%20Modif%4010x-100%20Large.jpeg";
-
-// Navigation component
-const Navigation = ({ activePage = 'informasi' }) => (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-                <Link to="/homepage" className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-emerald-900 flex items-center justify-center border-2 border-emerald-700">
-                        <span className="text-white font-bold text-lg">M</span>
-                    </div>
-                    <div>
-                        <span className="font-bold text-gray-800">Muktamirin</span>
-                        <p className="text-xs text-emerald-600">Sorogaten</p>
-                    </div>
-                </Link>
-                <div className="hidden md:flex items-center gap-1">
-                    {[
-                        { path: '/homepage', label: 'Home', key: 'home' },
-                        { path: '/homepage/agenda', label: 'Agenda', key: 'agenda' },
-                        { path: '/ramadan', label: 'Ramadan', key: 'ramadan' },
-                        { path: '/homepage/informasi', label: 'Informasi', key: 'informasi' },
-                        { path: '/homepage/about', label: 'Tentang Kami', key: 'about' },
-                    ].map((item) => (
-                        <Link
-                            key={item.key}
-                            to={item.path}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                activePage === item.key
-                                    ? 'bg-emerald-900 text-white'
-                                    : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                        >
-                            {item.label}
-                        </Link>
-                    ))}
-                </div>
-            </div>
-        </div>
-    </nav>
-);
-
-// Footer component
-const Footer = () => (
-    <footer className="bg-emerald-950 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                    <h3 className="font-heading text-xl font-bold mb-4">Masjid Muktamirin</h3>
-                    <p className="text-emerald-200 text-sm">Sorogaten, Galur, Kulon Progo</p>
-                </div>
-                <div>
-                    <h3 className="font-heading text-lg font-bold mb-4">Navigasi</h3>
-                    <ul className="space-y-2 text-sm text-emerald-200">
-                        <li><Link to="/homepage" className="hover:text-white">Jadwal Sholat</Link></li>
-                        <li><Link to="/homepage/agenda" className="hover:text-white">Kalender Kegiatan</Link></li>
-                        <li><Link to="/homepage/informasi" className="hover:text-white">Laporan ZIS</Link></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 className="font-heading text-lg font-bold mb-4">Kontak</h3>
-                    <p className="text-emerald-200 text-sm flex items-center gap-2">
-                        <Phone className="w-4 h-4" /> 0812-1554-551
-                    </p>
-                </div>
-            </div>
-            <div className="border-t border-emerald-800 mt-8 pt-8 text-center text-emerald-400 text-sm">
-                <p>&copy; {new Date().getFullYear()} Masjid Muktamirin Sorogaten</p>
-            </div>
-        </div>
-    </footer>
-);
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
