@@ -5,7 +5,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { toast } from 'sonner';
 
-export default function QRISSettingsPage() {
+export default function QRISSettingsPage({ isEmbedded = false }) {
     const [settings, setSettings] = useState({
         qris_image_url: '',
         bank_name: 'BSI (Bank Syariah Indonesia)',
@@ -70,24 +70,26 @@ export default function QRISSettingsPage() {
     return (
         <div className="space-y-6" data-testid="qris-settings-page">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-                    <QrCode className="w-7 h-7 text-amber-400" />
-                    Pengaturan QRIS & Rekening
-                </h1>
-                <p className="text-slate-400 text-sm mt-1">Kelola informasi donasi dan QRIS masjid</p>
-            </div>
+            {!isEmbedded && (
+                <div>
+                    <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+                        <QrCode className="w-7 h-7 text-amber-400" />
+                        Pengaturan QRIS & Rekening
+                    </h1>
+                    <p className="text-slate-400 text-sm mt-1">Kelola informasi donasi dan QRIS masjid</p>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* QRIS Image */}
                 <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
                     <h2 className="text-lg font-semibold text-white mb-4">Gambar QRIS</h2>
-                    
+
                     <div className="bg-slate-900/50 rounded-xl p-6 text-center mb-4">
                         {settings.qris_image_url ? (
-                            <img 
-                                src={settings.qris_image_url} 
-                                alt="QRIS" 
+                            <img
+                                src={settings.qris_image_url}
+                                alt="QRIS"
                                 className="max-w-[250px] mx-auto rounded-lg shadow-lg"
                             />
                         ) : (
@@ -97,14 +99,14 @@ export default function QRISSettingsPage() {
                             </div>
                         )}
                     </div>
-                    
+
                     <div>
                         <label className="text-sm text-slate-400 mb-2 block">Upload Gambar QRIS Baru</label>
-                        <Input 
-                            type="file" 
+                        <Input
+                            type="file"
                             accept="image/*"
                             onChange={handleImageUpload}
-                            className="bg-slate-800 border-slate-700" 
+                            className="bg-slate-800 border-slate-700"
                         />
                         <p className="text-xs text-slate-500 mt-2">Format: JPG, PNG, WebP. Max 5MB.</p>
                     </div>
@@ -113,32 +115,32 @@ export default function QRISSettingsPage() {
                 {/* Bank Info */}
                 <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
                     <h2 className="text-lg font-semibold text-white mb-4">Informasi Rekening</h2>
-                    
+
                     <div className="space-y-4">
                         <div>
                             <label className="text-sm text-slate-400 mb-1 block">Nama Bank</label>
-                            <Input 
-                                value={settings.bank_name} 
-                                onChange={(e) => setSettings(p => ({ ...p, bank_name: e.target.value }))} 
-                                className="bg-slate-800 border-slate-700" 
+                            <Input
+                                value={settings.bank_name}
+                                onChange={(e) => setSettings(p => ({ ...p, bank_name: e.target.value }))}
+                                className="bg-slate-800 border-slate-700"
                                 placeholder="BSI (Bank Syariah Indonesia)"
                             />
                         </div>
                         <div>
                             <label className="text-sm text-slate-400 mb-1 block">Nomor Rekening</label>
-                            <Input 
-                                value={settings.account_number} 
-                                onChange={(e) => setSettings(p => ({ ...p, account_number: e.target.value }))} 
-                                className="bg-slate-800 border-slate-700 font-mono" 
+                            <Input
+                                value={settings.account_number}
+                                onChange={(e) => setSettings(p => ({ ...p, account_number: e.target.value }))}
+                                className="bg-slate-800 border-slate-700 font-mono"
                                 placeholder="1234567890"
                             />
                         </div>
                         <div>
                             <label className="text-sm text-slate-400 mb-1 block">Nama Pemilik Rekening</label>
-                            <Input 
-                                value={settings.account_name} 
-                                onChange={(e) => setSettings(p => ({ ...p, account_name: e.target.value }))} 
-                                className="bg-slate-800 border-slate-700" 
+                            <Input
+                                value={settings.account_name}
+                                onChange={(e) => setSettings(p => ({ ...p, account_name: e.target.value }))}
+                                className="bg-slate-800 border-slate-700"
                                 placeholder="Masjid Muktamirin"
                             />
                         </div>
@@ -156,8 +158,8 @@ export default function QRISSettingsPage() {
 
             {/* Save Button */}
             <div className="flex justify-end">
-                <Button 
-                    onClick={handleSave} 
+                <Button
+                    onClick={handleSave}
                     disabled={saving}
                     className="bg-emerald-600 hover:bg-emerald-700"
                     data-testid="save-qris-btn"

@@ -5,7 +5,7 @@ Sistem manajemen masjid digital lengkap dengan tampilan TV Display, Website Publ
 ## Fitur Utama
 
 ### TV Display (jamsholat.masjidmuktamirin.web.id)
-- Jadwal sholat real-time berbasis KHGT Muhammadiyah
+- Jadwal sholat real-time berbasis **API Hisabmu.com (KHGT Muhammadiyah)** otomatis mengikuti tata letak Latitude dan Longitude
 - Countdown waktu sholat berikutnya
 - Running text pengumuman
 - Slideshow konten (poster, video)
@@ -20,15 +20,24 @@ Sistem manajemen masjid digital lengkap dengan tampilan TV Display, Website Publ
 - Responsive design (mobile-friendly)
 
 ### Dashboard Admin (admin.masjidmuktamirin.web.id)
-- Manajemen identitas masjid (logo, nama, alamat, deskripsi)
+- Manajemen identitas masjid (logo, nama, profil)
+- Konfigurasi Lokasi (embed Google Maps dan pencarian otomatis) untuk akurasi jadwal sholat
 - Manajemen konten (agenda, pengumuman, artikel)
-- Laporan ZIS (Zakat, Infaq, Shodaqoh)
-- Galeri foto kegiatan
+- Laporan ZIS Terintegrasi (Zakat, Infaq, Shodaqoh dan Pengeluaran)
+- Sinkronisasi Laporan ZIS otomatis ke Google Sheets
+- Galeri foto kegiatan berdasarkan kategori (Umum, Ramadan, Idulfitri)
 - Struktur pengurus takmir
 - Event khusus
 - Quote islami
 - Pengaturan QRIS & rekening donasi
-- Role-based access (admin/editor)
+- Endpoint Scraping Jadwal Sholat Dinamis ke Hisabmu KHGT
+- Manajemen Pengguna (Role-based access: Administrator & Editor)
+
+## Pembaruan Rilis Terakhir
+- **Dinamisasi Jadwal Sholat**: Menonaktifkan data kalender statis (built-in backend) dan bertransisi sepenuhnya menggunakan API Scraper ke `hisabmu.com`. Menyesuaikan jadwal berdasarkan posisi kordinat (*Latitude, Longitude*, Elevasi, TZ).
+- **Auto-Search Peta**: Penambahan *Embed* Google Maps interaktif dan integrasi *Nominatim OpenStreetMap* untuk fitur pencarian alamat di Dashboard Admin, guna memudahkan pencarian titik kordinat masjid.
+- **Kemanan Sistem**: Form pendaftaran (Register) dimatikan dari publik. Tata kelola User kini dikendalikan penuh oleh opsi "Administrator" (CRUD & Role-based) di Dasbor Admin.
+- **ZIS Google Sheets**: Export & Sinkronisasi instan *one-click* (sekali klik) dari aplikasi sistem zakat infaq masjid langsung menuju ke spreadsheet Google Sheets Akuntansi Masjid Muktamirin.
 
 ## Tech Stack
 
@@ -277,6 +286,16 @@ docker-compose logs mongo
 
 # Verify connection string di .env
 MONGO_URL=mongodb://mongo:27017
+```
+
+### ⚠️ WARNING: Kehilangan Data di Local Development (Mac/Linux)
+Jika Anda me-restart komputer lalu menjalankan MongoDB lokal (`mongod`), pastikan **selalu** menggunakan `--dbpath` yang benar, tempat data lama Anda tersimpan. Secara default Homebrew menyimpannya di `/opt/homebrew/var/mongodb`.
+
+**JANGAN** menjalankan `mongod` di path `/tmp` atau direktori kosong lainnya, karena seluruh user (termasuk admin) akan hilang dan backend akan gagal memuat data!
+
+```bash
+# Cara yang BENAR untuk menjalankan MongoDB lokal:
+mongod --port 27018 --dbpath /opt/homebrew/var/mongodb &
 ```
 
 ### Frontend blank/error

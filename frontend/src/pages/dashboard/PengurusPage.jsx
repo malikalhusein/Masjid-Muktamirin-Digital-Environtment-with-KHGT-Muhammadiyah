@@ -7,7 +7,7 @@ import { Switch } from '../../components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { toast } from 'sonner';
 
-export default function PengurusPage() {
+export default function PengurusPage({ isEmbedded = false }) {
     const [pengurus, setPengurus] = useState([]);
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -132,19 +132,28 @@ export default function PengurusPage() {
         <div className="space-y-6" data-testid="pengurus-page">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-                        <Users className="w-7 h-7 text-purple-400" />
-                        Struktur Pengurus
-                    </h1>
-                    <p className="text-slate-400 text-sm mt-1">Kelola struktur pengurus takmir masjid</p>
-                </div>
-                <Button 
-                    onClick={() => { 
-                        setEditingItem(null); 
-                        setFormData({ name: '', position: '', period: '2024-2027', photo_url: '', phone: '', order: pengurus.length, is_active: true }); 
-                        setDialogOpen(true); 
-                    }} 
+                {!isEmbedded ? (
+                    <div>
+                        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+                            <Users className="w-7 h-7 text-purple-400" />
+                            Struktur Pengurus
+                        </h1>
+                        <p className="text-slate-400 text-sm mt-1">Kelola struktur pengurus takmir masjid</p>
+                    </div>
+                ) : (
+                    <div>
+                        <h2 className="font-heading text-lg text-white flex items-center gap-2">
+                            <Users className="w-5 h-5 text-purple-400" /> Daftar Pengurus
+                        </h2>
+                        <p className="text-slate-400 text-sm mt-1">Kelola personil takmir</p>
+                    </div>
+                )}
+                <Button
+                    onClick={() => {
+                        setEditingItem(null);
+                        setFormData({ name: '', position: '', period: '2024-2027', photo_url: '', phone: '', order: pengurus.length, is_active: true });
+                        setDialogOpen(true);
+                    }}
                     className="bg-purple-600 hover:bg-purple-700"
                     data-testid="add-pengurus-btn"
                 >
@@ -161,8 +170,8 @@ export default function PengurusPage() {
                     </div>
                 ) : (
                     pengurus.map((item) => (
-                        <div 
-                            key={item.id} 
+                        <div
+                            key={item.id}
                             className={`bg-slate-800/50 border rounded-xl p-4 ${item.is_active ? 'border-slate-700' : 'border-slate-800 opacity-60'}`}
                         >
                             <div className="flex items-start justify-between mb-3">
@@ -204,19 +213,19 @@ export default function PengurusPage() {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="text-sm text-slate-400 mb-1 block">Nama Lengkap *</label>
-                            <Input 
-                                value={formData.name} 
-                                onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))} 
-                                className="bg-slate-800 border-slate-700" 
+                            <Input
+                                value={formData.name}
+                                onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
+                                className="bg-slate-800 border-slate-700"
                                 placeholder="Nama lengkap"
                             />
                         </div>
                         <div>
                             <label className="text-sm text-slate-400 mb-1 block">Jabatan *</label>
-                            <Input 
-                                value={formData.position} 
-                                onChange={(e) => setFormData(p => ({ ...p, position: e.target.value }))} 
-                                className="bg-slate-800 border-slate-700" 
+                            <Input
+                                value={formData.position}
+                                onChange={(e) => setFormData(p => ({ ...p, position: e.target.value }))}
+                                className="bg-slate-800 border-slate-700"
                                 placeholder="Ketua Takmir"
                                 list="positions"
                             />
@@ -227,30 +236,30 @@ export default function PengurusPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm text-slate-400 mb-1 block">Periode</label>
-                                <Input 
-                                    value={formData.period} 
-                                    onChange={(e) => setFormData(p => ({ ...p, period: e.target.value }))} 
-                                    className="bg-slate-800 border-slate-700" 
+                                <Input
+                                    value={formData.period}
+                                    onChange={(e) => setFormData(p => ({ ...p, period: e.target.value }))}
+                                    className="bg-slate-800 border-slate-700"
                                     placeholder="2024-2027"
                                 />
                             </div>
                             <div>
                                 <label className="text-sm text-slate-400 mb-1 block">No. HP</label>
-                                <Input 
-                                    value={formData.phone} 
-                                    onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))} 
-                                    className="bg-slate-800 border-slate-700" 
+                                <Input
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
+                                    className="bg-slate-800 border-slate-700"
                                     placeholder="08xxx"
                                 />
                             </div>
                         </div>
                         <div>
                             <label className="text-sm text-slate-400 mb-1 block">Foto (opsional)</label>
-                            <Input 
-                                type="file" 
+                            <Input
+                                type="file"
                                 accept="image/*"
                                 onChange={handlePhotoUpload}
-                                className="bg-slate-800 border-slate-700" 
+                                className="bg-slate-800 border-slate-700"
                             />
                             {formData.photo_url && (
                                 <img src={formData.photo_url} alt="Preview" className="w-16 h-16 rounded-full object-cover mt-2" />
@@ -259,18 +268,18 @@ export default function PengurusPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm text-slate-400 mb-1 block">Urutan</label>
-                                <Input 
-                                    type="number" 
-                                    value={formData.order} 
-                                    onChange={(e) => setFormData(p => ({ ...p, order: parseInt(e.target.value) || 0 }))} 
+                                <Input
+                                    type="number"
+                                    value={formData.order}
+                                    onChange={(e) => setFormData(p => ({ ...p, order: parseInt(e.target.value) || 0 }))}
                                     className="bg-slate-800 border-slate-700"
                                     min="0"
                                 />
                             </div>
                             <div className="flex items-end pb-2">
                                 <div className="flex items-center gap-2">
-                                    <Switch 
-                                        checked={formData.is_active} 
+                                    <Switch
+                                        checked={formData.is_active}
                                         onCheckedChange={(v) => setFormData(p => ({ ...p, is_active: v }))}
                                     />
                                     <label className="text-sm text-slate-300">Aktif</label>

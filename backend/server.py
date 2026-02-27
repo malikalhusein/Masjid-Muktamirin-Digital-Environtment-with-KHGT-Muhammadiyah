@@ -42,6 +42,18 @@ class UserCreate(BaseModel):
     name: str
     role: str = "editor"  # admin or editor
 
+class UserUpdate(BaseModel):
+    password: Optional[str] = None
+    name: Optional[str] = None
+    role: Optional[str] = None
+
+class UserResponse(BaseModel):
+    id: str
+    username: str
+    name: str
+    role: str
+    created_at: Optional[datetime] = None
+
 class UserLogin(BaseModel):
     username: str
     password: str
@@ -228,6 +240,8 @@ class ZISReport(BaseModel):
     month: int  # 1-12
     year: int
     donor_name: Optional[str] = None  # Optional, bisa anonim
+    expenditure_amount: Optional[float] = None  # Jumlah pengeluaran terkait
+    expenditure_description: Optional[str] = None  # Keterangan pengeluaran
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ZISReportCreate(BaseModel):
@@ -236,6 +250,8 @@ class ZISReportCreate(BaseModel):
     description: Optional[str] = None
     date: str
     donor_name: Optional[str] = None
+    expenditure_amount: Optional[float] = None
+    expenditure_description: Optional[str] = None
 
 class ZISReportUpdate(BaseModel):
     type: Optional[str] = None
@@ -243,6 +259,8 @@ class ZISReportUpdate(BaseModel):
     description: Optional[str] = None
     date: Optional[str] = None
     donor_name: Optional[str] = None
+    expenditure_amount: Optional[float] = None
+    expenditure_description: Optional[str] = None
 
 # ==================== ANNOUNCEMENT MODELS ====================
 
@@ -352,6 +370,7 @@ class GalleryItem(BaseModel):
     image_url: str
     description: Optional[str] = None
     event_date: Optional[str] = None
+    category: str = "umum"
     order: int = 0
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -361,6 +380,7 @@ class GalleryItemCreate(BaseModel):
     image_url: str
     description: Optional[str] = None
     event_date: Optional[str] = None
+    category: str = "umum"
     order: int = 0
     is_active: bool = True
 
@@ -369,6 +389,7 @@ class GalleryItemUpdate(BaseModel):
     image_url: Optional[str] = None
     description: Optional[str] = None
     event_date: Optional[str] = None
+    category: Optional[str] = None
     order: Optional[int] = None
     is_active: Optional[bool] = None
 
@@ -468,10 +489,20 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-# ==================== AUTH ROUTES ====================
+async def require_admin(user: dict = Depends(get_current_user)):
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
 
-@api_router.post("/auth/register")
-async def register(user: UserCreate):
+# ==================== AUTH & USER ROUTES ====================
+
+@api_router.get("/users", response_model=List[UserResponse])
+async def get_users(admin_user: dict = Depends(require_admin)):
+    users = await db.users.find({}, {"password": 0, "_id": 0}).to_list(100)
+    return users
+
+@api_router.post("/users", response_model=UserResponse)
+async def create_user(user: UserCreate, admin_user: dict = Depends(require_admin)):
     existing = await db.users.find_one({"username": user.username})
     if existing:
         raise HTTPException(status_code=400, detail="Username already exists")
@@ -483,8 +514,34 @@ async def register(user: UserCreate):
     doc["created_at"] = doc["created_at"].isoformat()
     
     await db.users.insert_one(doc)
-    token = create_token(user_obj.id, user_obj.username)
-    return {"token": token, "user": {"id": user_obj.id, "username": user_obj.username, "name": user_obj.name, "role": user_obj.role}}
+    doc["created_at"] = user_obj.created_at # for response
+    return doc
+
+@api_router.put("/users/{user_id}", response_model=UserResponse)
+async def update_user(user_id: str, update: UserUpdate, admin_user: dict = Depends(require_admin)):
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    if "password" in update_data:
+        update_data["password"] = hash_password(update_data["password"])
+        
+    if update_data:
+        await db.users.update_one({"id": user_id}, {"$set": update_data})
+        
+    updated = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+    return updated
+
+@api_router.delete("/users/{user_id}")
+async def delete_user(user_id: str, admin_user: dict = Depends(require_admin)):
+    if user_id == admin_user["id"]:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+        
+    result = await db.users.delete_one({"id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "User deleted"}
 
 @api_router.post("/auth/login")
 async def login(user: UserLogin):
@@ -493,11 +550,11 @@ async def login(user: UserLogin):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     token = create_token(db_user["id"], db_user["username"])
-    return {"token": token, "user": {"id": db_user["id"], "username": db_user["username"], "name": db_user["name"]}}
+    return {"token": token, "user": {"id": db_user["id"], "username": db_user["username"], "name": db_user["name"], "role": db_user.get("role", "editor")}}
 
 @api_router.get("/auth/me")
 async def get_me(user: dict = Depends(get_current_user)):
-    return {"id": user["id"], "username": user["username"], "name": user["name"]}
+    return {"id": user["id"], "username": user["username"], "name": user["name"], "role": user.get("role", "editor")}
 
 # ==================== MOSQUE IDENTITY ====================
 
@@ -578,99 +635,7 @@ async def update_layout_settings(update: LayoutSettingsUpdate, user: dict = Depe
     updated = await db.layout_settings.find_one({}, {"_id": 0})
     return LayoutSettings(**updated)
 
-# ==================== PRAYER TIMES (KHGT DATABASE) ====================
-
-# Data jadwal sholat KHGT Yogyakarta Feb-Mar 2026 (dari hisabmu.com)
-# Format: (subuh, terbit, dhuha, dzuhur, ashar, maghrib, isya)
-KHGT_YOGYAKARTA_2026 = {
-    # February 2026
-    (2026, 2, 1): ("04:25", "05:39", "05:57", "11:53", "15:12", "18:06", "19:19"),
-    (2026, 2, 2): ("04:26", "05:39", "05:57", "11:53", "15:12", "18:06", "19:19"),
-    (2026, 2, 3): ("04:26", "05:39", "05:57", "11:53", "15:11", "18:06", "19:19"),
-    (2026, 2, 4): ("04:27", "05:40", "05:58", "11:53", "15:11", "18:06", "19:19"),
-    (2026, 2, 5): ("04:27", "05:40", "05:58", "11:53", "15:11", "18:06", "19:19"),
-    (2026, 2, 6): ("04:28", "05:40", "05:58", "11:54", "15:10", "18:06", "19:18"),
-    (2026, 2, 7): ("04:28", "05:40", "05:58", "11:54", "15:10", "18:06", "19:18"),
-    (2026, 2, 8): ("04:28", "05:41", "05:59", "11:54", "15:09", "18:06", "19:18"),
-    (2026, 2, 9): ("04:29", "05:41", "05:59", "11:54", "15:09", "18:05", "19:18"),
-    (2026, 2, 10): ("04:29", "05:41", "05:59", "11:54", "15:09", "18:05", "19:17"),
-    (2026, 2, 11): ("04:29", "05:41", "05:59", "11:54", "15:08", "18:05", "19:17"),
-    (2026, 2, 12): ("04:30", "05:42", "06:00", "11:54", "15:07", "18:05", "19:17"),
-    (2026, 2, 13): ("04:30", "05:42", "06:00", "11:54", "15:07", "18:05", "19:17"),
-    (2026, 2, 14): ("04:30", "05:42", "06:00", "11:54", "15:06", "18:04", "19:16"),
-    (2026, 2, 15): ("04:30", "05:42", "06:00", "11:54", "15:05", "18:04", "19:16"),
-    (2026, 2, 16): ("04:31", "05:42", "06:00", "11:54", "15:05", "18:04", "19:15"),
-    (2026, 2, 17): ("04:31", "05:42", "06:00", "11:54", "15:05", "18:04", "19:15"),
-    (2026, 2, 18): ("04:31", "05:43", "06:01", "11:53", "15:03", "18:03", "19:14"),
-    (2026, 2, 19): ("04:31", "05:43", "06:01", "11:53", "15:02", "18:03", "19:14"),
-    (2026, 2, 20): ("04:32", "05:43", "06:01", "11:53", "15:02", "18:03", "19:14"),
-    (2026, 2, 21): ("04:32", "05:43", "06:01", "11:53", "15:01", "18:02", "19:13"),
-    (2026, 2, 22): ("04:32", "05:43", "06:01", "11:53", "15:01", "18:02", "19:13"),
-    (2026, 2, 23): ("04:32", "05:43", "06:01", "11:53", "14:59", "18:02", "19:12"),
-    (2026, 2, 24): ("04:33", "05:43", "06:01", "11:53", "14:58", "18:01", "19:12"),
-    (2026, 2, 25): ("04:33", "05:43", "06:01", "11:53", "14:57", "18:01", "19:11"),
-    (2026, 2, 26): ("04:33", "05:43", "06:01", "11:52", "14:56", "18:01", "19:11"),
-    (2026, 2, 27): ("04:33", "05:43", "06:01", "11:52", "14:55", "18:00", "19:10"),
-    (2026, 2, 28): ("04:33", "05:43", "06:01", "11:52", "14:54", "18:00", "19:10"),
-    # March 2026
-    (2026, 3, 1): ("04:33", "05:43", "06:01", "11:51", "14:52", "17:59", "19:09"),
-    (2026, 3, 2): ("04:33", "05:43", "06:01", "11:51", "14:52", "17:58", "19:08"),
-    (2026, 3, 3): ("04:33", "05:43", "06:01", "11:51", "14:51", "17:58", "19:08"),
-    (2026, 3, 4): ("04:33", "05:43", "06:01", "11:51", "14:50", "17:57", "19:07"),
-    (2026, 3, 5): ("04:33", "05:43", "06:01", "11:51", "14:50", "17:57", "19:07"),
-    (2026, 3, 6): ("04:33", "05:43", "06:01", "11:50", "14:48", "17:56", "19:06"),
-    (2026, 3, 7): ("04:33", "05:43", "06:01", "11:50", "14:47", "17:55", "19:05"),
-    (2026, 3, 8): ("04:33", "05:42", "06:00", "11:50", "14:46", "17:55", "19:05"),
-    (2026, 3, 9): ("04:33", "05:42", "06:00", "11:49", "14:45", "17:54", "19:04"),
-    (2026, 3, 10): ("04:33", "05:42", "06:00", "11:49", "14:44", "17:53", "19:03"),
-    (2026, 3, 11): ("04:33", "05:42", "06:00", "11:49", "14:43", "17:53", "19:03"),
-    (2026, 3, 12): ("04:32", "05:41", "05:59", "11:48", "14:42", "17:52", "19:02"),
-    (2026, 3, 13): ("04:32", "05:41", "05:59", "11:48", "14:41", "17:51", "19:01"),
-    (2026, 3, 14): ("04:32", "05:41", "05:59", "11:47", "14:40", "17:51", "19:01"),
-    (2026, 3, 15): ("04:32", "05:40", "05:58", "11:47", "14:39", "17:50", "19:00"),
-    (2026, 3, 16): ("04:31", "05:40", "05:58", "11:47", "14:38", "17:49", "18:59"),
-    (2026, 3, 17): ("04:31", "05:39", "05:57", "11:46", "14:37", "17:49", "18:58"),
-    (2026, 3, 18): ("04:31", "05:39", "05:57", "11:46", "14:36", "17:48", "18:58"),
-    (2026, 3, 19): ("04:30", "05:39", "05:57", "11:45", "14:35", "17:47", "18:57"),
-    (2026, 3, 20): ("04:30", "05:38", "05:56", "11:45", "14:34", "17:47", "18:56"),
-    (2026, 3, 21): ("04:30", "05:38", "05:56", "11:44", "14:32", "17:46", "18:55"),
-    (2026, 3, 22): ("04:29", "05:37", "05:55", "11:44", "14:31", "17:45", "18:55"),
-    (2026, 3, 23): ("04:29", "05:37", "05:55", "11:44", "14:30", "17:45", "18:54"),
-    (2026, 3, 24): ("04:28", "05:36", "05:54", "11:43", "14:29", "17:44", "18:53"),
-    (2026, 3, 25): ("04:28", "05:36", "05:54", "11:43", "14:28", "17:43", "18:52"),
-    (2026, 3, 26): ("04:27", "05:35", "05:53", "11:42", "14:27", "17:43", "18:52"),
-    (2026, 3, 27): ("04:27", "05:35", "05:53", "11:42", "14:26", "17:42", "18:51"),
-    (2026, 3, 28): ("04:26", "05:34", "05:52", "11:41", "14:25", "17:41", "18:50"),
-    (2026, 3, 29): ("04:26", "05:34", "05:52", "11:41", "14:24", "17:41", "18:50"),
-    (2026, 3, 30): ("04:25", "05:33", "05:51", "11:40", "14:23", "17:40", "18:49"),
-    (2026, 3, 31): ("04:25", "05:33", "05:51", "11:40", "14:22", "17:39", "18:48"),
-}
-
-def get_khgt_prayer_times(year: int, month: int, day: int):
-    """Get prayer times from KHGT database"""
-    key = (year, month, day)
-    if key in KHGT_YOGYAKARTA_2026:
-        times = KHGT_YOGYAKARTA_2026[key]
-        # Calculate imsak (10 minutes before subuh)
-        subuh_parts = times[0].split(":")
-        imsak_hour = int(subuh_parts[0])
-        imsak_min = int(subuh_parts[1]) - 10
-        if imsak_min < 0:
-            imsak_min += 60
-            imsak_hour -= 1
-        imsak = f"{imsak_hour:02d}:{imsak_min:02d}"
-        
-        return {
-            "imsak": imsak,
-            "subuh": times[0],
-            "terbit": times[1],
-            "dhuha": times[2],
-            "dzuhur": times[3],
-            "ashar": times[4],
-            "maghrib": times[5],
-            "isya": times[6],
-        }
-    return None
+# ==================== PRAYER TIMES ====================
 
 @api_router.get("/prayer-times")
 async def get_prayer_times(date: Optional[str] = None):
@@ -690,19 +655,11 @@ async def get_prayer_times(date: Optional[str] = None):
     month = target_date.month
     day = target_date.day
     
-    # Try to get from KHGT database first
-    khgt_times = get_khgt_prayer_times(year, month, day)
-    
-    if khgt_times:
-        return {
-            "date": target_date.strftime("%Y-%m-%d"),
-            **khgt_times
-        }
-    
-    # Fallback to API if not in database
+    # Extract requested params to pass to hisabmu API
     lat = identity.get("latitude", -7.9404)
     lng = identity.get("longitude", 110.2357)
     elev = identity.get("elevation", 50)
+
     
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -1002,6 +959,20 @@ async def get_zis_summary(month: Optional[int] = None, year: Optional[int] = Non
             summary[r["_id"]] = {"total": r["total"], "count": r["count"]}
     
     summary["grand_total"] = summary["zakat"]["total"] + summary["infaq"]["total"] + summary["shodaqoh"]["total"]
+    
+    # Calculate total pengeluaran
+    exp_pipeline = [
+        {"$match": {"month": target_month, "year": target_year, "expenditure_amount": {"$exists": True, "$gt": 0}}},
+        {"$group": {
+            "_id": None,
+            "total": {"$sum": "$expenditure_amount"},
+            "count": {"$sum": 1}
+        }}
+    ]
+    exp_results = await db.zis_reports.aggregate(exp_pipeline).to_list(1)
+    summary["total_pengeluaran"] = exp_results[0]["total"] if exp_results else 0
+    summary["pengeluaran_count"] = exp_results[0]["count"] if exp_results else 0
+    
     return summary
 
 @api_router.get("/zis/monthly-chart")
@@ -1078,6 +1049,218 @@ async def delete_zis_report(report_id: str, user: dict = Depends(get_current_use
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Report not found")
     return {"message": "Report deleted"}
+
+# ==================== EXPENDITURE (PENGELUARAN DANA) ROUTES ====================
+
+class ExpenditureReport(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    category: str  # operasional, pembangunan, dakwah, sosial, lainnya
+    amount: float
+    description: Optional[str] = None
+    date: str  # YYYY-MM-DD
+    month: int
+    year: int
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ExpenditureCreate(BaseModel):
+    category: str
+    amount: float
+    description: Optional[str] = None
+    date: str
+
+class ExpenditureUpdate(BaseModel):
+    category: Optional[str] = None
+    amount: Optional[float] = None
+    description: Optional[str] = None
+    date: Optional[str] = None
+
+@api_router.get("/expenditure")
+async def get_expenditures(month: Optional[int] = None, year: Optional[int] = None):
+    """Get expenditure reports with optional filters"""
+    query = {}
+    if month:
+        query["month"] = month
+    if year:
+        query["year"] = year
+    reports = await db.expenditure_reports.find(query, {"_id": 0}).sort("date", -1).to_list(1000)
+    return reports
+
+@api_router.get("/expenditure/summary")
+async def get_expenditure_summary(month: Optional[int] = None, year: Optional[int] = None):
+    """Get expenditure summary per category"""
+    now = datetime.now(timezone.utc)
+    target_month = month or now.month
+    target_year = year or now.year
+
+    pipeline = [
+        {"$match": {"month": target_month, "year": target_year}},
+        {"$group": {
+            "_id": "$category",
+            "total": {"$sum": "$amount"},
+            "count": {"$sum": 1}
+        }}
+    ]
+    results = await db.expenditure_reports.aggregate(pipeline).to_list(20)
+    categories = {}
+    for r in results:
+        categories[r["_id"]] = {"total": r["total"], "count": r["count"]}
+    grand_total = sum(v["total"] for v in categories.values())
+    return {
+        "month": target_month,
+        "year": target_year,
+        "categories": categories,
+        "grand_total": grand_total
+    }
+
+@api_router.post("/expenditure")
+async def create_expenditure(data: ExpenditureCreate, user: dict = Depends(get_current_user)):
+    """Create new expenditure record"""
+    date_obj = datetime.strptime(data.date, "%Y-%m-%d")
+    report = ExpenditureReport(
+        category=data.category,
+        amount=data.amount,
+        description=data.description,
+        date=data.date,
+        month=date_obj.month,
+        year=date_obj.year
+    )
+    doc = report.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.expenditure_reports.insert_one(doc)
+    return report
+
+@api_router.put("/expenditure/{report_id}")
+async def update_expenditure(report_id: str, data: ExpenditureUpdate, user: dict = Depends(get_current_user)):
+    """Update expenditure record"""
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    if "date" in update_data:
+        date_obj = datetime.strptime(update_data["date"], "%Y-%m-%d")
+        update_data["month"] = date_obj.month
+        update_data["year"] = date_obj.year
+    result = await db.expenditure_reports.update_one({"id": report_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Expenditure not found")
+    updated = await db.expenditure_reports.find_one({"id": report_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/expenditure/{report_id}")
+async def delete_expenditure(report_id: str, user: dict = Depends(get_current_user)):
+    """Delete expenditure record"""
+    result = await db.expenditure_reports.delete_one({"id": report_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Expenditure not found")
+    return {"message": "Expenditure deleted"}
+
+# ==================== GOOGLE SHEETS SYNC ROUTES ====================
+
+class SheetsConfig(BaseModel):
+    spreadsheet_id: Optional[str] = None
+    service_account_json: Optional[str] = None  # JSON string of service account credentials
+
+@api_router.get("/zis/sheets-config")
+async def get_sheets_config(user: dict = Depends(get_current_user)):
+    """Get Google Sheets configuration"""
+    config = await db.settings.find_one({"key": "sheets_config"}, {"_id": 0})
+    if not config:
+        return {"spreadsheet_id": None, "has_credentials": False}
+    return {
+        "spreadsheet_id": config.get("spreadsheet_id"),
+        "has_credentials": bool(config.get("service_account_json"))
+    }
+
+@api_router.post("/zis/sheets-config")
+async def save_sheets_config(data: SheetsConfig, user: dict = Depends(get_current_user)):
+    """Save Google Sheets configuration"""
+    update = {"key": "sheets_config"}
+    if data.spreadsheet_id is not None:
+        update["spreadsheet_id"] = data.spreadsheet_id
+    if data.service_account_json is not None:
+        update["service_account_json"] = data.service_account_json
+    await db.settings.update_one({"key": "sheets_config"}, {"$set": update}, upsert=True)
+    return {"message": "Konfigurasi Google Sheets disimpan"}
+
+@api_router.post("/zis/sync-to-sheets")
+async def sync_to_sheets(user: dict = Depends(get_current_user)):
+    """Sync ZIS and Expenditure data to Google Sheets"""
+    try:
+        import gspread
+        from google.oauth2.service_account import Credentials
+        import json as json_lib
+
+        config = await db.settings.find_one({"key": "sheets_config"}, {"_id": 0})
+        if not config or not config.get("spreadsheet_id") or not config.get("service_account_json"):
+            raise HTTPException(status_code=400, detail="Konfigurasi Google Sheets belum diatur. Masukkan Spreadsheet ID dan Service Account terlebih dahulu.")
+
+        scopes = [
+            "https://spreadsheets.google.com/feeds",
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive"
+        ]
+        sa_info = json_lib.loads(config["service_account_json"])
+        creds = Credentials.from_service_account_info(sa_info, scopes=scopes)
+        gc = gspread.authorize(creds)
+        spreadsheet = gc.open_by_key(config["spreadsheet_id"])
+
+        now = datetime.now(timezone.utc)
+
+        # ---- Sheet 1: Pemasukan ZIS ----
+        try:
+            ws_zis = spreadsheet.worksheet("Pemasukan ZIS")
+            ws_zis.clear()
+        except gspread.exceptions.WorksheetNotFound:
+            ws_zis = spreadsheet.add_worksheet(title="Pemasukan ZIS", rows=500, cols=10)
+
+        zis_reports = await db.zis_reports.find({}, {"_id": 0}).sort("date", -1).to_list(1000)
+        zis_rows = [["Tanggal", "Jenis", "Donatur", "Jumlah (Rp)", "Keterangan"]]
+        for r in zis_reports:
+            zis_rows.append([
+                r.get("date", ""),
+                r.get("type", "").capitalize(),
+                r.get("donor_name") or "Anonim",
+                r.get("amount", 0),
+                r.get("description") or ""
+            ])
+        ws_zis.update(zis_rows, "A1")
+
+        # ---- Sheet 2: Pengeluaran Dana ----
+        try:
+            ws_exp = spreadsheet.worksheet("Pengeluaran Dana")
+            ws_exp.clear()
+        except gspread.exceptions.WorksheetNotFound:
+            ws_exp = spreadsheet.add_worksheet(title="Pengeluaran Dana", rows=500, cols=10)
+
+        exp_reports = await db.expenditure_reports.find({}, {"_id": 0}).sort("date", -1).to_list(1000)
+        exp_rows = [["Tanggal", "Kategori", "Jumlah (Rp)", "Keterangan"]]
+        for r in exp_reports:
+            exp_rows.append([
+                r.get("date", ""),
+                r.get("category", "").capitalize(),
+                r.get("amount", 0),
+                r.get("description") or ""
+            ])
+        ws_exp.update(exp_rows, "A1")
+
+        # Save sync timestamp
+        await db.settings.update_one(
+            {"key": "sheets_config"},
+            {"$set": {"last_sync": now.isoformat()}},
+            upsert=True
+        )
+
+        return {
+            "message": "Sinkronisasi berhasil!",
+            "zis_rows": len(zis_rows) - 1,
+            "expenditure_rows": len(exp_rows) - 1,
+            "synced_at": now.isoformat()
+        }
+
+    except ImportError:
+        raise HTTPException(status_code=500, detail="Library gspread belum terinstall. Hubungi administrator.")
+    except gspread.exceptions.SpreadsheetNotFound:
+        raise HTTPException(status_code=400, detail="Spreadsheet tidak ditemukan. Pastikan ID benar dan sudah di-share ke Service Account.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal sinkronisasi: {str(e)}")
 
 # ==================== ANNOUNCEMENT ROUTES ====================
 
@@ -1205,9 +1388,13 @@ async def delete_special_event(item_id: str, user: dict = Depends(get_current_us
 # ==================== GALLERY ROUTES ====================
 
 @api_router.get("/gallery")
-async def get_gallery(active_only: bool = False):
-    """Get all gallery items"""
-    query = {"is_active": True} if active_only else {}
+async def get_gallery(active_only: bool = False, category: Optional[str] = None):
+    """Get all gallery items, optionally filtered by category"""
+    query = {}
+    if active_only:
+        query["is_active"] = True
+    if category:
+        query["category"] = category
     items = await db.gallery.find(query, {"_id": 0}).sort([("order", 1), ("created_at", -1)]).to_list(100)
     return items
 

@@ -29,7 +29,7 @@ const DayInputForm = ({ date, data, onChange }) => {
         { key: 'penyedia_takjil', label: 'Penyedia Takjil' },
         { key: 'penyedia_jaburan', label: 'Penyedia Jaburan' },
     ];
-    
+
     return (
         <div className="grid grid-cols-2 gap-4">
             {fields.map((field) => (
@@ -54,15 +54,15 @@ export default function RamadanAdminPage() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    
+
     // Get Ramadan dates for 1447 H (Feb 17 - Mar 18, 2026)
     const ramadanStart = new Date(2026, 1, 17); // Feb 17, 2026
     const ramadanEnd = new Date(2026, 2, 18); // Mar 18, 2026
-    
+
     useEffect(() => {
         fetchSchedule();
     }, []);
-    
+
     const fetchSchedule = async () => {
         try {
             const res = await fetch(`${API_URL}/api/ramadan/schedule`);
@@ -81,24 +81,24 @@ export default function RamadanAdminPage() {
             setLoading(false);
         }
     };
-    
+
     const handleSaveDay = async () => {
         if (!selectedDate) return;
         setSaving(true);
-        
+
         const dateStr = selectedDate.toISOString().split('T')[0];
         const dayData = ramadanSchedule[dateStr] || { ...emptyDayData };
-        
+
         try {
             const res = await fetch(`${API_URL}/api/ramadan/schedule`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 },
                 body: JSON.stringify({ date: dateStr, ...dayData }),
             });
-            
+
             if (res.ok) {
                 toast.success('Data berhasil disimpan');
                 setDialogOpen(false);
@@ -112,7 +112,7 @@ export default function RamadanAdminPage() {
             setSaving(false);
         }
     };
-    
+
     const updateDayData = (field, value) => {
         if (!selectedDate) return;
         const dateStr = selectedDate.toISOString().split('T')[0];
@@ -124,16 +124,16 @@ export default function RamadanAdminPage() {
             }
         }));
     };
-    
+
     const isRamadanDate = (date) => {
         return date >= ramadanStart && date <= ramadanEnd;
     };
-    
+
     const getRamadanDay = (date) => {
         if (!isRamadanDate(date)) return null;
         return Math.floor((date - ramadanStart) / (1000 * 60 * 60 * 24)) + 1;
     };
-    
+
     // Calendar generation
     const generateCalendarDays = () => {
         const year = currentMonth.getFullYear();
@@ -142,7 +142,7 @@ export default function RamadanAdminPage() {
         const lastDay = new Date(year, month + 1, 0);
         const startDay = firstDay.getDay();
         const daysInMonth = lastDay.getDate();
-        
+
         const days = [];
         for (let i = 0; i < startDay; i++) days.push(null);
         for (let i = 1; i <= daysInMonth; i++) {
@@ -150,13 +150,13 @@ export default function RamadanAdminPage() {
         }
         return days;
     };
-    
+
     const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-    
+
     const prevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
     const nextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
-    
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -164,7 +164,7 @@ export default function RamadanAdminPage() {
             </div>
         );
     }
-    
+
     return (
         <div className="space-y-6" data-testid="ramadan-admin-page">
             <div>
@@ -176,7 +176,7 @@ export default function RamadanAdminPage() {
                     Input data imam, penceramah, dan penyedia takjil untuk setiap hari Ramadan
                 </p>
             </div>
-            
+
             {/* Info Banner */}
             <Card className="bg-gradient-to-r from-amber-900/50 to-orange-900/50 border-amber-700">
                 <CardContent className="p-4">
@@ -189,7 +189,7 @@ export default function RamadanAdminPage() {
                     </div>
                 </CardContent>
             </Card>
-            
+
             {/* Calendar */}
             <Card className="bg-slate-900/80 border-slate-800">
                 <CardHeader>
@@ -222,13 +222,13 @@ export default function RamadanAdminPage() {
                         ))}
                         {generateCalendarDays().map((date, index) => {
                             if (!date) return <div key={index} />;
-                            
+
                             const isRamadan = isRamadanDate(date);
                             const ramadanDay = getRamadanDay(date);
                             const dateStr = date.toISOString().split('T')[0];
                             const hasData = ramadanSchedule[dateStr] && Object.values(ramadanSchedule[dateStr]).some(v => v && v.trim());
                             const isToday = date.toDateString() === new Date().toDateString();
-                            
+
                             return (
                                 <Dialog key={index} open={dialogOpen && selectedDate?.toDateString() === date.toDateString()} onOpenChange={(open) => {
                                     if (open && isRamadan) {
@@ -243,8 +243,8 @@ export default function RamadanAdminPage() {
                                             disabled={!isRamadan}
                                             className={`
                                                 relative p-2 rounded-lg text-sm transition-all
-                                                ${isRamadan 
-                                                    ? 'bg-amber-900/30 hover:bg-amber-800/50 cursor-pointer border border-amber-800' 
+                                                ${isRamadan
+                                                    ? 'bg-amber-900/30 hover:bg-amber-800/50 cursor-pointer border border-amber-800'
                                                     : 'bg-slate-800/30 text-slate-600 cursor-not-allowed'
                                                 }
                                                 ${isToday ? 'ring-2 ring-amber-400' : ''}
@@ -272,7 +272,7 @@ export default function RamadanAdminPage() {
                                             </DialogTitle>
                                         </DialogHeader>
                                         <div className="mt-4">
-                                            <DayInputForm 
+                                            <DayInputForm
                                                 date={date}
                                                 data={ramadanSchedule[dateStr] || emptyDayData}
                                                 onChange={updateDayData}
@@ -292,7 +292,7 @@ export default function RamadanAdminPage() {
                             );
                         })}
                     </div>
-                    
+
                     {/* Legend */}
                     <div className="flex items-center gap-6 mt-6 text-sm">
                         <div className="flex items-center gap-2">

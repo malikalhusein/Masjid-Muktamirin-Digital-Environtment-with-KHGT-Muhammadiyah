@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-    Phone, 
-    Mail, 
+import {
+    Phone,
+    Mail,
     MapPin,
     Send,
     QrCode,
@@ -20,7 +20,7 @@ import {
     Image,
     FileText
 } from 'lucide-react';
-import { mosqueAPI, announcementAPI, pengurusAPI, articleAPI, galleryAPI } from '../../lib/api';
+import { mosqueAPI, announcementAPI, pengurusAPI, galleryAPI } from '../../lib/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
@@ -46,14 +46,14 @@ Sumber kisah ini berasal dari penuturan tokoh masyarakat, di antaranya R. Nur Ab
 // Contact Form Component - Redirect to WhatsApp
 const ContactForm = () => {
     const [form, setForm] = useState({ name: '', phone: '', message: '' });
-    
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!form.name.trim() || !form.message.trim()) {
             toast.error('Nama dan pesan harus diisi');
             return;
         }
-        
+
         const message = encodeURIComponent(
             `Assalamu'alaikum,\n\nNama: ${form.name}\nNo. HP: ${form.phone || '-'}\n\nPesan:\n${form.message}`
         );
@@ -61,14 +61,14 @@ const ContactForm = () => {
         window.open(waUrl, '_blank');
         toast.success('Membuka WhatsApp...');
     };
-    
+
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
-                <Input 
+                <Input
                     value={form.name}
-                    onChange={(e) => setForm({...form, name: e.target.value})}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="Masukkan nama Anda"
                     required
                     data-testid="contact-name"
@@ -76,18 +76,18 @@ const ContactForm = () => {
             </div>
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp</label>
-                <Input 
+                <Input
                     value={form.phone}
-                    onChange={(e) => setForm({...form, phone: e.target.value})}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     placeholder="08xxx (opsional)"
                     data-testid="contact-phone"
                 />
             </div>
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Pesan *</label>
-                <Textarea 
+                <Textarea
                     value={form.message}
-                    onChange={(e) => setForm({...form, message: e.target.value})}
+                    onChange={(e) => setForm({ ...form, message: e.target.value })}
                     placeholder="Tulis pesan Anda..."
                     rows={4}
                     required
@@ -126,7 +126,7 @@ const HighlightCards = () => (
 // Profile Section Component
 const ProfileSection = ({ mosqueIdentity }) => {
     const description = mosqueIdentity?.description || DEFAULT_HISTORY;
-    
+
     return (
         <div className="bg-white rounded-2xl p-6 shadow-sm" data-testid="profile-section">
             <div className="flex items-center gap-3 mb-4">
@@ -138,23 +138,23 @@ const ProfileSection = ({ mosqueIdentity }) => {
                     <p className="text-sm text-gray-500">Sejarah dan Informasi</p>
                 </div>
             </div>
-            
+
             {/* Profile Image if available */}
             {mosqueIdentity?.profile_image_url && (
                 <div className="mb-4 rounded-xl overflow-hidden">
-                    <img 
-                        src={mosqueIdentity.profile_image_url} 
+                    <img
+                        src={mosqueIdentity.profile_image_url}
                         alt="Masjid Muktamirin"
                         className="w-full h-48 object-cover"
                     />
                 </div>
             )}
-            
+
             {/* Description with line breaks */}
             <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
                 {description}
             </div>
-            
+
             {/* Highlight Cards */}
             <HighlightCards />
         </div>
@@ -165,14 +165,14 @@ const ProfileSection = ({ mosqueIdentity }) => {
 const QRISSection = () => {
     const [copied, setCopied] = useState(false);
     const bankAccount = "7148254552";
-    
+
     const copyToClipboard = () => {
         navigator.clipboard.writeText(bankAccount);
         setCopied(true);
         toast.success('Nomor rekening disalin!');
         setTimeout(() => setCopied(false), 2000);
     };
-    
+
     return (
         <div className="bg-white rounded-2xl p-6 shadow-sm" data-testid="qris-section">
             <div className="flex items-center gap-3 mb-4">
@@ -184,17 +184,17 @@ const QRISSection = () => {
                     <p className="text-sm text-gray-500">Scan QRIS atau transfer</p>
                 </div>
             </div>
-            
+
             {/* QRIS Image */}
             <div className="bg-white border-2 border-dashed border-emerald-200 rounded-xl p-4 mb-4">
-                <img 
-                    src={QRIS_IMAGE_URL} 
+                <img
+                    src={QRIS_IMAGE_URL}
                     alt="QRIS Masjid Muktamirin"
                     className="w-full max-w-[200px] mx-auto"
                 />
                 <p className="text-center text-sm text-gray-500 mt-2">Scan untuk donasi infaq/zakat</p>
             </div>
-            
+
             {/* Bank Account */}
             <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
                 <p className="text-sm text-emerald-800 font-medium">BSI (Bank Syariah Indonesia)</p>
@@ -203,9 +203,9 @@ const QRISSection = () => {
                         <p className="text-2xl font-mono font-bold text-emerald-700">{bankAccount}</p>
                         <p className="text-xs text-emerald-600">a.n. Masjid Muktamirin</p>
                     </div>
-                    <Button 
-                        variant="ghost" 
-                        size="icon" 
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={copyToClipboard}
                         className="hover:bg-emerald-100"
                         data-testid="copy-account-btn"
@@ -230,9 +230,9 @@ const ContactInfoSection = ({ mosqueIdentity }) => (
                 <p className="text-sm text-gray-500">Hubungi kami</p>
             </div>
         </div>
-        
+
         <div className="space-y-4">
-            <a 
+            <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -247,7 +247,7 @@ const ContactInfoSection = ({ mosqueIdentity }) => (
                 </div>
                 <ExternalLink className="w-4 h-4 text-gray-400 ml-auto mt-1" />
             </a>
-            
+
             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                 <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-5 h-5 text-gray-600" />
@@ -259,8 +259,8 @@ const ContactInfoSection = ({ mosqueIdentity }) => (
                     </p>
                 </div>
             </div>
-            
-            <a 
+
+            <a
                 href="https://instagram.com/masjid_muktamirin_sorogaten"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -268,7 +268,7 @@ const ContactInfoSection = ({ mosqueIdentity }) => (
             >
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
                     <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
                     </svg>
                 </div>
                 <div>
@@ -284,7 +284,7 @@ const ContactInfoSection = ({ mosqueIdentity }) => (
 // Pengurus Takmir Section
 const PengurusSection = ({ pengurusList }) => {
     if (!pengurusList || pengurusList.length === 0) return null;
-    
+
     return (
         <div className="bg-white rounded-2xl p-6 shadow-sm" data-testid="pengurus-section">
             <div className="flex items-center gap-3 mb-4">
@@ -296,7 +296,7 @@ const PengurusSection = ({ pengurusList }) => {
                     <p className="text-sm text-gray-500">{pengurusList[0]?.period || 'Periode Aktif'}</p>
                 </div>
             </div>
-            
+
             <div className="space-y-3">
                 {pengurusList.slice(0, 6).map((pengurus, idx) => (
                     <div key={pengurus.id || idx} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
@@ -318,58 +318,17 @@ const PengurusSection = ({ pengurusList }) => {
     );
 };
 
-// Artikel Section
-const ArtikelSection = ({ articles }) => {
-    if (!articles || articles.length === 0) return null;
-    
-    const formatDate = (dateStr) => {
-        if (!dateStr) return '';
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-    };
-    
-    return (
-        <div className="bg-white rounded-2xl p-6 shadow-sm" data-testid="artikel-section">
-            <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-amber-700" />
-                </div>
-                <div>
-                    <h2 className="font-bold text-gray-800">Artikel & Berita</h2>
-                    <p className="text-sm text-gray-500">Informasi terbaru dari masjid</p>
-                </div>
-            </div>
-            
-            <div className="space-y-3">
-                {articles.slice(0, 5).map((article, idx) => (
-                    <div 
-                        key={article.id || idx} 
-                        className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:border-emerald-200 hover:bg-emerald-50/30 transition-colors cursor-pointer"
-                    >
-                        <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
-                            <FileText className="w-5 h-5 text-amber-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-800 line-clamp-2">{article.title}</p>
-                            <p className="text-xs text-gray-500 mt-1">{formatDate(article.date)}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
 
 // Pengumuman Section
 const PengumumanSection = ({ announcements }) => {
     if (!announcements || announcements.length === 0) return null;
-    
+
     const formatDate = (dateStr) => {
         if (!dateStr) return '';
         const date = new Date(dateStr);
         return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
     };
-    
+
     return (
         <div className="bg-white rounded-2xl p-6 shadow-sm" data-testid="pengumuman-section">
             <div className="flex items-center gap-3 mb-4">
@@ -381,7 +340,7 @@ const PengumumanSection = ({ announcements }) => {
                     <p className="text-sm text-gray-500">Info penting dari masjid</p>
                 </div>
             </div>
-            
+
             <div className="space-y-3">
                 {announcements.slice(0, 3).map((item, idx) => (
                     <div key={item.id || idx} className="p-3 bg-red-50 rounded-lg border border-red-100">
@@ -398,7 +357,7 @@ const PengumumanSection = ({ announcements }) => {
 // Gallery Preview
 const GalleryPreview = ({ galleries }) => {
     if (!galleries || galleries.length === 0) return null;
-    
+
     return (
         <div className="bg-white rounded-2xl p-6 shadow-sm" data-testid="gallery-preview">
             <div className="flex items-center justify-between mb-4">
@@ -411,20 +370,20 @@ const GalleryPreview = ({ galleries }) => {
                         <p className="text-sm text-gray-500">Dokumentasi terbaru</p>
                     </div>
                 </div>
-                <Link to="/homepage/gallery" className="text-emerald-600 text-sm flex items-center gap-1 hover:text-emerald-700">
+                <Link to="/gallery" className="text-emerald-600 text-sm flex items-center gap-1 hover:text-emerald-700">
                     Lihat semua <ChevronRight className="w-4 h-4" />
                 </Link>
             </div>
-            
+
             <div className="grid grid-cols-3 gap-2">
                 {galleries.slice(0, 6).map((item, idx) => (
-                    <Link 
+                    <Link
                         key={item.id || idx}
-                        to="/homepage/gallery"
+                        to="/gallery"
                         className="aspect-square rounded-lg overflow-hidden bg-gray-100"
                     >
-                        <img 
-                            src={item.image_url} 
+                        <img
+                            src={item.image_url}
                             alt={item.title || `Galeri ${idx + 1}`}
                             className="w-full h-full object-cover hover:scale-105 transition-transform"
                         />
@@ -439,24 +398,21 @@ export default function AboutPage() {
     const [mosqueIdentity, setMosqueIdentity] = useState(null);
     const [announcements, setAnnouncements] = useState([]);
     const [pengurusList, setPengurusList] = useState([]);
-    const [articles, setArticles] = useState([]);
     const [galleries, setGalleries] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('informasi');
-    
+
     const fetchData = useCallback(async () => {
         try {
-            const [mosqueRes, announcementRes, pengurusRes, articlesRes, galleryRes] = await Promise.all([
+            const [mosqueRes, announcementRes, pengurusRes, galleryRes] = await Promise.all([
                 mosqueAPI.getIdentity(),
                 announcementAPI.getAll(true).catch(() => ({ data: [] })),
                 pengurusAPI.getAll().catch(() => ({ data: [] })),
-                articleAPI.getAll(true).catch(() => ({ data: [] })),
                 galleryAPI.getAll(true).catch(() => ({ data: [] })),
             ]);
             setMosqueIdentity(mosqueRes.data);
             setAnnouncements(announcementRes.data || []);
             setPengurusList(pengurusRes.data || []);
-            setArticles(articlesRes.data || []);
             setGalleries(galleryRes.data || []);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -464,11 +420,11 @@ export default function AboutPage() {
             setLoading(false);
         }
     }, []);
-    
+
     useEffect(() => {
         fetchData();
     }, [fetchData]);
-    
+
     if (loading) {
         return (
             <div className="min-h-screen bg-stone-100 flex items-center justify-center">
@@ -476,11 +432,11 @@ export default function AboutPage() {
             </div>
         );
     }
-    
+
     return (
         <div className="min-h-screen bg-stone-100" data-testid="about-page">
             <WebsiteNavigation activePage="about" mosqueIdentity={mosqueIdentity} />
-            
+
             {/* Header */}
             <div className="bg-emerald-900 text-white py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -492,53 +448,121 @@ export default function AboutPage() {
                     </p>
                 </div>
             </div>
-            
+
             {/* Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Profile Section */}
                 <ProfileSection mosqueIdentity={mosqueIdentity} />
-                
+
                 {/* Tabs */}
                 <div className="mt-8">
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                         <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto mb-6 bg-gray-100 p-1 rounded-xl">
-                            <TabsTrigger 
-                                value="informasi" 
+                            <TabsTrigger
+                                value="informasi"
                                 className="data-[state=active]:bg-emerald-700 data-[state=active]:text-white rounded-lg py-2"
                                 data-testid="tab-informasi"
                             >
                                 Informasi
                             </TabsTrigger>
-                            <TabsTrigger 
-                                value="donasi" 
+                            <TabsTrigger
+                                value="donasi"
                                 className="data-[state=active]:bg-emerald-700 data-[state=active]:text-white rounded-lg py-2"
                                 data-testid="tab-donasi"
                             >
                                 Donasi & Infaq
                             </TabsTrigger>
-                            <TabsTrigger 
-                                value="kontak" 
+                            <TabsTrigger
+                                value="kontak"
                                 className="data-[state=active]:bg-emerald-700 data-[state=active]:text-white rounded-lg py-2"
                                 data-testid="tab-kontak"
                             >
                                 Kontak
                             </TabsTrigger>
                         </TabsList>
-                        
-                        {/* Informasi Tab */}
+
+                        {/* Informasi Tab - Visi, Misi, Nilai-nilai */}
                         <TabsContent value="informasi" className="mt-0">
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <div className="lg:col-span-2 space-y-6">
-                                    <ArtikelSection articles={articles} />
-                                    <PengumumanSection announcements={announcements} />
-                                    <GalleryPreview galleries={galleries} />
+                            <div className="max-w-4xl mx-auto space-y-6">
+                                {/* Visi */}
+                                <div className="bg-white rounded-2xl p-8 shadow-sm border-l-4 border-emerald-600">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                            <span className="text-2xl">🌟</span>
+                                        </div>
+                                        <div>
+                                            <h2 className="text-xl font-bold text-gray-800">Visi</h2>
+                                            <p className="text-sm text-emerald-600">Tujuan jangka panjang</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-700 leading-relaxed text-base">
+                                        Menjadi masjid yang makmur, berdaya, dan menjadi pusat kehidupan spiritual serta sosial kemasyarakatan yang membawa keberkahan bagi seluruh jamaah dan masyarakat sekitar.
+                                    </p>
                                 </div>
-                                <div className="space-y-6">
-                                    <PengurusSection pengurusList={pengurusList} />
+
+                                {/* Misi */}
+                                <div className="bg-white rounded-2xl p-8 shadow-sm border-l-4 border-blue-500">
+                                    <div className="flex items-center gap-3 mb-5">
+                                        <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                            <span className="text-2xl">🎯</span>
+                                        </div>
+                                        <div>
+                                            <h2 className="text-xl font-bold text-gray-800">Misi</h2>
+                                            <p className="text-sm text-blue-600">Langkah nyata kami</p>
+                                        </div>
+                                    </div>
+                                    <ul className="space-y-3">
+                                        {[
+                                            'Menyelenggarakan kegiatan ibadah, dakwah, dan pendidikan Islam yang berkualitas.',
+                                            'Membangun silaturahmi dan kebersamaan antar jamaah dan masyarakat luas.',
+                                            'Mengelola masjid secara transparan, amanah, dan profesional.',
+                                            'Menjadi pusat kegiatan sosial, budaya, dan pemberdayaan umat.',
+                                            'Melestarikan nilai-nilai Islam sebagai rahmat bagi semesta alam.',
+                                        ].map((item, idx) => (
+                                            <li key={idx} className="flex items-start gap-3">
+                                                <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">{idx + 1}</span>
+                                                <span className="text-gray-700 leading-relaxed">{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
+
+                                {/* Nilai-nilai */}
+                                <div className="bg-white rounded-2xl p-8 shadow-sm border-l-4 border-amber-500">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                            <span className="text-2xl">💎</span>
+                                        </div>
+                                        <div>
+                                            <h2 className="text-xl font-bold text-gray-800">Nilai-nilai</h2>
+                                            <p className="text-sm text-amber-600">Landasan gerak kami</p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {[
+                                            { icon: '🕌', title: 'Keimanan', desc: 'Berlandaskan Al-Qur\'an dan Sunnah dalam setiap langkah.' },
+                                            { icon: '🤝', title: 'Kebersamaan', desc: 'Membangun ukhuwah islamiyah yang kuat dan harmonis.' },
+                                            { icon: '✅', title: 'Amanah', desc: 'Mengelola kepercayaan jamaah dengan jujur dan transparan.' },
+                                            { icon: '📚', title: 'Ilmu', desc: 'Mendorong semangat belajar dan kemajuan intelektual umat.' },
+                                            { icon: '❤️', title: 'Kepedulian', desc: 'Hadir untuk sesama dalam suka maupun duka.' },
+                                            { icon: '⚡', title: 'Inovasi', desc: 'Terbuka terhadap kemajuan demi kemaslahatan umat.' },
+                                        ].map((nilai, idx) => (
+                                            <div key={idx} className="flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                                                <span className="text-2xl flex-shrink-0">{nilai.icon}</span>
+                                                <div>
+                                                    <p className="font-semibold text-gray-800">{nilai.title}</p>
+                                                    <p className="text-sm text-gray-600 mt-0.5 leading-relaxed">{nilai.desc}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Pengurus Takmir */}
+                                <PengurusSection pengurusList={pengurusList} />
                             </div>
                         </TabsContent>
-                        
+
                         {/* Donasi Tab */}
                         <TabsContent value="donasi" className="mt-0">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
@@ -568,20 +592,21 @@ export default function AboutPage() {
                                             </ul>
                                         </div>
                                         <p className="text-xs text-gray-500">
-                                            Laporan keuangan dapat dilihat di halaman <Link to="/homepage/informasi" className="text-emerald-600 hover:underline">Informasi ZIS</Link>
+                                            Laporan keuangan dapat dilihat di halaman <Link to="/informasi" className="text-emerald-600 hover:underline">Informasi ZIS</Link>
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         </TabsContent>
-                        
+
                         {/* Kontak Tab */}
                         <TabsContent value="kontak" className="mt-0">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                                <div className="space-y-6">
+                            <div className="max-w-4xl mx-auto">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    {/* Form Kirim Pesan */}
                                     <div className="bg-white rounded-2xl p-6 shadow-sm">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                        <div className="flex items-center gap-3 mb-5">
+                                            <div className="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center">
                                                 <Send className="w-5 h-5 text-emerald-700" />
                                             </div>
                                             <div>
@@ -591,17 +616,81 @@ export default function AboutPage() {
                                         </div>
                                         <ContactForm />
                                     </div>
-                                </div>
-                                <div className="space-y-6">
-                                    <ContactInfoSection mosqueIdentity={mosqueIdentity} />
-                                    <PengurusSection pengurusList={pengurusList} />
+
+                                    {/* Info Kontak — single card including Jam Operasional */}
+                                    <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-5">
+                                        {/* Header */}
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center">
+                                                <Phone className="w-5 h-5 text-emerald-700" />
+                                            </div>
+                                            <div>
+                                                <h2 className="font-bold text-gray-800">Informasi Kontak</h2>
+                                                <p className="text-sm text-gray-500">Hubungi kami</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Contact links */}
+                                        <div className="space-y-3">
+                                            {/* WhatsApp */}
+                                            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer"
+                                                className="flex items-center gap-4 p-4 bg-green-50 border border-green-100 rounded-xl hover:bg-green-100 hover:border-green-200 transition-all group">
+                                                <div className="w-11 h-11 rounded-xl bg-green-500 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                                                    <Phone className="w-5 h-5 text-white" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-semibold text-gray-800 text-sm">WhatsApp</p>
+                                                    <p className="text-gray-600 text-sm">0812-1554-551</p>
+                                                </div>
+                                                <ExternalLink className="w-4 h-4 text-gray-400" />
+                                            </a>
+
+                                            {/* Alamat */}
+                                            <a href="https://maps.google.com/?q=Sorogaten+II+Karangsewu+Galur+Kulon+Progo" target="_blank" rel="noopener noreferrer"
+                                                className="flex items-center gap-4 p-4 bg-blue-50 border border-blue-100 rounded-xl hover:bg-blue-100 hover:border-blue-200 transition-all group">
+                                                <div className="w-11 h-11 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                                                    <MapPin className="w-5 h-5 text-white" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-semibold text-gray-800 text-sm">Alamat</p>
+                                                    <p className="text-gray-600 text-xs leading-relaxed">{mosqueIdentity?.address || 'Sorogaten II, Karangsewu, Galur, Kulon Progo, DIY'}</p>
+                                                </div>
+                                                <ExternalLink className="w-4 h-4 text-gray-400" />
+                                            </a>
+
+                                            {/* Instagram */}
+                                            <a href="https://instagram.com/masjid_muktamirin_sorogaten" target="_blank" rel="noopener noreferrer"
+                                                className="flex items-center gap-4 p-4 bg-pink-50 border border-pink-100 rounded-xl hover:bg-pink-100 hover:border-pink-200 transition-all group">
+                                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                                                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073z" />
+                                                    </svg>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-semibold text-gray-800 text-sm">Instagram</p>
+                                                    <p className="text-gray-600 text-sm">@masjid_muktamirin_sorogaten</p>
+                                                </div>
+                                                <ExternalLink className="w-4 h-4 text-gray-400" />
+                                            </a>
+                                        </div>
+
+                                        {/* Jam Operasional — inside same card */}
+                                        <div className="bg-emerald-900 text-white rounded-xl p-4 mt-auto">
+                                            <div className="flex items-center gap-2 mb-1.5">
+                                                <Clock className="w-4 h-4 text-emerald-400" />
+                                                <p className="font-semibold text-sm">Jam Operasional</p>
+                                            </div>
+                                            <p className="text-emerald-300 text-sm">Masjid buka <span className="text-white font-bold">24 jam</span> setiap hari</p>
+                                            <p className="text-emerald-400 text-xs mt-0.5">Kantor Takmir: Senin–Jumat, 08.00–16.00 WIB</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </TabsContent>
                     </Tabs>
                 </div>
             </div>
-            
+
             <WebsiteFooter mosqueIdentity={mosqueIdentity} />
         </div>
     );

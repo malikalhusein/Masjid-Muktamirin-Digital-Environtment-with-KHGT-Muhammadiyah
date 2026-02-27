@@ -5,8 +5,15 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Switch } from '../../components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { toast } from 'sonner';
+
+const GALLERY_CATEGORIES = [
+    { value: 'umum', label: 'Umum' },
+    { value: 'ramadan', label: 'Khusus Ramadan' },
+    { value: 'idulfitri', label: 'Idulfitri' },
+];
 
 export default function GalleryPage() {
     const [items, setItems] = useState([]);
@@ -18,6 +25,7 @@ export default function GalleryPage() {
         image_url: '',
         description: '',
         event_date: '',
+        category: 'umum',
         order: 0,
         is_active: true
     });
@@ -55,7 +63,7 @@ export default function GalleryPage() {
             }
             setDialogOpen(false);
             setEditingItem(null);
-            setFormData({ title: '', image_url: '', description: '', event_date: '', order: 0, is_active: true });
+            setFormData({ title: '', image_url: '', description: '', event_date: '', category: 'umum', order: 0, is_active: true });
             fetchData();
         } catch (error) {
             toast.error('Gagal menyimpan foto');
@@ -69,6 +77,7 @@ export default function GalleryPage() {
             image_url: item.image_url,
             description: item.description || '',
             event_date: item.event_date || '',
+            category: item.category || 'umum',
             order: item.order,
             is_active: item.is_active
         });
@@ -118,12 +127,12 @@ export default function GalleryPage() {
                     </h1>
                     <p className="text-slate-400 text-sm mt-1">Kelola galeri foto kegiatan masjid</p>
                 </div>
-                <Button 
-                    onClick={() => { 
-                        setEditingItem(null); 
-                        setFormData({ title: '', image_url: '', description: '', event_date: '', order: items.length, is_active: true }); 
-                        setDialogOpen(true); 
-                    }} 
+                <Button
+                    onClick={() => {
+                        setEditingItem(null);
+                        setFormData({ title: '', image_url: '', description: '', event_date: '', category: 'umum', order: items.length, is_active: true });
+                        setDialogOpen(true);
+                    }}
                     className="bg-cyan-600 hover:bg-cyan-700"
                     data-testid="add-gallery-btn"
                 >
@@ -140,8 +149,8 @@ export default function GalleryPage() {
                     </div>
                 ) : (
                     items.map((item) => (
-                        <div 
-                            key={item.id} 
+                        <div
+                            key={item.id}
                             className={`group relative bg-slate-800/50 border rounded-xl overflow-hidden ${item.is_active ? 'border-slate-700' : 'border-slate-800 opacity-60'}`}
                         >
                             <img src={item.image_url} alt={item.title} className="w-full aspect-square object-cover" />
@@ -151,6 +160,12 @@ export default function GalleryPage() {
                                     {item.event_date && (
                                         <p className="text-slate-400 text-xs">{new Date(item.event_date).toLocaleDateString('id-ID')}</p>
                                     )}
+                                    <span className={`mt-1 inline-block px-2 py-0.5 rounded text-[10px] font-medium ${item.category === 'ramadan' ? 'bg-amber-500/30 text-amber-300' :
+                                            item.category === 'idulfitri' ? 'bg-green-500/30 text-green-300' :
+                                                'bg-slate-500/30 text-slate-300'
+                                        }`}>
+                                        {GALLERY_CATEGORIES.find(c => c.value === item.category)?.label || 'Umum'}
+                                    </span>
                                 </div>
                                 <div className="absolute top-2 right-2 flex gap-1">
                                     <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} className="bg-black/50 text-white hover:bg-white hover:text-black h-8 w-8">
@@ -175,20 +190,20 @@ export default function GalleryPage() {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="text-sm text-slate-400 mb-1 block">Judul *</label>
-                            <Input 
-                                value={formData.title} 
-                                onChange={(e) => setFormData(p => ({ ...p, title: e.target.value }))} 
-                                className="bg-slate-800 border-slate-700" 
+                            <Input
+                                value={formData.title}
+                                onChange={(e) => setFormData(p => ({ ...p, title: e.target.value }))}
+                                className="bg-slate-800 border-slate-700"
                                 placeholder="Kegiatan Tarawih 1447 H"
                             />
                         </div>
                         <div>
                             <label className="text-sm text-slate-400 mb-1 block">Gambar *</label>
-                            <Input 
-                                type="file" 
+                            <Input
+                                type="file"
                                 accept="image/*"
                                 onChange={handleImageUpload}
-                                className="bg-slate-800 border-slate-700" 
+                                className="bg-slate-800 border-slate-700"
                             />
                             {formData.image_url && (
                                 <img src={formData.image_url} alt="Preview" className="w-full max-h-48 object-cover rounded mt-2" />
@@ -196,38 +211,51 @@ export default function GalleryPage() {
                         </div>
                         <div>
                             <label className="text-sm text-slate-400 mb-1 block">Deskripsi</label>
-                            <Textarea 
-                                value={formData.description} 
-                                onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))} 
-                                className="bg-slate-800 border-slate-700" 
+                            <Textarea
+                                value={formData.description}
+                                onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))}
+                                className="bg-slate-800 border-slate-700"
                                 rows={2}
                                 placeholder="Deskripsi singkat..."
                             />
                         </div>
+                        <div>
+                            <label className="text-sm text-slate-400 mb-1 block">Kategori</label>
+                            <Select value={formData.category} onValueChange={(v) => setFormData(p => ({ ...p, category: v }))}>
+                                <SelectTrigger className="bg-slate-800 border-slate-700">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {GALLERY_CATEGORIES.map((cat) => (
+                                        <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm text-slate-400 mb-1 block">Tanggal Kegiatan</label>
-                                <Input 
-                                    type="date" 
-                                    value={formData.event_date} 
-                                    onChange={(e) => setFormData(p => ({ ...p, event_date: e.target.value }))} 
-                                    className="bg-slate-800 border-slate-700" 
+                                <Input
+                                    type="date"
+                                    value={formData.event_date}
+                                    onChange={(e) => setFormData(p => ({ ...p, event_date: e.target.value }))}
+                                    className="bg-slate-800 border-slate-700"
                                 />
                             </div>
                             <div>
                                 <label className="text-sm text-slate-400 mb-1 block">Urutan</label>
-                                <Input 
-                                    type="number" 
-                                    value={formData.order} 
-                                    onChange={(e) => setFormData(p => ({ ...p, order: parseInt(e.target.value) || 0 }))} 
+                                <Input
+                                    type="number"
+                                    value={formData.order}
+                                    onChange={(e) => setFormData(p => ({ ...p, order: parseInt(e.target.value) || 0 }))}
                                     className="bg-slate-800 border-slate-700"
                                     min="0"
                                 />
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Switch 
-                                checked={formData.is_active} 
+                            <Switch
+                                checked={formData.is_active}
                                 onCheckedChange={(v) => setFormData(p => ({ ...p, is_active: v }))}
                             />
                             <label className="text-sm text-slate-300">Aktif</label>

@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Marquee from 'react-fast-marquee';
 import { Clock, MapPin, Bell, Calendar, ChevronRight } from 'lucide-react';
-import { prayerAPI, mosqueAPI, settingsAPI, contentAPI, agendaAPI, runningTextAPI } from '../lib/api';
-import { 
-    formatTime, 
-    formatCountdown, 
-    getCurrentAndNextPrayer, 
-    parseTimeToday, 
+import { prayerAPI, mosqueAPI, settingsAPI, contentAPI, specialEventAPI, runningTextAPI } from '../lib/api';
+import {
+    formatTime,
+    formatCountdown,
+    getCurrentAndNextPrayer,
+    parseTimeToday,
     getTimeDiffSeconds,
     formatDateIndonesian,
     PRAYER_NAMES,
@@ -88,24 +88,24 @@ const MainClock = ({ time }) => {
 // Content Slideshow Component
 const ContentSlideshow = ({ contents }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    
+
     useEffect(() => {
         if (contents.length <= 1) return;
-        
+
         const currentContent = contents[currentIndex];
         const duration = (currentContent?.duration || 10) * 1000;
-        
+
         const timer = setTimeout(() => {
             setCurrentIndex((prev) => (prev + 1) % contents.length);
         }, duration);
-        
+
         return () => clearTimeout(timer);
     }, [currentIndex, contents]);
-    
+
     if (contents.length === 0) return null;
-    
+
     const current = contents[currentIndex];
-    
+
     return (
         <div className="relative w-full h-full overflow-hidden rounded-xl glass-card" data-testid="content-slideshow">
             <AnimatePresence mode="wait">
@@ -118,8 +118,8 @@ const ContentSlideshow = ({ contents }) => {
                     className="absolute inset-0 flex items-center justify-center p-4"
                 >
                     {current.type === 'poster' && current.content_url && (
-                        <img 
-                            src={current.content_url} 
+                        <img
+                            src={current.content_url}
                             alt={current.title}
                             className="max-w-full max-h-full object-contain rounded-lg"
                         />
@@ -132,11 +132,11 @@ const ContentSlideshow = ({ contents }) => {
                     )}
                 </motion.div>
             </AnimatePresence>
-            
+
             {contents.length > 1 && (
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
                     {contents.map((_, idx) => (
-                        <div 
+                        <div
                             key={idx}
                             className={`w-2 h-2 rounded-full transition-colors ${idx === currentIndex ? 'bg-emerald-500' : 'bg-slate-600'}`}
                         />
@@ -150,7 +150,7 @@ const ContentSlideshow = ({ contents }) => {
 // Agenda List Component
 const AgendaList = ({ agendas }) => {
     if (agendas.length === 0) return null;
-    
+
     return (
         <div className="glass-card rounded-xl p-4 lg:p-6" data-testid="agenda-list">
             <h3 className="font-heading text-xl lg:text-2xl text-emerald-400 mb-4 flex items-center gap-2">
@@ -175,18 +175,18 @@ const AgendaList = ({ agendas }) => {
 };
 
 // Modern Layout Component
-const ModernLayout = ({ 
-    currentTime, prayerTimes, mosqueIdentity, prayerSettings, 
-    contents, agendas, runningTexts, countdownSeconds, countdownMode, countdownLabel 
+const ModernLayout = ({
+    currentTime, prayerTimes, mosqueIdentity, prayerSettings,
+    contents, agendas, runningTexts, countdownSeconds, countdownMode, countdownLabel
 }) => {
     const { currentPrayer, nextPrayer } = prayerTimes ? getCurrentAndNextPrayer(prayerTimes) : {};
     const hijriDate = getKHGTHijriDate(currentTime);
     const inRamadan = isRamadan(currentTime);
-    
-    const marqueeText = runningTexts.length > 0 
+
+    const marqueeText = runningTexts.length > 0
         ? runningTexts.map(t => t.text).join('   •   ')
         : 'Selamat datang di Masjid • Jaga kebersihan dan kekhusyukan • Mari tingkatkan ibadah kita';
-    
+
     // Determine countdown display color based on mode
     const getCountdownColor = () => {
         switch (countdownMode) {
@@ -195,16 +195,16 @@ const ModernLayout = ({
             default: return countdownSeconds < 300 ? 'text-red-400' : 'text-white';
         }
     };
-    
+
     return (
         <div className="tv-display min-h-screen p-6 lg:p-8 xl:p-12" data-testid="tv-display-modern">
             {/* Header */}
             <header className="flex items-center justify-between mb-6 lg:mb-8">
                 <div className="flex items-center gap-4 lg:gap-6">
                     {mosqueIdentity?.logo_url ? (
-                        <img 
-                            src={mosqueIdentity.logo_url} 
-                            alt="Logo Masjid" 
+                        <img
+                            src={mosqueIdentity.logo_url}
+                            alt="Logo Masjid"
                             className="w-16 h-16 lg:w-20 lg:h-20 rounded-full object-cover border-2 border-emerald-500"
                         />
                     ) : (
@@ -224,7 +224,7 @@ const ModernLayout = ({
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="text-right">
                     <p className="font-body text-lg lg:text-xl text-slate-300" data-testid="gregorian-date">
                         {formatDateIndonesian(currentTime)}
@@ -237,7 +237,7 @@ const ModernLayout = ({
                     )}
                 </div>
             </header>
-            
+
             {/* Main Content Grid */}
             <div className="grid grid-cols-12 gap-4 lg:gap-6 xl:gap-8">
                 {/* Left Column */}
@@ -245,9 +245,9 @@ const ModernLayout = ({
                     <div className="glass-card rounded-2xl p-6 lg:p-8">
                         <MainClock time={currentTime} />
                     </div>
-                    
+
                     <div className="glass-card rounded-2xl p-6 lg:p-8">
-                        <CountdownDisplay 
+                        <CountdownDisplay
                             seconds={countdownSeconds}
                             label={countdownLabel || `Menuju ${PRAYER_NAMES[nextPrayer]?.id || 'Sholat'}`}
                             isUrgent={countdownSeconds < 300 && countdownMode === 'adzan'}
@@ -266,59 +266,59 @@ const ModernLayout = ({
                             </div>
                         )}
                     </div>
-                    
+
                     <AgendaList agendas={agendas} />
                 </div>
-                
+
                 {/* Center Column - Prayer Times */}
                 <div className="col-span-12 lg:col-span-4 xl:col-span-5">
                     <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
                         {inRamadan && (
-                            <PrayerCard 
-                                name="Imsak" 
+                            <PrayerCard
+                                name="Imsak"
                                 time={prayerTimes?.subuh ? `${parseInt(prayerTimes.subuh.split(':')[0]).toString().padStart(2, '0')}:${Math.max(0, parseInt(prayerTimes.subuh.split(':')[1]) - 10).toString().padStart(2, '0')}` : '--:--'}
                                 arabicName="الإمساك"
                                 isActive={false}
                                 isNext={false}
                             />
                         )}
-                        <PrayerCard 
-                            name="Subuh" 
+                        <PrayerCard
+                            name="Subuh"
                             time={prayerTimes?.subuh}
                             arabicName={PRAYER_NAMES.subuh.ar}
                             isActive={currentPrayer === 'subuh'}
                             isNext={nextPrayer === 'subuh'}
                         />
-                        <PrayerCard 
-                            name="Dzuhur" 
+                        <PrayerCard
+                            name="Dzuhur"
                             time={prayerTimes?.dzuhur}
                             arabicName={PRAYER_NAMES.dzuhur.ar}
                             isActive={currentPrayer === 'dzuhur'}
                             isNext={nextPrayer === 'dzuhur'}
                         />
-                        <PrayerCard 
-                            name="Ashar" 
+                        <PrayerCard
+                            name="Ashar"
                             time={prayerTimes?.ashar}
                             arabicName={PRAYER_NAMES.ashar.ar}
                             isActive={currentPrayer === 'ashar'}
                             isNext={nextPrayer === 'ashar'}
                         />
-                        <PrayerCard 
-                            name="Maghrib" 
+                        <PrayerCard
+                            name="Maghrib"
                             time={prayerTimes?.maghrib}
                             arabicName={PRAYER_NAMES.maghrib.ar}
                             isActive={currentPrayer === 'maghrib'}
                             isNext={nextPrayer === 'maghrib'}
                         />
-                        <PrayerCard 
-                            name="Isya" 
+                        <PrayerCard
+                            name="Isya"
                             time={prayerTimes?.isya}
                             arabicName={PRAYER_NAMES.isya.ar}
                             isActive={currentPrayer === 'isya'}
                             isNext={nextPrayer === 'isya'}
                         />
-                        <PrayerCard 
-                            name="Terbit" 
+                        <PrayerCard
+                            name="Terbit"
                             time={prayerTimes?.terbit}
                             arabicName={PRAYER_NAMES.terbit.ar}
                             isActive={false}
@@ -326,7 +326,7 @@ const ModernLayout = ({
                         />
                     </div>
                 </div>
-                
+
                 {/* Right Column - Content Slideshow */}
                 <div className="col-span-12 lg:col-span-3 min-h-[300px] lg:min-h-[400px]">
                     {contents.length > 0 ? (
@@ -338,7 +338,7 @@ const ModernLayout = ({
                     )}
                 </div>
             </div>
-            
+
             {/* Running Text Footer */}
             <div className="fixed bottom-0 left-0 right-0 running-text-container py-3 lg:py-4">
                 <Marquee speed={50} gradient={false}>
@@ -371,7 +371,7 @@ export default function TVDisplay() {
         iqamah: false,
     });
     const [loading, setLoading] = useState(true);
-    
+
     // Fetch all data
     const fetchData = useCallback(async () => {
         try {
@@ -381,10 +381,10 @@ export default function TVDisplay() {
                 settingsAPI.getPrayer(),
                 settingsAPI.getLayout(),
                 contentAPI.getAll(true),
-                agendaAPI.getAll(true, true),
+                specialEventAPI.getAll(true, true),
                 runningTextAPI.getAll(true),
             ]);
-            
+
             setPrayerTimes(prayerRes.data);
             setMosqueIdentity(mosqueRes.data);
             setPrayerSettings(prayerSettingsRes.data);
@@ -398,13 +398,13 @@ export default function TVDisplay() {
             setLoading(false);
         }
     }, []);
-    
+
     useEffect(() => {
         fetchData();
         const interval = setInterval(fetchData, 5 * 60 * 1000);
         return () => clearInterval(interval);
     }, [fetchData]);
-    
+
     // Update clock
     useEffect(() => {
         const timer = setInterval(() => {
@@ -412,14 +412,14 @@ export default function TVDisplay() {
         }, 1000);
         return () => clearInterval(timer);
     }, []);
-    
+
     // Calculate countdown with calibration settings
     useEffect(() => {
         if (!prayerTimes || !prayerSettings) return;
-        
+
         const { nextPrayer, nextPrayerTime } = getCurrentAndNextPrayer(prayerTimes);
         if (!nextPrayerTime || !nextPrayer) return;
-        
+
         // Get calibration for this prayer
         const calibration = prayerSettings[`calibration_${nextPrayer}`] || {
             pre_adzan: 1,
@@ -427,21 +427,21 @@ export default function TVDisplay() {
             pre_iqamah: prayerSettings[`iqomah_${nextPrayer}`] || 10,
             jeda_sholat: 10,
         };
-        
+
         const diff = getTimeDiffSeconds(nextPrayerTime, currentTime);
         const preAdzanSeconds = calibration.pre_adzan * 60;
         const jedaAdzanSeconds = calibration.jeda_adzan * 60;
         const preIqamahSeconds = calibration.pre_iqamah * 60;
         const prayerName = PRAYER_NAMES[nextPrayer]?.id || nextPrayer;
-        
+
         // Timeline: PreAdzan -> Adzan -> JedaAdzan -> Iqamah -> Sholat
-        
+
         if (diff > preAdzanSeconds) {
             // Before pre-adzan warning
             setCountdownMode('adzan');
             setCountdownSeconds(diff);
             setCountdownLabel(`Menuju ${prayerName}`);
-            
+
             // Reset sounds for new prayer cycle - use callback to avoid stale closure
             if (diff > preAdzanSeconds + 60) {
                 setSoundsPlayed(prev => {
@@ -456,7 +456,7 @@ export default function TVDisplay() {
             setCountdownMode('adzan');
             setCountdownSeconds(diff);
             setCountdownLabel(`⏰ ${prayerName} Sebentar Lagi`);
-            
+
             // Play pre-adzan sound once - use callback to check current state
             if (prayerSettings.sound_pre_adzan !== false) {
                 setSoundsPlayed(prev => {
@@ -472,7 +472,7 @@ export default function TVDisplay() {
             setCountdownMode('jeda_adzan');
             setCountdownSeconds(jedaAdzanSeconds + diff);
             setCountdownLabel(`🔊 Adzan ${prayerName}`);
-            
+
             // Play adzan sound once - use callback to check current state
             if (prayerSettings.sound_adzan !== false) {
                 setSoundsPlayed(prev => {
@@ -489,7 +489,7 @@ export default function TVDisplay() {
             setCountdownMode('iqomah');
             setCountdownSeconds(Math.max(0, iqamahRemaining));
             setCountdownLabel(`Iqomah ${prayerName}`);
-            
+
             // Play pre-iqamah sound when 1 minute left - use callback
             if (iqamahRemaining <= 60 && iqamahRemaining > 58 && prayerSettings.sound_pre_iqamah !== false) {
                 setSoundsPlayed(prev => {
@@ -500,7 +500,7 @@ export default function TVDisplay() {
                     return prev;
                 });
             }
-            
+
             // Play iqamah sound when countdown ends - use callback
             if (iqamahRemaining <= 2 && prayerSettings.sound_iqamah !== false) {
                 setSoundsPlayed(prev => {
@@ -518,7 +518,7 @@ export default function TVDisplay() {
             setCountdownLabel('Sholat Berlangsung');
         }
     }, [currentTime, prayerTimes, prayerSettings]); // Removed soundsPlayed from dependencies
-    
+
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -526,10 +526,10 @@ export default function TVDisplay() {
             </div>
         );
     }
-    
+
     // Render based on layout setting
     const selectedTheme = layoutSettings?.theme || 'modern';
-    
+
     // Pass common props to all layouts
     const commonProps = {
         currentTime,
@@ -544,15 +544,15 @@ export default function TVDisplay() {
         countdownMode,
         countdownLabel,
     };
-    
+
     if (selectedTheme === 'classic') {
         return <TVDisplayClassic {...commonProps} />;
     }
-    
+
     if (selectedTheme === 'layout2') {
         return <TVDisplayLayout2 {...commonProps} />;
     }
-    
+
     // Default to modern layout
     return (
         <ModernLayout {...commonProps} />

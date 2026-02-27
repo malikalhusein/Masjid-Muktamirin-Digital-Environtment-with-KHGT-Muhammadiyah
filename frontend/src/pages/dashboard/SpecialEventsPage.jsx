@@ -136,11 +136,11 @@ export default function SpecialEventsPage() {
     };
 
     const formatDate = (dateStr) => {
-        return new Date(dateStr).toLocaleDateString('id-ID', { 
-            weekday: 'long', 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric' 
+        return new Date(dateStr).toLocaleDateString('id-ID', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
         });
     };
 
@@ -163,31 +163,31 @@ export default function SpecialEventsPage() {
                 <div>
                     <h1 className="text-2xl font-bold text-white flex items-center gap-3">
                         <CalendarHeart className="w-7 h-7 text-rose-400" />
-                        Event Khusus
+                        Agenda
                     </h1>
-                    <p className="text-slate-400 text-sm mt-1">Kelola event khusus masjid (Nuzulul Quran, Syawalan, dll)</p>
+                    <p className="text-slate-400 text-sm mt-1">Kelola agenda kegiatan masjid (Pengajian, Nuzulul Quran, dll)</p>
                 </div>
-                <Button 
-                    onClick={() => { 
-                        setEditingItem(null); 
+                <Button
+                    onClick={() => {
+                        setEditingItem(null);
                         resetForm();
-                        setDialogOpen(true); 
-                    }} 
+                        setDialogOpen(true);
+                    }}
                     className="bg-rose-600 hover:bg-rose-700"
                     data-testid="add-event-btn"
                 >
-                    <Plus className="w-4 h-4 mr-2" /> Tambah Event
+                    <Plus className="w-4 h-4 mr-2" /> Tambah Agenda
                 </Button>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
-                    <p className="text-slate-400 text-sm">Total Event</p>
+                    <p className="text-slate-400 text-sm">Total Agenda</p>
                     <p className="text-2xl font-bold text-white">{events.length}</p>
                 </div>
                 <div className="bg-emerald-900/30 border border-emerald-800 rounded-xl p-4">
-                    <p className="text-emerald-400 text-sm">Event Mendatang</p>
+                    <p className="text-emerald-400 text-sm">Agenda Mendatang</p>
                     <p className="text-2xl font-bold text-white">{events.filter(e => isUpcoming(e.event_date)).length}</p>
                 </div>
                 <div className="bg-rose-900/30 border border-rose-800 rounded-xl p-4">
@@ -201,12 +201,12 @@ export default function SpecialEventsPage() {
                 {events.length === 0 ? (
                     <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-8 text-center">
                         <CalendarHeart className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                        <p className="text-slate-400">Belum ada event khusus</p>
+                        <p className="text-slate-400">Belum ada agenda</p>
                     </div>
                 ) : (
                     events.map((item) => (
-                        <div 
-                            key={item.id} 
+                        <div
+                            key={item.id}
                             className={`bg-slate-800/50 border rounded-xl p-4 ${item.is_active ? 'border-slate-700' : 'border-slate-800 opacity-60'}`}
                         >
                             <div className="flex gap-4">
@@ -266,16 +266,16 @@ export default function SpecialEventsPage() {
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>{editingItem ? 'Edit Event' : 'Tambah Event'}</DialogTitle>
+                        <DialogTitle>{editingItem ? 'Edit Agenda' : 'Tambah Agenda'}</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="col-span-2">
-                                <label className="text-sm text-slate-400 mb-1 block">Judul Event *</label>
-                                <Input 
-                                    value={formData.title} 
-                                    onChange={(e) => setFormData(p => ({ ...p, title: e.target.value }))} 
-                                    className="bg-slate-800 border-slate-700" 
+                                <label className="text-sm text-slate-400 mb-1 block">Judul Agenda *</label>
+                                <Input
+                                    value={formData.title}
+                                    onChange={(e) => setFormData(p => ({ ...p, title: e.target.value }))}
+                                    className="bg-slate-800 border-slate-700"
                                     placeholder="Nuzulul Quran 1447 H"
                                 />
                             </div>
@@ -294,72 +294,72 @@ export default function SpecialEventsPage() {
                             </div>
                             <div>
                                 <label className="text-sm text-slate-400 mb-1 block">Lokasi</label>
-                                <Input 
-                                    value={formData.location} 
-                                    onChange={(e) => setFormData(p => ({ ...p, location: e.target.value }))} 
-                                    className="bg-slate-800 border-slate-700" 
+                                <Input
+                                    value={formData.location}
+                                    onChange={(e) => setFormData(p => ({ ...p, location: e.target.value }))}
+                                    className="bg-slate-800 border-slate-700"
                                     placeholder="Masjid Muktamirin"
                                 />
                             </div>
                             <div>
                                 <label className="text-sm text-slate-400 mb-1 block">Tanggal *</label>
-                                <Input 
-                                    type="date" 
-                                    value={formData.event_date} 
-                                    onChange={(e) => setFormData(p => ({ ...p, event_date: e.target.value }))} 
-                                    className="bg-slate-800 border-slate-700" 
+                                <Input
+                                    type="date"
+                                    value={formData.event_date}
+                                    onChange={(e) => setFormData(p => ({ ...p, event_date: e.target.value }))}
+                                    className="bg-slate-800 border-slate-700"
                                 />
                             </div>
                             <div>
                                 <label className="text-sm text-slate-400 mb-1 block">Waktu</label>
-                                <Input 
-                                    type="time" 
-                                    value={formData.event_time} 
-                                    onChange={(e) => setFormData(p => ({ ...p, event_time: e.target.value }))} 
-                                    className="bg-slate-800 border-slate-700" 
+                                <Input
+                                    type="time"
+                                    value={formData.event_time}
+                                    onChange={(e) => setFormData(p => ({ ...p, event_time: e.target.value }))}
+                                    className="bg-slate-800 border-slate-700"
                                 />
                             </div>
                             <div>
                                 <label className="text-sm text-slate-400 mb-1 block">Imam</label>
-                                <Input 
-                                    value={formData.imam} 
-                                    onChange={(e) => setFormData(p => ({ ...p, imam: e.target.value }))} 
-                                    className="bg-slate-800 border-slate-700" 
+                                <Input
+                                    value={formData.imam}
+                                    onChange={(e) => setFormData(p => ({ ...p, imam: e.target.value }))}
+                                    className="bg-slate-800 border-slate-700"
                                     placeholder="Nama imam"
                                 />
                             </div>
                             <div>
                                 <label className="text-sm text-slate-400 mb-1 block">Penceramah</label>
-                                <Input 
-                                    value={formData.speaker} 
-                                    onChange={(e) => setFormData(p => ({ ...p, speaker: e.target.value }))} 
-                                    className="bg-slate-800 border-slate-700" 
+                                <Input
+                                    value={formData.speaker}
+                                    onChange={(e) => setFormData(p => ({ ...p, speaker: e.target.value }))}
+                                    className="bg-slate-800 border-slate-700"
                                     placeholder="Nama penceramah"
                                 />
                             </div>
                             <div className="col-span-2">
                                 <label className="text-sm text-slate-400 mb-1 block">Deskripsi</label>
-                                <Textarea 
-                                    value={formData.description} 
-                                    onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))} 
-                                    className="bg-slate-800 border-slate-700" 
+                                <Textarea
+                                    value={formData.description}
+                                    onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))}
+                                    className="bg-slate-800 border-slate-700"
                                     rows={3}
-                                    placeholder="Deskripsi event..."
+                                    placeholder="Deskripsi agenda..."
                                 />
                             </div>
                             <div>
                                 <label className="text-sm text-slate-400 mb-1 block">Gambar (opsional)</label>
-                                <Input 
-                                    type="file" 
+                                <Input
+                                    type="file"
                                     accept="image/*"
                                     onChange={handleImageUpload}
-                                    className="bg-slate-800 border-slate-700" 
+                                    className="bg-slate-800 border-slate-700"
                                 />
                             </div>
                             <div className="flex items-end pb-2">
                                 <div className="flex items-center gap-2">
-                                    <Switch 
-                                        checked={formData.is_active} 
+                                    <Switch
+                                        checked={formData.is_active}
                                         onCheckedChange={(v) => setFormData(p => ({ ...p, is_active: v }))}
                                     />
                                     <label className="text-sm text-slate-300">Aktif</label>

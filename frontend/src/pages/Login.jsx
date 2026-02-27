@@ -11,18 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 
 export default function Login() {
     const navigate = useNavigate();
-    const { login, register, error, setError } = useAuth();
+    const { login, error, setError } = useAuth();
     const [loading, setLoading] = useState(false);
-    
+
     // Login form state
     const [loginUsername, setLoginUsername] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
-    
-    // Register form state
-    const [regUsername, setRegUsername] = useState('');
-    const [regPassword, setRegPassword] = useState('');
-    const [regName, setRegName] = useState('');
-    
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -32,17 +27,7 @@ export default function Login() {
             navigate('/connect/dashboard');
         }
     };
-    
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        const success = await register(regUsername, regPassword, regName);
-        setLoading(false);
-        if (success) {
-            navigate('/connect/dashboard');
-        }
-    };
-    
+
     return (
         <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4" data-testid="login-page">
             {/* Background Pattern */}
@@ -50,7 +35,7 @@ export default function Login() {
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1739477274868-86a943b6cd5b?w=1920')] bg-cover bg-center opacity-10" />
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900/95 to-emerald-950/50" />
             </div>
-            
+
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -65,7 +50,7 @@ export default function Login() {
                     <h1 className="font-heading text-3xl text-white uppercase tracking-wide">Dashboard Admin</h1>
                     <p className="font-body text-slate-400 mt-2">Jam Sholat Digital KHGT</p>
                 </div>
-                
+
                 <Card className="bg-slate-900/80 backdrop-blur-xl border-slate-800">
                     <CardHeader className="space-y-1">
                         <CardTitle className="font-heading text-2xl text-white">Masuk ke Dashboard</CardTitle>
@@ -80,134 +65,62 @@ export default function Login() {
                                 <span className="text-sm">{error}</span>
                             </div>
                         )}
-                        
-                        <Tabs defaultValue="login" onValueChange={() => setError(null)}>
-                            <TabsList className="grid w-full grid-cols-2 bg-slate-800">
-                                <TabsTrigger value="login" className="data-[state=active]:bg-emerald-900">
-                                    <LogIn className="w-4 h-4 mr-2" />
-                                    Masuk
-                                </TabsTrigger>
-                                <TabsTrigger value="register" className="data-[state=active]:bg-emerald-900">
-                                    <UserPlus className="w-4 h-4 mr-2" />
-                                    Daftar
-                                </TabsTrigger>
-                            </TabsList>
-                            
-                            <TabsContent value="login" className="mt-6">
-                                <form onSubmit={handleLogin} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="login-username" className="text-slate-300">Username</Label>
-                                        <div className="relative">
-                                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                            <Input
-                                                id="login-username"
-                                                data-testid="login-username"
-                                                type="text"
-                                                placeholder="Masukkan username"
-                                                value={loginUsername}
-                                                onChange={(e) => setLoginUsername(e.target.value)}
-                                                className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="space-y-2">
-                                        <Label htmlFor="login-password" className="text-slate-300">Password</Label>
-                                        <div className="relative">
-                                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                            <Input
-                                                id="login-password"
-                                                data-testid="login-password"
-                                                type="password"
-                                                placeholder="Masukkan password"
-                                                value={loginPassword}
-                                                onChange={(e) => setLoginPassword(e.target.value)}
-                                                className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    
-                                    <Button 
-                                        type="submit" 
-                                        data-testid="login-submit"
-                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-body"
-                                        disabled={loading}
-                                    >
-                                        {loading ? 'Memproses...' : 'Masuk'}
-                                    </Button>
-                                </form>
-                            </TabsContent>
-                            
-                            <TabsContent value="register" className="mt-6">
-                                <form onSubmit={handleRegister} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="reg-name" className="text-slate-300">Nama Lengkap</Label>
-                                        <Input
-                                            id="reg-name"
-                                            data-testid="register-name"
-                                            type="text"
-                                            placeholder="Masukkan nama lengkap"
-                                            value={regName}
-                                            onChange={(e) => setRegName(e.target.value)}
-                                            className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
-                                            required
-                                        />
-                                    </div>
-                                    
-                                    <div className="space-y-2">
-                                        <Label htmlFor="reg-username" className="text-slate-300">Username</Label>
-                                        <div className="relative">
-                                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                            <Input
-                                                id="reg-username"
-                                                data-testid="register-username"
-                                                type="text"
-                                                placeholder="Pilih username"
-                                                value={regUsername}
-                                                onChange={(e) => setRegUsername(e.target.value)}
-                                                className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="space-y-2">
-                                        <Label htmlFor="reg-password" className="text-slate-300">Password</Label>
-                                        <div className="relative">
-                                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                            <Input
-                                                id="reg-password"
-                                                data-testid="register-password"
-                                                type="password"
-                                                placeholder="Buat password"
-                                                value={regPassword}
-                                                onChange={(e) => setRegPassword(e.target.value)}
-                                                className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
-                                                required
-                                                minLength={6}
-                                            />
-                                        </div>
-                                        <p className="text-xs text-slate-500">Minimal 6 karakter</p>
-                                    </div>
-                                    
-                                    <Button 
-                                        type="submit"
-                                        data-testid="register-submit"
-                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-body"
-                                        disabled={loading}
-                                    >
-                                        {loading ? 'Memproses...' : 'Daftar'}
-                                    </Button>
-                                </form>
-                            </TabsContent>
-                        </Tabs>
+
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="login-username" className="text-slate-300">Username</Label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                    <Input
+                                        id="login-username"
+                                        data-testid="login-username"
+                                        type="text"
+                                        placeholder="Masukkan username"
+                                        value={loginUsername}
+                                        onChange={(e) => {
+                                            setLoginUsername(e.target.value);
+                                            setError(null);
+                                        }}
+                                        className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="login-password" className="text-slate-300">Password</Label>
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                    <Input
+                                        id="login-password"
+                                        data-testid="login-password"
+                                        type="password"
+                                        placeholder="Masukkan password"
+                                        value={loginPassword}
+                                        onChange={(e) => {
+                                            setLoginPassword(e.target.value);
+                                            setError(null);
+                                        }}
+                                        className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <Button
+                                type="submit"
+                                data-testid="login-submit"
+                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-body"
+                                disabled={loading}
+                            >
+                                {loading ? 'Memproses...' : 'Masuk'}
+                            </Button>
+                        </form>
                     </CardContent>
                 </Card>
-                
+
                 <p className="text-center text-slate-500 text-sm mt-6 font-body">
-                    © {new Date().getFullYear()} Jam Sholat Digital KHGT Muhammadiyah
+                    © {new Date().getFullYear()} Masjid Muktamirin Sorogaten
                 </p>
             </motion.div>
         </div>

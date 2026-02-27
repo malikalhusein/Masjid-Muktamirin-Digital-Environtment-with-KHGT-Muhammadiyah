@@ -72,7 +72,7 @@ export const contentAPI = {
 
 // Agenda API
 export const agendaAPI = {
-    getAll: (activeOnly = false, upcomingOnly = false) => 
+    getAll: (activeOnly = false, upcomingOnly = false) =>
         api.get('/agenda', { params: { active_only: activeOnly, upcoming_only: upcomingOnly } }),
     create: (data) => api.post('/agenda', data),
     update: (id, data) => api.put(`/agenda/${id}`, data),
@@ -113,6 +113,22 @@ export const zisAPI = {
     delete: (id) => api.delete(`/zis/${id}`),
 };
 
+// Expenditure (Pengeluaran Dana) API
+export const expenditureAPI = {
+    getAll: (month, year) => api.get('/expenditure', { params: { month, year } }),
+    getSummary: (month, year) => api.get('/expenditure/summary', { params: { month, year } }),
+    create: (data) => api.post('/expenditure', data),
+    update: (id, data) => api.put(`/expenditure/${id}`, data),
+    delete: (id) => api.delete(`/expenditure/${id}`),
+};
+
+// Google Sheets API
+export const sheetsAPI = {
+    getConfig: () => api.get('/zis/sheets-config'),
+    saveConfig: (data) => api.post('/zis/sheets-config', data),
+    sync: () => api.post('/zis/sync-to-sheets'),
+};
+
 // Announcements API
 export const announcementAPI = {
     getAll: (activeOnly = false) => api.get('/announcements', { params: { active_only: activeOnly } }),
@@ -129,9 +145,18 @@ export const pengurusAPI = {
     delete: (id) => api.delete(`/pengurus/${id}`),
 };
 
+// User API (Admin only)
+export const userAPI = {
+    getAll: () => api.get('/users'),
+    create: (data) => api.post('/users', data),
+    update: (id, data) => api.put(`/users/${id}`, data),
+    delete: (id) => api.delete(`/users/${id}`),
+};
+
+
 // Special Events API
 export const specialEventAPI = {
-    getAll: (activeOnly = false, upcomingOnly = false) => 
+    getAll: (activeOnly = false, upcomingOnly = false) =>
         api.get('/special-events', { params: { active_only: activeOnly, upcoming_only: upcomingOnly } }),
     create: (data) => api.post('/special-events', data),
     update: (id, data) => api.put(`/special-events/${id}`, data),
@@ -140,7 +165,7 @@ export const specialEventAPI = {
 
 // Gallery API
 export const galleryAPI = {
-    getAll: (activeOnly = false) => api.get('/gallery', { params: { active_only: activeOnly } }),
+    getAll: (activeOnly = false, category = null) => api.get('/gallery', { params: { active_only: activeOnly, category } }),
     create: (data) => api.post('/gallery', data),
     update: (id, data) => api.put(`/gallery/${id}`, data),
     delete: (id) => api.delete(`/gallery/${id}`),
@@ -165,7 +190,7 @@ export const ramadanAPI = {
 
 // Article API
 export const articleAPI = {
-    getAll: (publishedOnly = false, category = null) => 
+    getAll: (publishedOnly = false, category = null) =>
         api.get('/articles', { params: { published_only: publishedOnly, category } }),
     getOne: (id) => api.get(`/articles/${id}`),
     create: (data) => api.post('/articles', data),

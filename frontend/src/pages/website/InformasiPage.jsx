@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-    Wallet, 
-    TrendingUp, 
-    Calendar, 
+import {
+    Wallet,
+    TrendingUp,
+    Calendar,
     ChevronRight,
     MapPin,
     Phone,
@@ -11,7 +11,7 @@ import {
     Heart,
     DollarSign
 } from 'lucide-react';
-import { zisAPI, qrisAPI, mosqueAPI } from '../../lib/api';
+import { zisAPI, expenditureAPI, qrisAPI, mosqueAPI } from '../../lib/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { WebsiteNavigation, WebsiteFooter } from '../../components/WebsiteNavigation';
 
@@ -28,6 +28,7 @@ const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep
 export default function InformasiPage() {
     const [summary, setSummary] = useState(null);
     const [chartData, setChartData] = useState([]);
+    const [expenditures, setExpenditures] = useState([]);
     const [qrisSettings, setQrisSettings] = useState(null);
     const [mosqueIdentity, setMosqueIdentity] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -35,14 +36,17 @@ export default function InformasiPage() {
 
     const fetchData = useCallback(async () => {
         try {
-            const [summaryRes, chartRes, qrisRes, mosqueRes] = await Promise.all([
+            const now = new Date();
+            const [summaryRes, chartRes, expRes, qrisRes, mosqueRes] = await Promise.all([
                 zisAPI.getSummary(),
                 zisAPI.getMonthlyChart(selectedYear),
+                expenditureAPI.getAll(now.getMonth() + 1, now.getFullYear()).catch(() => ({ data: [] })),
                 qrisAPI.getSettings().catch(() => ({ data: null })),
                 mosqueAPI.getIdentity()
             ]);
             setSummary(summaryRes.data);
             setChartData(chartRes.data);
+            setExpenditures(expRes.data || []);
             setQrisSettings(qrisRes.data);
             setMosqueIdentity(mosqueRes.data);
         } catch (error) {
@@ -74,7 +78,7 @@ export default function InformasiPage() {
     return (
         <div className="min-h-screen bg-stone-100" data-testid="informasi-page">
             <WebsiteNavigation activePage="informasi" mosqueIdentity={mosqueIdentity} />
-            
+
             {/* Header */}
             <div className="bg-emerald-900 text-white py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -83,11 +87,11 @@ export default function InformasiPage() {
                     <p className="text-emerald-300">Transparansi pengelolaan Zakat, Infaq, dan Shodaqoh</p>
                 </div>
             </div>
-            
+
             {/* Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div className="bg-white rounded-2xl shadow-sm p-6">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
@@ -139,8 +143,8 @@ export default function InformasiPage() {
                                 <Calendar className="w-5 h-5 text-emerald-600" />
                                 Grafik ZIS Bulanan
                             </h2>
-                            <select 
-                                value={selectedYear} 
+                            <select
+                                value={selectedYear}
                                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                                 className="border border-gray-200 rounded-lg px-3 py-1 text-sm"
                             >
@@ -194,6 +198,56 @@ export default function InformasiPage() {
                     </div>
                 </div>
 
+                {/* Pengeluaran Dana Section */}
+                {expenditures.length > 0 && (
+                    <div className="bg-white rounded-2xl shadow-sm p-6 mb-8">
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                                <Wallet className="w-5 h-5 text-red-600" />
+                            </div>
+                            <div>
+                                <h2 className="font-bold text-gray-800">Pengeluaran Dana</h2>
+                                <p className="text-sm text-gray-500">Rincian penggunaan dana masjid bulan ini</p>
+                            </div>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b border-gray-100">
+                                        <th className="text-left text-xs text-gray-500 pb-3 font-medium">Tanggal</th>
+                                        <th className="text-left text-xs text-gray-500 pb-3 font-medium">Kategori</th>
+                                        <th className="text-right text-xs text-red-500 pb-3 font-medium">Jumlah</th>
+                                        <th className="text-left text-xs text-gray-500 pb-3 font-medium">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                    {expenditures.map((item, idx) => (
+                                        <tr key={item.id || idx}>
+                                            <td className="py-3 text-sm text-gray-700">{new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                                            <td className="py-3">
+                                                <span className="px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700">
+                                                    {item.category?.charAt(0).toUpperCase() + item.category?.slice(1)}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 text-sm text-red-600 font-mono text-right font-semibold">{formatCurrency(item.amount)}</td>
+                                            <td className="py-3 text-sm text-gray-600 max-w-xs">{item.description || '-'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                                <tfoot>
+                                    <tr className="border-t-2 border-gray-200">
+                                        <td colSpan={2} className="pt-3 text-sm font-bold text-gray-700">Total Pengeluaran</td>
+                                        <td className="pt-3 text-sm font-bold text-red-600 font-mono text-right">
+                                            {formatCurrency(expenditures.reduce((sum, r) => sum + (r.amount || 0), 0))}
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
                 {/* QRIS Section */}
                 <div className="bg-white rounded-2xl shadow-sm p-6">
                     <div className="flex items-center gap-3 mb-6">
@@ -205,13 +259,13 @@ export default function InformasiPage() {
                             <p className="text-sm text-gray-500">Scan QRIS atau transfer ke rekening</p>
                         </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* QRIS */}
                         <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 text-center">
-                            <img 
-                                src={qrisSettings?.qris_image_url || DEFAULT_QRIS_URL} 
-                                alt="QRIS Masjid Muktamirin" 
+                            <img
+                                src={qrisSettings?.qris_image_url || DEFAULT_QRIS_URL}
+                                alt="QRIS Masjid Muktamirin"
                                 className="max-w-[220px] mx-auto rounded-lg shadow-md mb-4"
                             />
                             <div className="flex justify-center gap-2 flex-wrap">
@@ -220,7 +274,7 @@ export default function InformasiPage() {
                                 <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">Sedekah</span>
                             </div>
                         </div>
-                        
+
                         {/* Bank Transfer */}
                         <div className="flex flex-col justify-center">
                             <p className="text-gray-500 text-sm mb-4">Atau transfer ke rekening:</p>
@@ -236,7 +290,7 @@ export default function InformasiPage() {
                     </div>
                 </div>
             </div>
-            
+
             <WebsiteFooter mosqueIdentity={mosqueIdentity} />
         </div>
     );

@@ -1,200 +1,105 @@
-# 🕌 Jam Sholat Digital KHGT - Website Masjid Muktamirin
+# Panduan Deployment Sistem Masjid Muktamirin
 
-Aplikasi web lengkap untuk tampilan jadwal sholat digital dan website masjid. Mendukung TV Display, Website Publik, dan Dashboard Admin.
-
-## 📋 Fitur Utama
-
-### TV Display (Jam Sholat Digital)
-- Tampilan jadwal sholat real-time dengan countdown
-- Kalender Hijriah & Masehi
-- Slideshow konten (poster, video, pengumuman)
-- Running text
-- Notifikasi suara adzan & iqamah
-- Layout Modern & Classic
-
-### Website Masjid
-- Homepage dengan jadwal sholat
-- Halaman Agenda kegiatan
-- Halaman Ramadan khusus
-- Halaman About Us
-
-### Dashboard Admin
-- Manajemen identitas masjid
-- Kalibrasi waktu sholat
-- Manajemen konten display
-- Pengaturan layout & background
-- Manajemen jadwal Ramadan
-
-## 🚀 Deployment dengan Docker
-
-### Prasyarat
-- Docker & Docker Compose terinstall
-- Domain yang sudah dikonfigurasi (opsional)
-
-### Langkah Deployment
-
-1. **Clone/Download Repository**
-   ```bash
-   git clone <repository-url>
-   cd masjid-muktamirin
-   ```
-
-2. **Konfigurasi Environment**
-   ```bash
-   # Salin file environment
-   cp .env.example .env
-   cp backend/.env.example backend/.env
-   cp frontend/.env.example frontend/.env
-   
-   # Edit file .env sesuai kebutuhan
-   nano .env
-   ```
-
-3. **Konfigurasi Penting di `.env`**
-   ```bash
-   # Database
-   DB_NAME=masjid_db
-   
-   # JWT Secret - WAJIB DIGANTI!
-   JWT_SECRET=secret-key-unik-anda-minimal-32-karakter
-   
-   # URL Backend (sesuaikan dengan domain Anda)
-   REACT_APP_BACKEND_URL=https://api.masjidmuktamirin.web.id
-   
-   # CORS Origins
-   CORS_ORIGINS=https://masjidmuktamirin.web.id,https://jamsholat.masjidmuktamirin.web.id
-   ```
-
-4. **Build & Jalankan**
-   ```bash
-   # Build images
-   docker-compose build
-   
-   # Jalankan services
-   docker-compose up -d
-   
-   # Cek status
-   docker-compose ps
-   ```
-
-5. **Verifikasi**
-   ```bash
-   # Cek health endpoint
-   curl http://localhost:8001/api/health
-   
-   # Cek frontend
-   curl http://localhost
-   ```
-
-### Menghentikan Services
-```bash
-docker-compose down
-
-# Untuk menghapus data (hati-hati!)
-docker-compose down -v
-```
-
-## 🔧 Konfigurasi Subdomain (Opsional)
-
-Untuk setup subdomain, konfigurasi nginx/reverse proxy:
-
-| Subdomain | Route | Deskripsi |
-|-----------|-------|-----------|
-| `masjidmuktamirin.web.id` | `/homepage` | Website utama |
-| `jamsholat.masjidmuktamirin.web.id` | `/` | TV Display |
-| `ramadhan.masjidmuktamirin.web.id` | `/ramadan` | Channel Ramadan |
-| `admin.masjidmuktamirin.web.id` | `/connect` | Dashboard Admin |
-
-### Contoh Konfigurasi Nginx Reverse Proxy
-
-```nginx
-# Main website
-server {
-    server_name masjidmuktamirin.web.id;
-    location / {
-        proxy_pass http://localhost:80;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-
-# API Backend
-server {
-    server_name api.masjidmuktamirin.web.id;
-    location / {
-        proxy_pass http://localhost:8001;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
-## 📁 Struktur Proyek
-
-```
-├── backend/
-│   ├── Dockerfile
-│   ├── server.py           # FastAPI application
-│   ├── requirements.txt
-│   ├── uploads/            # File uploads
-│   └── .env.example
-├── frontend/
-│   ├── Dockerfile
-│   ├── nginx.conf          # Nginx configuration
-│   ├── src/
-│   │   ├── pages/          # React pages
-│   │   ├── components/     # Reusable components
-│   │   └── context/        # React contexts
-│   └── .env.example
-├── docker-compose.yml
-├── .env.example
-└── DEPLOYMENT.md           # File ini
-```
-
-## 🔐 Keamanan
-
-1. **WAJIB** ganti `JWT_SECRET` dengan nilai yang kuat
-2. Gunakan HTTPS di production
-3. Batasi `CORS_ORIGINS` ke domain yang valid
-4. Backup database MongoDB secara berkala
-
-## 📱 Akses Aplikasi
-
-Setelah deployment berhasil:
-
-| URL | Deskripsi |
-|-----|-----------|
-| `http://localhost` | TV Display |
-| `http://localhost/homepage` | Website Homepage |
-| `http://localhost/connect` | Login Admin |
-| `http://localhost:8001/api/health` | Health Check |
-
-## 🆘 Troubleshooting
-
-### MongoDB tidak terkoneksi
-```bash
-# Cek status container
-docker-compose ps
-
-# Cek logs MongoDB
-docker-compose logs mongodb
-```
-
-### Frontend tidak bisa akses API
-- Pastikan `REACT_APP_BACKEND_URL` sudah benar
-- Cek konfigurasi CORS di backend
-
-### Port sudah digunakan
-```bash
-# Ubah port di docker-compose.yml
-ports:
-  - "3000:80"    # Ganti port frontend
-  - "8002:8001"  # Ganti port backend
-```
-
-## 📞 Kontak
-
-Untuk pertanyaan atau bantuan, hubungi administrator masjid.
+Dokumen ini berisi panduan komprehensif untuk mendikompilasi dan mendeploy aplikasi Jam Sholat Digital & Sistem Informasi Masjid Muktamirin. Sistem ini dirancang untuk dapat di-*host* sendiri (Self-Hosted) menggunakan **1Panel** sebagai control panel dan **Cloudflare Tunnel** untuk mengamankan dan mengekspos aplikasi ke publik tanpa perlu membuka port (port-forwarding) di router Anda.
 
 ---
-**Dibuat dengan ❤️ untuk Masjid Muktamirin**
+
+## 1. Persiapan Server & Prasyarat
+Untuk mendeploy sistem ini dengan lancar, pastikan Anda memiliki:
+1. Sebuah Server/VPS atau Mini PC (bisa juga Raspberry Pi) yang terhubung ke internet.
+2. Sistem Operasi berbasis Linux (disarankan **Ubuntu 22.04 LTS** atau Debian).
+3. Akses ke domain Anda (misal `masjidmuktamirin.web.id`) di **Cloudflare**.
+4. RAM minimal 2GB (direkomendasikan 4GB).
+
+---
+
+## 2. Instalasi 1Panel (Control Panel Server)
+[1Panel](https://1panel.cn/docs/en/) adalah panel manajemen server modern berbasis Docker yang sangat memudahkan instalasi database dan manajemen container.
+
+1. Buka terminal/SSH ke server Anda.
+2. Jalankan skrip instalasi 1Panel:
+   ```bash
+   curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_start.sh && sudo bash quick_start.sh
+   ```
+3. Ikuti instruksi di layar (buat port admin, username, dan password).
+4. Setelah selesai, masuk ke Dashboard 1Panel melalui browser: `http://[IP_SERVER]:[PORT_1PANEL]`.
+
+---
+
+## 3. Instalasi MongoDB via 1Panel
+Aplikasi ini membutuhkan MongoDB minimal versi 6.0.
+
+1. Di Dashboard 1Panel, masuk ke menu **App Store**.
+2. Cari aplikasi **MongoDB** lalu klik **Install**.
+3. Centang opsi *Allow External Access* bila diperlukan, namun untuk keamanan tetap biarkan lokal (port 27017) jika backend akan di-deploy di 1Panel yang sama.
+4. Tentukan *Root Password* untuk MongoDB Anda. Ingat password ini!
+5. Klik **Confirm** dan tunggu hingga instalasi Database selesai.
+
+> **Catatan Penting Keamanan Data:**  
+> Selalu pastikan Volume MongoDB di-mount ke *persistent storage* agar data user, artikel, dan pengaturan tidak hilang saat server di-restart.
+
+---
+
+## 4. Deployment Aplikasi (Docker Compose via 1Panel)
+Aplikasi kita (Backend FastAPI & Frontend React) sudah memiliki `docker-compose.yml`.
+
+1. Di 1Panel, masuk ke menu **Websites** -> **Runtime** (atau **Containers** -> **Compose**).
+2. Klik tombol **Create Compose** / **Add Compose**.
+3. Beri nama proyek: `masjid-muktamirin`.
+4. Pilih metode **Path** atau **Git Repository** (jika kode sudah ditekan ke GitHub).
+5. Pada bagian `docker-compose.yml`, pastikan isinya mencakup *services* `backend` dan `frontend`.
+6. Jangan lupa mengatur file `.env` untuk Backend dan Frontend.
+   
+   **Contoh `.env` Backend:**
+   ```env
+   MONGO_URL=mongodb://root:[PASSWORD_MONGO_ANDA]@mongo:27017
+   DB_NAME=masjid_db
+   CORS_ORIGINS=https://masjidmuktamirin.web.id,https://admin.masjidmuktamirin.web.id
+   JWT_SECRET=GantiDenganSecretKeyYangSuperAman
+   ```
+   
+   **Contoh `.env` Frontend:**
+   ```env
+   REACT_APP_BACKEND_URL=https://api.masjidmuktamirin.web.id
+   ```
+   
+7. Klik **Confirm / Deploy**. 1Panel akan men-download *image* (membangun *image*) dan menjalankan *container* frontend dan backend.
+
+---
+
+## 5. Menghubungkan ke Domain Publik (Cloudflare Tunnel)
+Karena server mungkin berada di dalam jaringan lokal masjid (tanpa IP Publik Statis) atau Anda ingin menghindari *DDoS*, solusi terbaik adalah menggunakan **Cloudflare Tunnel (Zero Trust)**. Anda tidak perlu repot setup Nginx HTTPS atau membuka port router.
+
+### Langkah A: Setup Cloudflare Zero Trust
+1. Login ke dashboard [Cloudflare](https://dash.cloudflare.com) dan pilih domain `masjidmuktamirin.web.id`.
+2. Di menu kiri, masuk ke **Zero Trust** -> **Networks** -> **Tunnels**.
+3. Klik tombol **Create a tunnel**.
+4. Pilih **Cloudflared** dan beri nama tunnel (misal: `masjid-server`).
+5. Cloudflare akan memberikan sebuah perintah *Install and run a connector*. Pilih OS sesuai server Anda (misal Linux 64-bit).
+6. Salin perintah instalasi token tersebut dan jalankan di terminal server Anda.
+   ```bash
+   sudo cloudflared service install eyJh...[TOKEN_PANJANG_ANDA]
+   ```
+7. Jika koneksi di Cloudflare Dashboard sudah bewarna hijau (Healthy), klik **Next**.
+
+### Langkah B: Routing Domain ke Localhost
+Di tahap *Route traffic*, kita akan mengaitkan domain (subdomain) publik Anda ke port aplikasi lokal di server. Setup 3 rute ini:
+
+| Public Hostname | Service | URL |
+|---|---|---|
+| `masjidmuktamirin.web.id` | HTTP | `localhost:3000` (Port Frontend Web) |
+| `admin.masjidmuktamirin.web.id` | HTTP | `localhost:3000` (Port Frontend Web) |
+| `api.masjidmuktamirin.web.id` | HTTP | `localhost:5005` (Port Backend API) |
+
+> **Catatan:** Ganti `localhost:3000` dan `localhost:5005` dengan IP lokal *container* Docker atau host jika Anda membungkus network di Docker. 
+
+Kini, website Anda dapat diakses secara global, sepenuhnya dienkripsi oleh HTTPS Cloudflare, dan backend Anda tetap tersembunyi dengan aman!
+
+---
+
+## 6. Integrasi Akun & Sinkronisasi
+Setelah aplikasi online:
+1. Buka `https://admin.masjidmuktamirin.web.id/connect`
+2. Login dengan akun yang telah di-*seed* di database (Default role: Administrator).
+3. Segera arahkan ke **Pengaturan Sistem -> Administrator** dan ubah password Anda.
+4. Konfigurasikan *Google Sheets* pada menu ZIS sesuai instruksi `settings` di Dashboard untuk memastikan Laporan Zakat tersinkronisasi.

@@ -64,20 +64,22 @@ export function formatCountdown(seconds) {
 
 // Get current prayer and next prayer
 export function getCurrentAndNextPrayer(prayerTimes) {
+    if (!prayerTimes) return { currentPrayer: null, nextPrayer: null, nextPrayerTime: null };
+
     const now = new Date();
     const prayers = ['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'];
-    
+
     let currentPrayer = null;
     let nextPrayer = null;
     let nextPrayerTime = null;
-    
+
     for (let i = 0; i < prayers.length; i++) {
         const prayerKey = prayers[i];
         const prayerTime = parseTimeToday(prayerTimes[prayerKey]);
-        
+
         if (prayerTime && now >= prayerTime) {
             currentPrayer = prayerKey;
-            
+
             // Check if next prayer exists today
             if (i < prayers.length - 1) {
                 nextPrayer = prayers[i + 1];
@@ -92,13 +94,13 @@ export function getCurrentAndNextPrayer(prayerTimes) {
             }
         }
     }
-    
+
     // If before Subuh
     if (!currentPrayer) {
         nextPrayer = 'subuh';
         nextPrayerTime = parseTimeToday(prayerTimes.subuh);
     }
-    
+
     return { currentPrayer, nextPrayer, nextPrayerTime };
 }
 
@@ -109,15 +111,15 @@ export function getApproximateHijriDate(date = new Date()) {
     // The Islamic calendar started on July 16, 622 CE
     const hijriEpoch = new Date(622, 6, 16);
     const daysSinceEpoch = Math.floor((date - hijriEpoch) / (1000 * 60 * 60 * 24));
-    
+
     // Average length of a Hijri year is about 354.37 days
     const hijriYears = Math.floor(daysSinceEpoch / 354.37);
     const remainingDays = daysSinceEpoch % 354.37;
-    
+
     // Average length of a Hijri month is about 29.53 days
     const hijriMonths = Math.floor(remainingDays / 29.53);
     const hijriDays = Math.floor(remainingDays % 29.53) + 1;
-    
+
     return {
         day: hijriDays,
         month: (hijriMonths % 12) + 1,
@@ -133,7 +135,7 @@ export function formatDateIndonesian(date = new Date()) {
     const day = date.getDate();
     const month = GREGORIAN_MONTHS[date.getMonth()];
     const year = date.getFullYear();
-    
+
     return `${dayName}, ${day} ${month} ${year}`;
 }
 
@@ -164,12 +166,12 @@ function getAudioContext() {
 export function playNotificationSound(type = SOUND_TYPES.ADZAN) {
     try {
         const ctx = getAudioContext();
-        
+
         // Resume context if suspended (browser autoplay policy)
         if (ctx.state === 'suspended') {
             ctx.resume();
         }
-        
+
         const soundConfigs = {
             [SOUND_TYPES.PRE_ADZAN]: {
                 // Gentle bell chime - 3 soft notes
@@ -204,30 +206,30 @@ export function playNotificationSound(type = SOUND_TYPES.ADZAN) {
                 type: 'triangle'
             },
         };
-        
+
         const config = soundConfigs[type] || soundConfigs[SOUND_TYPES.ADZAN];
         let startTime = ctx.currentTime;
-        
+
         config.notes.forEach((freq, i) => {
             const oscillator = ctx.createOscillator();
             const gainNode = ctx.createGain();
-            
+
             oscillator.connect(gainNode);
             gainNode.connect(ctx.destination);
-            
+
             oscillator.frequency.value = freq;
             oscillator.type = config.type;
-            
+
             const noteStart = startTime + (i * (config.duration + config.gap));
-            
+
             gainNode.gain.setValueAtTime(0, noteStart);
             gainNode.gain.linearRampToValueAtTime(config.volume, noteStart + 0.05);
             gainNode.gain.exponentialRampToValueAtTime(0.01, noteStart + config.duration);
-            
+
             oscillator.start(noteStart);
             oscillator.stop(noteStart + config.duration + 0.1);
         });
-        
+
         return true;
     } catch (e) {
         console.error('Error playing notification sound:', e);
