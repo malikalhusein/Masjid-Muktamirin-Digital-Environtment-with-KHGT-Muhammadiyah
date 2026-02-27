@@ -30,9 +30,24 @@ JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_HOURS = 24
 
 # Create the main app
-app = FastAPI(title="Jam Sholat Digital KHGT")
+app = FastAPI(title="Jam Sholat Digital KHGT", lifespan=None)
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer()
+
+# ==================== STARTUP INIT ====================
+
+@app.on_event("startup")
+async def startup_db_init():
+    # Cek apakah koleksi users kosong, jika ya buat admin default
+    user_count = await db.users.count_documents({})
+    if user_count == 0:
+        logging.info("TIDAK ADA AKUN DITEMUKAN. Membuat akun admin default...")
+        admin_user = User(username="admin", name="Administrator", role="admin")
+        doc = admin_user.model_dump()
+        doc["password"] = hash_password("admin123")
+        doc["created_at"] = doc["created_at"].isoformat()
+        await db.users.insert_one(doc)
+        logging.info("Berhasil membuat username: admin, password: admin123")
 
 # ==================== MODELS ====================
 
@@ -662,7 +677,12 @@ async def get_prayer_times(date: Optional[str] = None):
 
     
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7"
+        }
+        async with httpx.AsyncClient(timeout=30.0, headers=headers) as client:
             url = f"https://hisabmu.com/shalat/?latitude={lat}&longitude={lng}&elevation={elev}&timezone={tz}&dst=auto&method=MU&ikhtiyat=16"
             response = await client.get(url)
             html = response.text
@@ -730,7 +750,12 @@ async def get_monthly_prayer_times(month: Optional[int] = None, year: Optional[i
         year = now.year
     
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7"
+        }
+        async with httpx.AsyncClient(timeout=30.0, headers=headers) as client:
             url = f"https://hisabmu.com/shalat/?latitude={lat}&longitude={lng}&elevation={elev}&timezone={tz}&dst=auto&method=MU&ikhtiyat=16"
             response = await client.get(url)
             html = response.text
