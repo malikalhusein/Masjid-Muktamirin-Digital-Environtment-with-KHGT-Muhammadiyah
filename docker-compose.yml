@@ -7,7 +7,7 @@ services:
     container_name: masjid_mongodb
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "27018:27017" # Host 27018 -> Container 27017
     volumes:
       - mongodb_data:/data/db
     environment:
@@ -28,11 +28,11 @@ services:
     container_name: masjid_backend
     restart: unless-stopped
     ports:
-      - "8001:8001"
+      - "5005:8001" # Host 5005 -> Container 8001
     volumes:
       - ./backend/uploads:/app/uploads
     environment:
-      - MONGO_URL=mongodb://mongodb:27017
+      - MONGO_URL=mongodb://mongodb:27017 # Tetap pakai 27017 karena ini jalur internal Docker
       - DB_NAME=${DB_NAME:-masjid_db}
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
@@ -53,11 +53,12 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL:-http://localhost:8001}
+        # PENTING: Arahkan React ke IP dan port API backend yang baru (5005)
+        - REACT_APP_BACKEND_URL=http://10.11.1.4:5005 
     container_name: masjid_frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "8091:80" # Host 8091 -> Container 80
     depends_on:
       - backend
     networks:
